@@ -18,7 +18,7 @@ input_file = "conf/algorithm/business/count/count_renlian.yaml"  # 与output不�
 output_file = "script/output/count/drawn_points.yaml"  # 输出路径
 auto_save = True
 mode_str = ['red', 'green']
-mode_idx = 0  # 0:red 1:green
+mode_idx = 1  # 0:red 1:green
 
 # 预定义变量，用于保存上一次点击的位置和所有绘制的点的位置
 prev_point = None
