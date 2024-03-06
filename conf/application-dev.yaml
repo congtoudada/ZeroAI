@@ -1,0 +1,4 @@
+INCLUDE:
+  - conf/log/log.yaml
+cam_list:
+  - conf/cam/stream1.yaml

@@ -1,9 +1,19 @@
-from zero.utility.yaml import YamlKit
+from zero.utility.yaml_kit import YamlKit
 
 
 class ConfigKit:
     @staticmethod
-    def load_by_path(template_path: str, cur_path: str) -> dict:
+    def load(path: str) -> dict:
+        file: dict = YamlKit.read_yaml(file=path)
+        if file.__contains__("INCLUDE"):
+            for key in file["INCLUDE"]:
+                dep = ConfigKit.load(key)
+                # file优先级最大
+                file = ConfigKit.override_by_dict(dep, file)
+        return file
+
+    @staticmethod
+    def override_by_path(template_path: str, cur_path: str) -> dict:
         """
         加载配置文件，用当前配置重载模板配置
         :param template_path: 模板路径
@@ -12,10 +22,10 @@ class ConfigKit:
         """
         template_file = YamlKit.read_yaml(file=template_path)
         cur_file = YamlKit.read_yaml(file=cur_path)
-        return ConfigKit.equip_file(template_file, cur_file)
+        return ConfigKit.override_by_dict(template_file, cur_file)
 
     @staticmethod
-    def load_by_dict(template_dict: dict, cur_dict: dict) -> dict:
+    def override_by_dict(template_dict: dict, cur_dict: dict) -> dict:
         """
         加载配置文件，用当前配置重载模板配置
         :param template_dict: 模板yaml文件
@@ -42,6 +52,8 @@ class ConfigKit:
     def _addNew(template_dict: dict, override_dict: dict):
         # 添加新参数
         for key in override_dict.keys():
+            if type(override_dict[key]) is dict and template_dict.__contains__(key):
+                ConfigKit._addNew(template_dict[key], override_dict[key])
             if not template_dict.__contains__(key):
                 template_dict[key] = override_dict[key]
 

@@ -1,0 +1,15 @@
+INCLUDE:
+  - conf/algorithm/mot/bytetrack/bytetrack_root.yaml
+bytetrack:
+  input_port: head
+  output_port: head
+
+
+
+
+
+
+
+
+
+

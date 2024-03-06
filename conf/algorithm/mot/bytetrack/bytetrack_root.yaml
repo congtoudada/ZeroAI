@@ -1,0 +1,15 @@
+INCLUDE:
+  - conf/log/log.yaml
+  - conf/algorithm/detection/detection_labels.yaml
+log:
+  enable: True
+bytetrack:
+  vis: False  # 是否使用opencv可视化（测试用）
+  args:
+    fps: 30 # frame rate (fps)
+    thresh: 0.5 # tracking confidence threshold
+    buffer: 30 # the frames for keep lost tracks
+    match_thresh: 0.8 # matching threshold for tracking
+    aspect_ratio_thresh: 5 # threshold for filtering out boxes of which aspect ratio are above the given value.
+    min_box_area: 5 # filter out tiny boxes
+    mot20: False

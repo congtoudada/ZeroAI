@@ -1,0 +1,6 @@
+INCLUDE:
+  - conf/algorithm/business/count/count_root.yaml
+  - conf/algorithm/business/count/zone/count_renlian_points.yaml
+count:
+  input_port: head
+  output_port: head

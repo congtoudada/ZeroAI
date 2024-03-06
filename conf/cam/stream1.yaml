@@ -1,0 +1,14 @@
+INCLUDE:
+  - conf/cam/stream_root.yaml
+log:
+  analysis: False
+stream:
+  cam_id: 1  # 摄像头编号
+  url: res/video/renlian/renlian1.mp4  # 取流地址
+  algorithm: # 算法配置
+    - name: yolox
+      conf: conf/algorithm/detection/yolox/yolox_head.yaml
+    - name: bytetrack
+      conf: conf/algorithm/mot/bytetrack/bytetrack_head.yaml
+    - name: count
+      conf: conf/algorithm/business/count/count_renlian.yaml
