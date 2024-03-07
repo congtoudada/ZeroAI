@@ -3,12 +3,12 @@ import time
 from multiprocessing import Process
 from loguru import logger
 
-from zero.core.component.base.base_comp import Component
+from zero.core.component.helper.base_helper_comp import BaseHelperComponent
 from zero.core.info.app_info import AppInfo
 from zero.core.key.shared_key import SharedKey
 
 
-class ServiceGroupComponent(Component):
+class ServiceGroupComponent(BaseHelperComponent):
     """
     算法管理组件
     """

@@ -4,12 +4,12 @@ from multiprocessing import Process
 
 from loguru import logger
 
-from zero.core.component.base.base_comp import Component
+from zero.core.component.helper.base_helper_comp import BaseHelperComponent
 from zero.core.info.stream_info import StreamInfo
 from zero.core.key.shared_key import SharedKey
 
 
-class AlgorithmGroupComponent(Component):
+class AlgorithmGroupComponent(BaseHelperComponent):
     """
     算法管理组件
     """

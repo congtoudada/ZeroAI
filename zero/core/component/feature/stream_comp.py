@@ -1,17 +1,13 @@
-import multiprocessing
 import os
 import sys
 import time
 import traceback
-from multiprocessing import Process
 import cv2
-import numpy as np
 from loguru import logger
 
-from zero.core.component.feature.algorithm_group_comp import AlgorithmGroupComponent
-from zero.core.component.helper.face_process_helper_comp import FaceProcessHelperComponent
+from zero.core.component.helper.algorithm_group_comp import AlgorithmGroupComponent
 from zero.core.info.stream_info import StreamInfo
-from zero.core.component.base.base_comp import Component
+from zero.core.component.base.component import Component
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit
 

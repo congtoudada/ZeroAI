@@ -4,7 +4,7 @@ import random
 import time
 from loguru import logger
 
-from zero.core.component.base.base_comp import Component
+from zero.core.component.base.component import Component
 from zero.core.info.face_helper_info import FaceHelperInfo
 from zero.core.key.face_key import FaceKey
 from zero.core.key.shared_key import SharedKey

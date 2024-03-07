@@ -1,4 +1,4 @@
-from zero.core.component.base.base_comp import Component
+from zero.core.component.base.component import Component
 
 
 class BaseHelperComponent(Component):

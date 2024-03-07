@@ -8,9 +8,9 @@ from multiprocessing import Process
 import cv2
 from loguru import logger
 
-from zero.core.component.base.base_comp import Component
+from zero.core.component.base.component import Component
 from zero.core.component.feature.stream_comp import create_stream_process
-from zero.core.component.service.service_group_comp import ServiceGroupComponent
+from zero.core.component.helper.service_group_comp import ServiceGroupComponent
 from zero.core.info.app_info import AppInfo
 from zero.core.info.stream_info import StreamInfo
 from zero.core.key.shared_key import SharedKey

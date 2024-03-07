@@ -56,6 +56,14 @@ class CountFaceComponent(CountComponent):
     def on_draw_vis(self, im):
         super().on_draw_vis(im)
         face_dict = self.helper.get_face_dict()
+        # 参考线
+        point1 = (0, int(self.helper.config.face_cull_y * self.height))
+        point2 = (self.width, int(self.helper.config.face_cull_y * self.height))
+        point3 = (0, int((1 - self.helper.config.face_cull_y) * self.height))
+        point4 = (self.width, int((1 - self.helper.config.face_cull_y) * self.height))
+        cv2.line(im, point1, point2, (127, 127, 127), 1)  # 绘制线条
+        cv2.line(im, point3, point4, (127, 127, 127), 1)  # 绘制线条
+        # 人脸识别结果
         for key, value in face_dict.items():
             ltrb = self.item_dict[key].ltrb
             cv2.putText(im, f"{face_dict[key]['per_id']}",

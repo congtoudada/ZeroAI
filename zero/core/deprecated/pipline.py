@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import List
 
-from zero.core.component.base.base_comp import Component
+from zero.core.component.base.component import Component
 
 
 class Pipline(ABC):

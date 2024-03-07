@@ -3,7 +3,7 @@ import time
 from loguru import logger
 import numpy as np
 
-from zero.core.component.base.base_comp import Component
+from zero.core.component.base.component import Component
 from zero.core.key.shared_key import SharedKey
 from zero.utility.timer_kit import TimerKit
 

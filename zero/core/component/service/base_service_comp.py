@@ -1,4 +1,4 @@
-from zero.core.component.base.base_comp import Component
+from zero.core.component.base.component import Component
 from loguru import logger
 
 from zero.core.key.shared_key import SharedKey
