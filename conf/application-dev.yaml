@@ -2,3 +2,7 @@ INCLUDE:
   - conf/log/log.yaml
 cam_list:
   - conf/cam/stream1.yaml
+service: # 全局服务
+  - name: insight
+    conf: conf/algorithm/face/insight/insight.yaml
+

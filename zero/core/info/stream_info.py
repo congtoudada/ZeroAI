@@ -13,4 +13,6 @@ class StreamInfo(BaseInfo):
         self.stream_width = 640  # 取流重缩放宽
         self.stream_height = 640  # 取流重缩放高
         self.stream_channel = 3  # 取流通道数
+        self.stream_update_fps = -1  # 算法更新帧率
+        self.face_helper = ""
         super().__init__(data)   # 前面是声明，一定要最后调用这段赋值

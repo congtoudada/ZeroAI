@@ -1,0 +1,3 @@
+INCLUDE:
+  - conf/algorithm/business/count/count_renlian.yaml
+  - conf/algorithm/face/face_helper.yaml

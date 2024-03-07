@@ -15,3 +15,5 @@ stream:
   height: 640
   # 取流通道数
   channel: 3
+  # 算法update帧率, <=0 表示无限制
+  update_fps: 60

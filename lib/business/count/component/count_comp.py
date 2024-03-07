@@ -9,10 +9,10 @@ from loguru import logger
 from count.component.count_item import CountItem
 from count.component.count_pool import CountPool
 from count.info.count_info import CountInfo
-from yolox.tracking_utils.timer import Timer
 from zero.core.component.base.based_mot_comp import BasedMOTComponent
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit
+from zero.utility.timer_kit import TimerKit
 
 
 class CountComponent(BasedMOTComponent):
@@ -32,7 +32,7 @@ class CountComponent(BasedMOTComponent):
         self.green_vecs = []
         self.temp_red_result = []
         self.temp_green_result = []
-        self.timer = Timer()
+        self.timer = TimerKit()
 
     def on_start(self):
         super().on_start()
@@ -63,9 +63,12 @@ class CountComponent(BasedMOTComponent):
             if self.config.count_vis:
                 self._draw_vis()
             self.postprocess()
-        return False
+        return True
 
     def preprocess(self):
+        # 清空前一帧状态
+        for item in self.item_dict.values():
+            item.reset_update()
         # 清空长期未更新点
         clear_keys = []
         for key, item in self.item_dict.items():
@@ -74,6 +77,7 @@ class CountComponent(BasedMOTComponent):
         for key in clear_keys:
             self.pool.push(self.item_dict[key])  # 放回对象池
             self.item_dict.pop(key)  # 从字典中移除
+            self.on_destroy_obj(key)
 
     def process_update(self):
         """
@@ -100,9 +104,10 @@ class CountComponent(BasedMOTComponent):
                 item: CountItem = self.pool.pop()
                 item.init(obj_id, self.config.count_valid_frames)  # 初始化对象
                 self.item_dict[obj_id] = item
+                self.on_create_obj(item)
             # 2.更新状态
             x, y = self._get_base(self.config.count_base, ltrb)
-            self.item_dict[obj_id].update(self.current_frame_id, x / self.width, y / self.height)
+            self.item_dict[obj_id].update(self.current_frame_id, x / self.width, y / self.height, ltrb)
 
     def process_result(self):
         """
@@ -114,7 +119,7 @@ class CountComponent(BasedMOTComponent):
         for item in self.item_dict.values():
             if not item.enable:  # 不是有效点，则跳过
                 continue
-            epsilon = 1e-9
+            epsilon = 1e-3
             self.temp_red_result.clear()
             self.temp_green_result.clear()
             # 收集红绿信号（线上为0，线下为1，无效-1）
@@ -124,7 +129,7 @@ class CountComponent(BasedMOTComponent):
                 if abs(vec3d_length) > epsilon:
                     vec3d = vec3d / vec3d_length
                     dot_ret = np.dot(self.red_vecs[i], vec3d)
-                    cross_ret = np.cross(self.red_vecs[i], vec3d)[dot_ret > 0, 2]  # (n, 1) n为red_vec
+                    cross_ret = np.cross(self.red_vecs[i], vec3d)[dot_ret > epsilon, 2]  # (n, 1) n为red_vec
                     self.temp_red_result.append(cross_ret)
             for i in range(self.green_points.__len__() - 1):  # 最后一个点不计算
                 vec3d = (item.base_x - self.green_points[i][0], item.base_y - self.green_points[i][1], 0)
@@ -140,8 +145,13 @@ class CountComponent(BasedMOTComponent):
             self._resolve_result(item)
 
     def postprocess(self):
-        for item in self.item_dict.values():
-            item.reset_update()  # 所有点无效，直到下次更新
+        pass
+
+    def on_destroy_obj(self, obj_id):
+        pass
+
+    def on_create_obj(self, obj):
+        pass
 
     def _resolve_result(self, item: CountItem):
         """
@@ -181,9 +191,11 @@ class CountComponent(BasedMOTComponent):
         text_thickness = 1
         line_thickness = 2
         # 标题线
-        cv2.putText(im,
-                    'frame: %d fps: %.2f num: %d in: %d out: %d' % (self.current_frame_id, 1. / max(1e-5, self.timer.average_time),
-                                                     self.input_mot.shape[0], self.in_count, self.out_count), (0, int(15 * text_scale)),
+        cv2.putText(im, 'frame:%d video_fps:%.2f inference_fps:%.2f num:%d in:%d out:%d' %
+                    (self.current_frame_id,
+                     1. / max(1e-5, self.update_timer.average_time),
+                     1. / max(1e-5, self.timer.average_time),
+                     self.input_mot.shape[0], self.in_count, self.out_count), (0, int(15 * text_scale)),
                     cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
         # 红线
         for i, red_point in enumerate(self.red_points):
@@ -211,12 +223,21 @@ class CountComponent(BasedMOTComponent):
         # 对象包围盒
         for obj in self.input_mot:
             ltrb = obj[:4]
+            obj_id = int(obj[6])
             cv2.rectangle(im, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
                           color=(0, 0, 255), thickness=1)
+            cv2.putText(im, f"{obj_id}",
+                        (int(ltrb[0]), int(ltrb[1])),
+                        cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
+
+        self.on_draw_vis(im)
         cv2.imshow("count window", im)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             self.config.bytetrack_vis = False
             self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
+
+    def on_draw_vis(self, im):
+        pass
 
     def _get_base(self, base, ltrb):
         """
@@ -238,13 +259,17 @@ class CountComponent(BasedMOTComponent):
 
     def _process_cross(self, results):
         # 全部 < 0, 在线之上, return 0; 存在 > 0, return 1; 接近0, 在线附近无效, return -1
-        epsilon = 1e-9
+        epsilon = 1e-3
         for re in results:
             if abs(re) < epsilon:
                 return -1
             if re > 0:
                 return 1
         return 0
+
+    def on_analysis(self):
+        logger.info(f"{self.pname} video fps: {1. / max(1e-5, self.update_timer.average_time):.2f}"
+                    f" count calculate fps: {1. / max(1e-5, self.timer.average_time):.2f}")
 
 
 def create_count_process(shared_data, config_path: str):

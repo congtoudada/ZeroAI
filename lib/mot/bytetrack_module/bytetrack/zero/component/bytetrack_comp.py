@@ -6,10 +6,10 @@ from loguru import logger
 
 from bytetrack.zero.info.bytetrack_info import BytetrackInfo
 from bytetrack.zero.tracker.byte_tracker import BYTETracker, STrack
-from yolox.tracking_utils.timer import Timer
 from zero.core.component.base.base_mot_comp import BaseMOTComponent
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit
+from zero.utility.timer_kit import TimerKit
 
 
 class BytetrackComponent(BaseMOTComponent):
@@ -21,7 +21,7 @@ class BytetrackComponent(BaseMOTComponent):
         self.output_port = self.config.bytetrack_output_port
         # 自身定义
         self.tracker = None
-        self.timer = Timer()
+        self.timer = TimerKit()
         self.width = 640
         self.height = 640
         self.test_size = 640  # 无用
@@ -49,7 +49,8 @@ class BytetrackComponent(BaseMOTComponent):
         return False
 
     def on_analysis(self):
-        logger.info(f"{self.pname} bytetrack inference fps: {1. / max(1e-5, self.timer.average_time):.2f} ")
+        logger.info(f"{self.pname} video fps: {1. / max(1e-5, self.update_timer.average_time):.2f}"
+                    f" inference fps: {1. / max(1e-5, self.timer.average_time):.2f}")
 
     def on_resolve_output(self, online_targets: List[STrack]):
         """
@@ -100,9 +101,11 @@ class BytetrackComponent(BaseMOTComponent):
             text_thickness = 1
             line_thickness = 2
 
-            cv2.putText(im,
-                        'frame: %d fps: %.2f num: %d' % (self.current_frame_id, 1. / max(1e-5, self.timer.average_time),
-                                                         self.inference_outputs.__len__()), (0, int(15 * text_scale)),
+            cv2.putText(im, 'frame:%d video_fps:%.2f bytetrack_fps:%.2f num:%d' %
+                        (self.current_frame_id,
+                         1. / max(1e-5, self.update_timer.average_time),
+                         1. / max(1e-5, self.timer.average_time),
+                         len(self.inference_outputs)), (0, int(15 * text_scale)),
                         cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
             for i, tlwh in enumerate(self.online_tlwhs):
                 x1, y1, w, h = tlwh

@@ -35,7 +35,7 @@ if __name__ == '__main__':
         for seq in sorted(seqs):
             if '.DS_Store' in seq:
                 continue
-            video_cnt += 1  # video sequence number.
+            video_cnt += 1  # videos sequence number.
             out['videos'].append({'id': video_cnt, 'file_name': seq})
             seq_path = os.path.join(data_path, seq)
             img_path = os.path.join(seq_path, 'img1')
@@ -56,7 +56,7 @@ if __name__ == '__main__':
                 height, width = img.shape[:2]
                 image_info = {'file_name': '{}/img1/{:06d}.jpg'.format(seq, i + 1),  # image name.
                               'id': image_cnt + i + 1,  # image number in the entire training set.
-                              'frame_id': i + 1 - image_range[0],  # image number in the video sequence, starting from 1.
+                              'frame_id': i + 1 - image_range[0],  # image number in the videos sequence, starting from 1.
                               'prev_image_id': image_cnt + i if i > 0 else -1,  # image number in the entire training set.
                               'next_image_id': image_cnt + i + 2 if i < num_images - 1 else -1,
                               'video_id': video_cnt,

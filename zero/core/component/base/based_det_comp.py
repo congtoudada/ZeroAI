@@ -14,7 +14,7 @@ class BasedDetComponent(BasedStreamComponent):
         self.input_port = ""
         self.input_det = None  # 目标检测算法的输出作为该组件的输入
 
-    def on_update(self) -> bool:
+    def on_resolve_stream(self) -> bool:
         # 只有不同帧才有必要计算
         det_info = self.shared_data[SharedKey.DETECTION_INFO.name + self.input_port]
         if det_info is not None and self.current_frame_id != int(det_info[SharedKey.DETECTION_ID]):
@@ -34,4 +34,5 @@ class BasedDetComponent(BasedStreamComponent):
             """
             self.input_det = det_info[SharedKey.DETECTION_OUTPUT]
             return True
-        return False
+        else:
+            return False

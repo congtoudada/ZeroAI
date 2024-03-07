@@ -4,15 +4,15 @@ import signal
 import sys
 import time
 from multiprocessing import Process
-from multiprocessing.managers import DictProxy
-from typing import List
 
 import cv2
 from loguru import logger
 
 from zero.core.component.base.base_comp import Component
 from zero.core.component.feature.stream_comp import create_stream_process
-from zero.core.info.base_info import BaseInfo
+from zero.core.component.service.service_group_comp import ServiceGroupComponent
+from zero.core.info.app_info import AppInfo
+from zero.core.info.stream_info import StreamInfo
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit
 
@@ -23,10 +23,13 @@ class LauncherComponent(Component):
     """
     def __init__(self, application_path: str):
         super().__init__(None)
-        ret = ConfigKit.load(application_path)
-        self.config = BaseInfo().set_attrs(ret)
+        self.config: AppInfo = AppInfo(ConfigKit.load(application_path))
+        self.service_group_comp = None
         self.pname = f"[ {os.getpid()}:main ]"
-        self.proxy_arr: List[DictProxy] = []
+        self.global_shared_proxy = None  # 全局代理
+        self.cam_id_list = []  # 所有摄像头id
+        self.global_cameras = None  # 所有摄像头代理（Manger().dict弱引用）
+        self.cameras_ref = []   # 所有摄像头代理（强引用）
         self.esc_event = None
 
     def on_start(self):
@@ -42,19 +45,44 @@ class LauncherComponent(Component):
         self.esc_event = multiprocessing.Manager().Event()
         signal.signal(signal.SIGINT, self.handle_termination)
         signal.signal(signal.SIGTERM, self.handle_termination)
-        for cam_config_path in self.config.cam_list:
-            # -------------------------------- 1.初始化各个视频流 --------------------------------
-            logger.info(f"{self.pname} 初始化摄像头: {cam_config_path}")
 
-            # 进程间代理（对每台摄像头是隔离的）
+        # -------------------------------- 1.初始化共享内存 --------------------------------
+        # --- 服务类
+        self.global_shared_proxy: dict = multiprocessing.Manager().dict()
+        self.global_shared_proxy[SharedKey.EVENT_ESC] = self.esc_event
+        self.global_shared_proxy[SharedKey.WAIT_COUNTER] = 0
+        self.global_cameras = multiprocessing.Manager().dict()
+        self.global_shared_proxy[SharedKey.CAMERAS] = self.global_cameras
+        # --- 摄像头类
+        for cam in self.config.cam_list:
+            # 摄像头代理（对每台摄像头是隔离的）
             shared_proxy: dict = multiprocessing.Manager().dict()
             shared_proxy[SharedKey.EVENT_ESC] = self.esc_event
-            self.proxy_arr.append(shared_proxy)  # 缓存起来，避免被垃圾回收了
+            streamInfo = StreamInfo(ConfigKit.load(cam))
+            # global -> camera
+            self.global_cameras[streamInfo.stream_cam_id] = shared_proxy
+            self.cam_id_list.append(streamInfo.stream_cam_id)
+            self.cameras_ref.append(shared_proxy)  # 强引用，避免垃圾回收
+            # camera -> global
+            shared_proxy[SharedKey.STREAM_GLOBAL] = self.global_shared_proxy
 
-            # -------------------------------- 2.摄像头工作 --------------------------------
+        # -------------------------------- 2.初始化全局服务 --------------------------------
+        self.service_group_comp = ServiceGroupComponent(self.global_shared_proxy, self.config)
+        self.service_group_comp.start()
+        # 等待所有服务初始化完成
+        while self.global_shared_proxy[SharedKey.WAIT_COUNTER] < len(self.config.service):
+            time.sleep(0.2)
+        # -------------------------------- 初始化全局服务End --------------------------------
+
+        # -------------------------------- 3.初始化视频流 --------------------------------
+        for i, cam_config_path in enumerate(self.config.cam_list):
+            logger.info(f"{self.pname} 初始化摄像头: {cam_config_path}")
+            cam_dict = self.global_cameras[self.cam_id_list[i]]
+            # --- 初始化每个摄像头的算法 ---
             Process(target=create_stream_process,
-                    args=(shared_proxy, cam_config_path),
+                    args=(cam_dict, cam_config_path),
                     daemon=False).start()
+        # -------------------------------- 初始化视频流End --------------------------------------
 
     def on_update(self) -> bool:
         time.sleep(1)

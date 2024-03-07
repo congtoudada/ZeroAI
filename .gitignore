@@ -167,8 +167,10 @@ docs/api
 *.pth
 *.onnx
 *.engine
+*.mnn
 events.out.tfevents*
 
 /test
 /log
 /res
+/pretrained

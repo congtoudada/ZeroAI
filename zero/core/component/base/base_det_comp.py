@@ -1,3 +1,5 @@
+import numpy as np
+
 from zero.core.component.base.based_stream_comp import BasedStreamComponent
 from zero.core.key.shared_key import SharedKey
 

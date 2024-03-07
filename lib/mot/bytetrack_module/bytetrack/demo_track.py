@@ -21,20 +21,20 @@ IMAGE_EXT = [".jpg", ".jpeg", ".webp", ".bmp", ".png"]
 def make_parser():
     parser = argparse.ArgumentParser("ByteTrack Demo!")
     parser.add_argument(
-        "demo", default="image", help="demo type, eg. image, video and webcam"
+        "demo", default="image", help="demo type, eg. image, videos and webcam"
     )
     parser.add_argument("-expn", "--experiment-name", type=str, default=None)
     parser.add_argument("-n", "--name", type=str, default=None, help="model name")
 
     parser.add_argument(
-        #"--path", default="./datasets/mot/train/MOT17-05-FRCNN/img1", help="path to images or video"
-        "--path", default="./videos/palace.mp4", help="path to images or video"
+        #"--path", default="./datasets/mot/train/MOT17-05-FRCNN/img1", help="path to images or videos"
+        "--path", default="./videos/palace.mp4", help="path to images or videos"
     )
     parser.add_argument("--camid", type=int, default=0, help="webcam demo camera id")
     parser.add_argument(
         "--save_result",
         action="store_true",
-        help="whether to save the inference result of image/video",
+        help="whether to save the inference result of image/videos",
     )
 
     # exp file
@@ -235,18 +235,18 @@ def image_demo(predictor, vis_folder, current_time, args):
 
 
 def imageflow_demo(predictor, vis_folder, current_time, args):
-    cap = cv2.VideoCapture(args.path if args.demo == "video" else args.camid)
+    cap = cv2.VideoCapture(args.path if args.demo == "videos" else args.camid)
     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)  # float
     height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float
     fps = cap.get(cv2.CAP_PROP_FPS)
     timestamp = time.strftime("%Y_%m_%d_%H_%M_%S", current_time)
     save_folder = osp.join(vis_folder, timestamp)
     os.makedirs(save_folder, exist_ok=True)
-    if args.demo == "video":
+    if args.demo == "videos":
         save_path = osp.join(save_folder, args.path.split("/")[-1])
     else:
         save_path = osp.join(save_folder, "camera.mp4")
-    logger.info(f"video save_path is {save_path}")
+    logger.info(f"videos save_path is {save_path}")
     vid_writer = cv2.VideoWriter(
         save_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (int(width), int(height))
     )
@@ -362,7 +362,7 @@ def main(exp, args):
     current_time = time.localtime()
     if args.demo == "image":
         image_demo(predictor, vis_folder, current_time, args)
-    elif args.demo == "video" or args.demo == "webcam":
+    elif args.demo == "videos" or args.demo == "webcam":
         imageflow_demo(predictor, vis_folder, current_time, args)
 
 

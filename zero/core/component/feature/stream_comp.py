@@ -9,6 +9,7 @@ import numpy as np
 from loguru import logger
 
 from zero.core.component.feature.algorithm_group_comp import AlgorithmGroupComponent
+from zero.core.component.helper.face_process_helper_comp import FaceProcessHelperComponent
 from zero.core.info.stream_info import StreamInfo
 from zero.core.component.base.base_comp import Component
 from zero.core.key.shared_key import SharedKey
@@ -31,6 +32,11 @@ class StreamComponent(Component):
         self.drop_flag = 0  # 丢帧标记
         self.last_time = 0  # 上次读取视频流的时间
         self.stream_frame_info = {}
+        # callback(obj_id, per_id, score)
+        # self.face_helper = FaceProcessHelperComponent(shared_data,
+        #                                               self.config.face_helper,
+        #                                               self.config.stream_cam_id,
+        #                                               lambda obj_id, per_id, score: print(f"{obj_id} {per_id} {score}"))
 
     def on_start(self):
         """
@@ -50,18 +56,22 @@ class StreamComponent(Component):
         self.shared_data[SharedKey.STREAM_ORIGINAL_CHANNEL] = int(self.config.stream_channel)
         self.shared_data[SharedKey.STREAM_ORIGINAL_FPS] = self.frame_fps
         self.shared_data[SharedKey.STREAM_WAIT_COUNTER] = 0
-        self.shared_data[SharedKey.STREAM_WAIT_MAX] = self.config.stream_algorithm.__len__()
+        # self.shared_data[SharedKey.STREAM_WAIT_MAX] = len(self.config.stream_algorithm)
         self.shared_data[SharedKey.STREAM_URL] = self.config.stream_url
         self.shared_data[SharedKey.STREAM_CAMERA_ID] = self.config.stream_cam_id
+        self.shared_data[SharedKey.STREAM_UPDATE_FPS] = self.config.stream_update_fps
 
         # 多进程启动算法
         self.algo_group_comp.start()
 
         # 等待所有算法初始化完成
-        while self.shared_data[SharedKey.STREAM_WAIT_COUNTER] < self.shared_data[SharedKey.STREAM_WAIT_MAX]:
+        while self.shared_data[SharedKey.STREAM_WAIT_COUNTER] < len(self.config.stream_algorithm):
             time.sleep(0.2)
 
         logger.info(f"{self.pname} 所有算法成功初始化！开始取流 URL: {self.config.stream_url} fps: {self.frame_fps}")
+        # self.face_helper.start()
+        # img = cv2.imread('res/images/face/database/48-0001.jpg')
+        # self.face_helper.send(1, img)
 
     def on_update(self) -> bool:
         """
@@ -70,6 +80,7 @@ class StreamComponent(Component):
         """
         try:
             if self.cap.isOpened() and self._can_read():
+                # self.face_helper.update()
                 status, frame = self.cap.read()
                 if status:
                     self.success_frame = (self.success_frame + 1) % sys.maxsize

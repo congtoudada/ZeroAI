@@ -4,13 +4,13 @@ import numpy as np
 from loguru import logger
 from conf.algorithm.detection.yolox.exps.yolox_s_head import Exp
 from yolox.exp import get_exp
-from yolox.tracking_utils.timer import Timer
 from yolox.zero.component.predictor import create_zero_predictor
 from yolox.zero.info.yolox_info import YoloxInfo
 from zero.core.component.base.base_det_comp import BaseDetComponent
 from zero.core.component.feature.launcher_comp import LauncherComponent
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit
+from zero.utility.timer_kit import TimerKit
 
 
 class YoloxComponent(BaseDetComponent):
@@ -22,7 +22,7 @@ class YoloxComponent(BaseDetComponent):
         # 自身定义
         self.output_dir = ""  # 输出目录
         self.predictor = None  # 推理模型
-        self.timer = Timer()  # 计时器
+        self.timer = TimerKit()  # 计时器
         self.scale = 1  # 结果缩放尺寸
 
     def on_start(self):
@@ -67,7 +67,8 @@ class YoloxComponent(BaseDetComponent):
         return False
 
     def on_analysis(self):
-        logger.info(f"{self.pname} yolox inference fps: {1. / max(1e-5, self.timer.average_time):.2f} ")
+        logger.info(f"{self.pname} video fps: {1. / max(1e-5, self.update_timer.average_time):.2f}"
+                    f" yolox inference fps: {1. / max(1e-5, self.timer.average_time):.2f}")
 
     def on_resolve_output(self, inference_outputs):
         """
@@ -111,9 +112,11 @@ class YoloxComponent(BaseDetComponent):
             text_thickness = 1
             line_thickness = 2
 
-            cv2.putText(im,
-                        'frame: %d fps: %.2f num: %d' % (self.current_frame_id, 1. / max(1e-5, self.timer.average_time),
-                                                         self.inference_outputs.shape[0]), (0, int(15 * text_scale)),
+            cv2.putText(im, 'frame:%d video_fps:%.2f inference_fps:%.2f num:%d' %
+                        (self.current_frame_id,
+                         1. / max(1e-5, self.update_timer.average_time),
+                         1. / max(1e-5, self.timer.average_time),
+                         self.inference_outputs.shape[0]), (0, int(15 * text_scale)),
                         cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
             for i in range(self.inference_outputs.shape[0]):
                 tlbr = self.inference_outputs[i, :4] / self.scale

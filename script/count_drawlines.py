@@ -11,7 +11,7 @@ from zero.utility.config_kit import ConfigKit
 from zero.utility.yaml_kit import YamlKit
 
 # 用户设置变量
-cap = cv2.VideoCapture("res/video/renlian/renlian1.mp4")  # 打开本地视频
+cap = cv2.VideoCapture("res/videos/renlian/renlian1.mp4")  # 打开本地视频
 expect_preview = (1280, 720)  # 期望分辨率
 frame_index = 50  # 替换为你想要读取的帧索引
 input_file = "conf/algorithm/business/count/count_renlian.yaml"  # 与output不一致，每次可以在结果集基础上预览
@@ -153,7 +153,7 @@ def handle_termination(signal_num, frame):
 
 # 检查视频是否成功打开
 if not cap.isOpened():
-    print("Error: Failed to open video.")
+    print("Error: Failed to open videos.")
     exit()
 
 # 获取视频帧数

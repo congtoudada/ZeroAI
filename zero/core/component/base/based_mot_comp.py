@@ -13,10 +13,7 @@ class BasedMOTComponent(BasedStreamComponent):
         self.input_port = ""
         self.input_mot = None  # 多目标追踪算法的输出作为该组件的输入
 
-    def on_start(self):
-        super().on_start()
-
-    def on_update(self) -> bool:
+    def on_resolve_stream(self) -> bool:
         # 只有不同帧才有必要计算
         mot_info = self.shared_data[SharedKey.MOT_INFO.name + self.input_port]
         if mot_info is not None and self.current_frame_id != int(mot_info[SharedKey.MOT_ID]):
@@ -37,4 +34,5 @@ class BasedMOTComponent(BasedStreamComponent):
             """
             self.input_mot = mot_info[SharedKey.MOT_OUTPUT]
             return True
-        return False
+        else:
+            return False

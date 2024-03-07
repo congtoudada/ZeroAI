@@ -16,8 +16,11 @@ class Component(ABC):
         self.shared_data: dict = shared_data
         self.config: BaseInfo = None
         self.pname = f"[ {os.getpid()}:component ]"
+        self.esc_event = None
 
     def on_start(self):
+        if self.shared_data is not None:
+            self.esc_event = self.shared_data[SharedKey.EVENT_ESC]
         if LogKit.load_info(self.config):  # 新进程设置日志
             pass
             # logger.info(f"{self.pname} 成功运行日志模块! 输出路径: {self.config.log_output_path}")
@@ -55,7 +58,7 @@ class Component(ABC):
         while True:
             if self.enable:
                 self.on_update()
-            if self.shared_data[SharedKey.EVENT_ESC].is_set():
+            if self.esc_event.is_set():
                 self.destroy()
                 return
 
