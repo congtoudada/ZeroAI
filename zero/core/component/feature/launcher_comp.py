@@ -9,7 +9,7 @@ import cv2
 from loguru import logger
 
 from zero.core.component.base.component import Component
-from zero.core.component.feature.stream_comp import create_stream_process
+from zero.core.component.feature.stream_comp import create_process
 from zero.core.component.helper.service_group_comp import ServiceGroupComponent
 from zero.core.info.feature.app_info import AppInfo
 from zero.core.key.shared_key import SharedKey
@@ -63,7 +63,7 @@ class LauncherComponent(Component):
             logger.info(f"{self.pname} 初始化摄像头: {cam_config_path}")
             self.global_shared_proxy[SharedKey.STREAM_WAIT_COUNTER_MAX] += 1
             # --- 初始化每个摄像头的算法 ---
-            Process(target=create_stream_process,
+            Process(target=create_process,
                     args=(self.global_shared_proxy, cam_config_path),
                     daemon=False).start()
         # -------------------------------- 初始化视频流End --------------------------------------

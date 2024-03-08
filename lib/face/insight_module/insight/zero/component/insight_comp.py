@@ -79,7 +79,7 @@ class InsightComponent(BaseServiceComponent):
         super().on_destroy()
 
 
-def create_insight_process(shared_data, config_path: str):
+def create_process(shared_data, config_path: str):
     insightComp: InsightComponent = InsightComponent(shared_data, config_path)  # 创建组件
     insightComp.start()  # 初始化
     insightComp.update()  # 算法逻辑循环

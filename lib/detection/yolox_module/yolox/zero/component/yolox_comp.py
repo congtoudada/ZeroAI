@@ -139,7 +139,7 @@ class YoloxComponent(BaseDetComponent):
             self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
 
 
-def create_yolox_process(shared_data, config_path: str):
+def create_process(shared_data, config_path: str):
     yoloxComp: YoloxComponent = YoloxComponent(shared_data, config_path)  # 创建组件
     yoloxComp.start()  # 初始化
     yoloxComp.update()  # 算法逻辑循环

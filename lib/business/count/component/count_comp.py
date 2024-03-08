@@ -271,7 +271,7 @@ class CountComponent(BasedMOTComponent):
                     f" count calculate fps: {1. / max(1e-5, self.timer.average_time):.2f}")
 
 
-def create_count_process(shared_data, config_path: str):
+def create_process(shared_data, config_path: str):
     countComp: CountComponent = CountComponent(shared_data, config_path)  # 创建组件
     countComp.start()  # 初始化
     countComp.update()  # 算法逻辑循环

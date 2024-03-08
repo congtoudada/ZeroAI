@@ -104,7 +104,7 @@ class StreamComponent(Component):
         return True
 
 
-def create_stream_process(shared_data, config_path: str):
+def create_process(shared_data, config_path: str):
     # 创建视频流组件
     streamComp: StreamComponent = StreamComponent(shared_data, config_path)
     streamComp.start()  # 一阶段：初始化自身

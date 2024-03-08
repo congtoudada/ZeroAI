@@ -2,8 +2,8 @@ INCLUDE:
   - conf/global/log.yaml
 cam_list:
   - conf/cam/stream1.yaml
-#  - conf/cam/stream2.yaml
+  - conf/cam/stream2.yaml
 service: # 全局服务
-  - name: insight
+  - path: lib/face/insight_module/insight/zero/component/insight_comp.py
     conf: conf/algorithm/face/insight/insight.yaml
 

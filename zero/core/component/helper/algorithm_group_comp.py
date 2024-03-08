@@ -28,41 +28,29 @@ class AlgorithmGroupComponent(BaseHelperComponent):
             while lock == self.shared_data[SharedKey.STREAM_WAIT_COUNTER]:
                 time.sleep(1)
             lock = self.shared_data[SharedKey.STREAM_WAIT_COUNTER]
-            logger.info(f"{self.pname} 启动算法: {comp['name']}")
-            # TODO: 可以用反射优化该部分代码
-            if comp['name'] == 'stream':
-                from zero.core.component.feature.stream_comp import create_stream_process
-                Process(target=create_stream_process,
-                        args=(self.shared_data, comp['conf']),
-                        daemon=False).start()
-            elif comp['name'] == "yolox":
-                from yolox.zero.component.yolox_comp import create_yolox_process
-                Process(target=create_yolox_process,
-                        args=(self.shared_data, comp['conf']),
-                        daemon=False).start()
-            elif comp['name'] == "bytetrack":
-                from bytetrack.zero.component.bytetrack_comp import create_bytetrack_process
-                Process(target=create_bytetrack_process,
-                        args=(self.shared_data, comp['conf']),
-                        daemon=False).start()
-            elif comp['name'] == "count":
-                from count.component.count_comp import create_count_process
-                Process(target=create_count_process,
-                        args=(self.shared_data, comp['conf']),
-                        daemon=False).start()
-            elif comp['name'] == 'count_face':
-                from count.extension.count_face_comp import create_count_face_process
-                Process(target=create_count_face_process,
-                        args=(self.shared_data, comp['conf']),
-                        daemon=False).start()
+            logger.info(f"{self.pname} 启动算法: {os.path.basename(comp['path']).split('.')[0]}")
+            module_file = comp['path']
+            if os.path.exists(module_file):
+                sys.path.append(os.path.dirname(module_file))
+                module = importlib.import_module(os.path.basename(module_file).split(".")[0])
+                if module.__dict__.__contains__("create_process"):
+                    Process(target=module.create_process,
+                            args=(self.shared_data, comp['conf']),
+                            daemon=False).start()
+                else:
+                    logger.error(f"{self.pname} 算法启动失败！没有实现create_process函数: {os.path.basename(module_file)}")
+            else:
+                logger.error(f"{self.pname} 算法启动失败！找不到py脚本: {module_file}")
 
 
 if __name__ == '__main__':
     exp_file = "script/helloworld.py"
     sys.path.append(os.path.dirname(exp_file))
     current_exp = importlib.import_module(os.path.basename(exp_file).split(".")[0])
-    exp = current_exp.A()
-    exp.print()
-
+    print(current_exp.__dict__.__contains__("print_hello"))
+    print(current_exp.__dict__.__contains__("print_hello1"))
+    func = current_exp.__getattribute__("print_hello")
+    # exp = current_exp.print_hello('congtou')
+    func('congtoudada')
 
 

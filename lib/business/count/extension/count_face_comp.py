@@ -57,10 +57,10 @@ class CountFaceComponent(CountComponent):
         super().on_draw_vis(im)
         face_dict = self.helper.get_face_dict()
         # 参考线
-        point1 = (0, int(self.helper.config.face_cull_y * self.stream_height))
-        point2 = (self.stream_width, int(self.helper.config.face_cull_y * self.stream_height))
-        point3 = (0, int((1 - self.helper.config.face_cull_y) * self.stream_height))
-        point4 = (self.stream_width, int((1 - self.helper.config.face_cull_y) * self.stream_height))
+        point1 = (0, int(self.helper.config.face_cull_up_y * self.stream_height))
+        point2 = (self.stream_width, int(self.helper.config.face_cull_up_y * self.stream_height))
+        point3 = (0, int((1 - self.helper.config.face_cull_down_y) * self.stream_height))
+        point4 = (self.stream_width, int((1 - self.helper.config.face_cull_down_y) * self.stream_height))
         cv2.line(im, point1, point2, (127, 127, 127), 1)  # 绘制线条
         cv2.line(im, point3, point4, (127, 127, 127), 1)  # 绘制线条
         # 人脸识别结果
@@ -95,7 +95,7 @@ class CountFaceComponent(CountComponent):
         super().on_destroy()
 
 
-def create_count_face_process(shared_data, config_path: str):
+def create_process(shared_data, config_path: str):
     countFaceComp: CountFaceComponent = CountFaceComponent(shared_data, config_path)  # 创建组件
     countFaceComp.start()  # 初始化
     countFaceComp.update()  # 算法逻辑循环

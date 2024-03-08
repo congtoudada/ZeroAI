@@ -38,7 +38,7 @@ class FaceHelperComponent(BaseHelperComponent):
             return False
         if not diff > self.config.face_min_send_interval:  # 不满足发送间隔，不发送
             return False
-        if not self.config.face_cull_y < per_y < 1.0 - self.config.face_cull_y:  # 在剔除区域，不发送
+        if not self.config.face_cull_up_y < per_y < 1.0 - self.config.face_cull_down_y:  # 在剔除区域，不发送
             return False
         return True
 

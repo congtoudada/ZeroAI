@@ -7,13 +7,13 @@ stream:
   url: res/videos/renlian/renlian1.mp4  # 取流地址（输入）
   output_port: camera1  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
   algorithm: # 算法配置
-#    - name: stream
+#    - path: zero/core/component/feature/stream_comp.py
 #      conf: conf/cam/stream2.yaml
-    - name: yolox
+    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py
       conf: conf/algorithm/detection/yolox/yolox_head.yaml
-    - name: bytetrack
+    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py
       conf: conf/algorithm/mot/bytetrack/bytetrack_head.yaml
-#    - name: count
+#    - path: lib/business/count/component/count_comp.py
 #      conf: conf/algorithm/business/count/count_renlian.yaml
-    - name: count_face
+    - path: lib/business/count/extension/count_face_comp.py
       conf: conf/algorithm/business/count/count_face/count_face.yaml

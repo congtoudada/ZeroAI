@@ -126,7 +126,7 @@ class BytetrackComponent(BaseMOTComponent):
             self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
 
 
-def create_bytetrack_process(shared_data, config_path: str):
+def create_process(shared_data, config_path: str):
     bytetrackComp: BytetrackComponent = BytetrackComponent(shared_data, config_path)  # 创建组件
     bytetrackComp.start()  # 初始化
     bytetrackComp.update()  # 算法逻辑循环
