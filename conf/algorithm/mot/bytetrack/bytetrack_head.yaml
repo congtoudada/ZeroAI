@@ -1,8 +1,8 @@
 INCLUDE:
   - conf/algorithm/mot/bytetrack/bytetrack_root.yaml
-bytetrack:
-  input_port: head
-  output_port: head
+input_port: camera1-yolox  # 存在时序关系，只能单输入
+output_port: camera1-bytetrack
+
 
 
 

@@ -1,7 +1,8 @@
-from zero.core.info.base_info import BaseInfo
+from zero.core.info.base.base_info import BaseInfo
+from zero.core.info.based.based_mot_info import BasedMOTInfo
 
 
-class CountInfo(BaseInfo):
+class CountInfo(BasedMOTInfo):
     def __init__(self, data: dict = None):
         self.count_input_port = ""  # 输入端口
         self.count_output_port = ""  # 输出端口

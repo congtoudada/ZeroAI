@@ -1,6 +1,26 @@
 # ZeroAI（持续更新中）
 
-ZeroAI是一个由**配置文件驱动**的**组件式**，基于**视频流**的**多进程**AI框架
+ZeroAI是一个由**配置文件驱动**的**组件式**，基于**视频流**的**多进程**AI框架，支持任意数量AI算法的快速部署与整合。
+
+* 高效：
+
+  * 基于Python多进程编写，相比于Socket通信，效率更高
+  * 基于GPU的推理，可采用Tensor RT或ONNX-GPU加速
+
+* 灵活性强：
+
+  * 基于配置文件驱动，通过修改配置文件，可以实现算法的自由切换与高度自定义配置
+
+  * 基于Port的设计，使得输出结果可以复用，同时单个算法也可以处理多输入
+
+* 可扩展性强：
+
+  * 基于组件式的设计，无需改动框架结构，可以轻松实现逻辑的横向、纵向扩展
+
+* 易上手：
+
+  * 框架预提供了丰富的组件，可以很轻松地根据需要接入自己的业务
+  * 配备贴心的教程文档，助力开发人员快速上手
 
 ## 目录结构
 
@@ -37,19 +57,17 @@ ZeroAI是一个由**配置文件驱动**的**组件式**，基于**视频流**�
 
 
 
-
-
 ## 运行
 
 
 
+## 实践
 
 
-## TODO
 
-* 拓展算法
-* 接入Web后端
-* 效果演示
+## 自定义组件
+
+
 
 ## 关键概念
 
@@ -70,17 +88,65 @@ ZeroAI是一个由**配置文件驱动**的**组件式**，基于**视频流**�
 * `on_destroy`：销毁时调用。释放资源
 * `on_analysis`：每帧调用，具体频率由配置文件指定。自动打印日志
 
-> 某些组件可能有自己单独的生命周期函数
+```python
+class Component(ABC):
+    def __init__(self, shared_data: dict):
+        self.pname = "component"
+        self.enable = True
+        self.shared_data: dict = shared_data
+        self.config: BaseInfo = None
+        self.pname = f"[ {os.getpid()}:component ]"
+        self.esc_event = None
+
+    def on_start(self):
+        if self.shared_data is not None:
+            self.esc_event = self.shared_data[SharedKey.EVENT_ESC]
+        if LogKit.load_info(self.config):  # 新进程设置日志
+            pass
+            # logger.info(f"{self.pname} 成功运行日志模块! 输出路径: {self.config.log_output_path}")
+        else:
+            logger.info(f"{self.pname} 日志模块被关闭!")
+
+    def on_update(self) -> bool:
+        return True
+
+    def on_destroy(self):
+        logger.info(f"{self.pname} destroy!")
+
+    def on_analysis(self):
+        pass
+
+    ...
+```
+
+> Tips：某些组件可能有自己单独的生命周期函数
 
 框架流程纵向图
 
 ![第一阶段纵向图](README.assets/第一阶段纵向图.jpg)
 
-> 每个Component通常对应一个Info，用于挂载配置参数
-
 框架流程横向图
 
 ![第一阶段横向图](README.assets/第一阶段横向图.jpg)
+
+> Tips：
+>
+> * 每个Component通常对应一个Info，用于存储配置参数。
+> * Basedxxx，通常说明组件的输入来自哪里；Basexxx，通常说明组件输出到哪里。
+
+### Info 文件
+
+通常每一个Component都可以编写一个对应的Info文件，用于存放从配置文件中读取的配置信息，共享内存的Key等。使用Info文件可以有效避免手动输入字符串导致的错拼、漏拼的问题。
+
+```python
+class AppInfo(BaseInfo):
+    def __init__(self, data: dict = None):
+        self.cam_list = []
+        self.service = []
+        super().__init__(data)  # 前面是声明，一定要最后调用这段赋值
+```
+
+> Tips：切记，除非你明确知道后果，如果需要加载配置文件的内容，需将`super().__init__(data)`放在变量声明的最后。
 
 ### Config 配置
 
@@ -90,6 +156,55 @@ ZeroAI是一个由**配置文件驱动**的**组件式**，基于**视频流**�
 * 基于YAML文件，支持配置细粒度重载；充分利用python动态语言特性，支持通过`set_attrs`自动赋值。
 
 工作流程：编写yaml配置文件 --> 编写对应的info脚本 --> 利用ConfigKit工具加载配置 --> 借助info脚本使用配置
+
+Yolox yaml配置参考：
+
+```yaml
+INCLUDE:
+  - conf/algorithm/detection/yolox/yolox_root.yaml
+stream:
+  input_ports:  # 输入端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
+    - camera1
+    - camera2
+detection:
+  output_port: yolox  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-yolox-camera1
+yolox:
+  args:
+    expn: head  # 实验名称
+    path: null  # 取流路径（为None则通过内部框架取流）
+    save_result: False # 是否存储视频
+    ...
+```
+
+YoloxInfo参考：
+
+在最后调用`super().__init__(data)`来重载配置
+
+```python
+class YoloxInfo(DetInfo):
+    def __init__(self, data: dict = None):
+        self.yolox_vis = False  # 是否使用opencv可视化（测试用）
+        self.yolox_args_expn = ""  # 实验名称
+        self.yolox_args_path = None  # 取流路径（为None则通过内部框架取流）
+        self.yolox_args_save_result = False  # 是否存储视频
+        ...
+        super().__init__(data)  # 前面是声明，一定要最后调用这段赋值
+```
+
+YoloxComponent参考：
+
+其中`self.config`就是根据路径从配置文件中加载的配置
+
+```python
+class YoloxComponent(BaseDetComponent):
+    def __init__(self, shared_data, config_path: str):
+        super().__init__(shared_data)
+        self.config: YoloxInfo = YoloxInfo(ConfigKit.load(config_path))
+        self.pname = f"[ {os.getpid()}:yolox for {self.config.yolox_args_expn}]"
+        # 自身定义
+        self.output_dir = ""  # 输出目录
+        ...
+```
 
 ### 共享内存
 
@@ -118,43 +233,10 @@ class SharedKey(Enum):
     EVENT_ESC = 0  # 退出事件
     WAIT_COUNTER = 1  # 服务初始化等待计数器（取决于服务数量，初始化用）
     CAMERAS = 2  # 相机dict列表
-    # ------------------ 以下Key对global_shared_data无效 ------------------
-    """
-    视频流
-    """
-    STREAM_GLOBAL = 100  # 全局共享内存的引用
-    STREAM_WAIT_COUNTER = 101  # 视频流初始化等待计数器（取决于算法数量，初始化用）
-    # ---
-    STREAM_FRAME_INFO = 102  # 视频流信息 (package)
-    STREAM_FRAME_ID = 103  # 原始图像ID（每次成功读取新的FRAME都会更新ID，避免算法重复处理相同帧）
-    STREAM_FRAME = 104  # 原始图像
-    # ---
-    STREAM_ORIGINAL_WIDTH = 105  # 原始图像宽
-    STREAM_ORIGINAL_HEIGHT = 106  # 原始图像高
-    STREAM_ORIGINAL_CHANNEL = 107  # 原始图像通道数
-    STREAM_ORIGINAL_FPS = 108  # 原始视频图像帧率
-    STREAM_URL = 109  # 摄像头取流地址
-    STREAM_CAMERA_ID = 110  # 摄像头id
-    STREAM_UPDATE_FPS = 111  # 算法最小update间隔
-    """
-    目标检测
-    """
-    # ---
-    DETECTION_INFO = 200  # 检测算法信息 (package)
-    DETECTION_ID = 201  # 当前帧ID（每次成功读取新的FRAME都会更新ID，避免算法重复处理相同帧）
-    DETECTION_FRAME = 202  # 读取的检测图像
-    # 算法输出结果 shape: [n, 6]
-    # n: n个对象
-    # [0,1,2,3]: ltrb bboxes (基于视频流分辨率)
-    #   [0]: x1
-    #   [1]: y1
-    #   [2]: x2
-    #   [3]: y2
-    # [4]: 置信度
-    # [5]: 类别 (下标从0开始)
-    DETECTION_OUTPUT = 203
-    # ---
-    DETECTION_TEST_SIZE = 204  # 目标检测输入尺寸 (暂时没用)
+    LOCK = 3  # 锁
+    
+    ...
+    
     """
     多目标追踪
     """
@@ -174,6 +256,7 @@ class SharedKey(Enum):
     # [6]: id
     MOT_OUTPUT = 303
     # ---
+    ...
 ```
 
 #### FaceKey
@@ -196,3 +279,8 @@ class FaceKey(Enum):
     RSP_SCORE = 13  # 人脸识别分数
 ```
 
+## TODO
+
+* 拓展算法
+* 接入Web后端
+* 效果演示

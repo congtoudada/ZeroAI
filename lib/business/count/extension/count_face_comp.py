@@ -16,7 +16,7 @@ class CountFaceComponent(CountComponent):
         self.pname = f"[ {os.getpid()}:face helper ]"
         self.helper = FaceHelperComponent(shared_data,
                                           self.config,
-                                          shared_data[SharedKey.STREAM_CAMERA_ID],
+                                          self.stream_cam_id,
                                           self.face_callback)
 
     def on_start(self):
@@ -57,10 +57,10 @@ class CountFaceComponent(CountComponent):
         super().on_draw_vis(im)
         face_dict = self.helper.get_face_dict()
         # 参考线
-        point1 = (0, int(self.helper.config.face_cull_y * self.height))
-        point2 = (self.width, int(self.helper.config.face_cull_y * self.height))
-        point3 = (0, int((1 - self.helper.config.face_cull_y) * self.height))
-        point4 = (self.width, int((1 - self.helper.config.face_cull_y) * self.height))
+        point1 = (0, int(self.helper.config.face_cull_y * self.stream_height))
+        point2 = (self.stream_width, int(self.helper.config.face_cull_y * self.stream_height))
+        point3 = (0, int((1 - self.helper.config.face_cull_y) * self.stream_height))
+        point4 = (self.stream_width, int((1 - self.helper.config.face_cull_y) * self.stream_height))
         cv2.line(im, point1, point2, (127, 127, 127), 1)  # 绘制线条
         cv2.line(im, point3, point4, (127, 127, 127), 1)  # 绘制线条
         # 人脸识别结果

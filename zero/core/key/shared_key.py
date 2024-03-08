@@ -11,24 +11,26 @@ class SharedKey(Enum):
     EVENT_ESC = 0  # 退出事件
     WAIT_COUNTER = 1  # 服务初始化等待计数器（取决于服务数量，初始化用）
     CAMERAS = 2  # 相机dict列表
+    LOCK = 3  # 锁
     # ------------------ 以下Key对global_shared_data无效 ------------------
     """
     视频流
     """
     STREAM_GLOBAL = 100  # 全局共享内存的引用
-    STREAM_WAIT_COUNTER = 101  # 视频流初始化等待计数器（取决于算法数量，初始化用）
+    STREAM_WAIT_COUNTER = 101  # 视频流初始化等待计数器
+    STREAM_WAIT_COUNTER_MAX = 102  # 视频流初始化等待计数器最大值（取决于算法数量，初始化用）
     # ---
-    STREAM_FRAME_INFO = 102  # 视频流信息 (package)
-    STREAM_FRAME_ID = 103  # 原始图像ID（每次成功读取新的FRAME都会更新ID，避免算法重复处理相同帧）
-    STREAM_FRAME = 104  # 原始图像
+    STREAM_FRAME_INFO = 103  # 视频流信息 (package)
+    STREAM_FRAME_ID = 104  # 原始图像ID（每次成功读取新的FRAME都会更新ID，避免算法重复处理相同帧）
+    STREAM_FRAME = 105  # 原始图像
     # ---
-    STREAM_ORIGINAL_WIDTH = 105  # 原始图像宽
-    STREAM_ORIGINAL_HEIGHT = 106  # 原始图像高
-    STREAM_ORIGINAL_CHANNEL = 107  # 原始图像通道数
-    STREAM_ORIGINAL_FPS = 108  # 原始视频图像帧率
-    STREAM_URL = 109  # 摄像头取流地址
-    STREAM_CAMERA_ID = 110  # 摄像头id
-    STREAM_UPDATE_FPS = 111  # 算法最小update间隔
+    STREAM_ORIGINAL_WIDTH = 106  # 原始图像宽
+    STREAM_ORIGINAL_HEIGHT = 107  # 原始图像高
+    STREAM_ORIGINAL_CHANNEL = 108  # 原始图像通道数
+    STREAM_ORIGINAL_FPS = 109  # 原始视频图像帧率
+    STREAM_URL = 110  # 摄像头取流地址
+    STREAM_CAMERA_ID = 111  # 摄像头id
+    STREAM_UPDATE_FPS = 112  # 算法最小update间隔
     """
     目标检测
     """

@@ -2,14 +2,13 @@ import os
 from typing import Dict
 
 import cv2
-import numpy
 import numpy as np
 from loguru import logger
 
 from count.component.count_item import CountItem
 from count.component.count_pool import CountPool
 from count.info.count_info import CountInfo
-from zero.core.component.base.based_mot_comp import BasedMOTComponent
+from zero.core.component.based.based_mot_comp import BasedMOTComponent
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit
 from zero.utility.timer_kit import TimerKit
@@ -107,7 +106,7 @@ class CountComponent(BasedMOTComponent):
                 self.on_create_obj(item)
             # 2.更新状态
             x, y = self._get_base(self.config.count_base, ltrb)
-            self.item_dict[obj_id].update(self.current_frame_id, x / self.width, y / self.height, ltrb)
+            self.item_dict[obj_id].update(self.current_frame_id, x / self.stream_width, y / self.stream_height, ltrb)
 
     def process_result(self):
         """
@@ -201,20 +200,20 @@ class CountComponent(BasedMOTComponent):
         for i, red_point in enumerate(self.red_points):
             if i == 0:
                 continue
-            cv2.line(im, (int(self.red_points[i][0] * self.width), int(self.red_points[i][1] * self.height)),
-                     (int(self.red_points[i-1][0] * self.width), int(self.red_points[i-1][1] * self.height)),
+            cv2.line(im, (int(self.red_points[i][0] * self.stream_width), int(self.red_points[i][1] * self.stream_height)),
+                     (int(self.red_points[i-1][0] * self.stream_width), int(self.red_points[i-1][1] * self.stream_height)),
                      (0, 0, 255), line_thickness)  # 绘制线条
         # 绿线
         for i, green_point in enumerate(self.green_points):
             if i == 0:
                 continue
-            cv2.line(im, (int(self.green_points[i][0] * self.width), int(self.green_points[i][1] * self.height)),
-                     (int(self.green_points[i-1][0] * self.width), int(self.green_points[i-1][1] * self.height)),
+            cv2.line(im, (int(self.green_points[i][0] * self.stream_width), int(self.green_points[i][1] * self.stream_height)),
+                     (int(self.green_points[i-1][0] * self.stream_width), int(self.green_points[i-1][1] * self.stream_height)),
                      (255, 0, 0), line_thickness)  # 绘制线条
         # 对象基准点、红绿信息
         for item in self.item_dict.values():
-            screen_x = int(item.base_x * self.width)
-            screen_y = int(item.base_y * self.height)
+            screen_x = int(item.base_x * self.stream_width)
+            screen_y = int(item.base_y * self.stream_height)
             cv2.circle(im, (screen_x, screen_y), 4, (118, 154, 242), line_thickness)
             cv2.putText(im, str(item.red_cur), (screen_x, screen_y), cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255),
                         thickness=text_thickness)

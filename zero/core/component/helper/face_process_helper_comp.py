@@ -1,11 +1,10 @@
 import multiprocessing
 import os
 import random
-import time
 from loguru import logger
 
 from zero.core.component.base.component import Component
-from zero.core.info.face_helper_info import FaceHelperInfo
+from zero.core.info.feature.face_helper_info import FaceHelperInfo
 from zero.core.key.face_key import FaceKey
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit
@@ -36,7 +35,6 @@ class FaceProcessHelperComponent(Component):
         self.rsp_keys = [FaceKey.RSP.name + port + str(os.getpid()) for port in self.ports]
         self.cam_id = cam_id
         self.callback = callback
-        self.global_shared_data = shared_data[SharedKey.STREAM_GLOBAL]
 
     def on_start(self):
         super().on_start()
@@ -64,7 +62,7 @@ class FaceProcessHelperComponent(Component):
         if self.can_send(obj_id):
             logger.info(f"{self.pname} 发送人脸识别请求: {obj_id}")
             self.send_lock.add(obj_id)
-            self.global_shared_data[self._get_random_req_key()].put({
+            self.shared_data[self._get_random_req_key()].put({
                 FaceKey.REQ_CAM_ID: self.cam_id,
                 FaceKey.REQ_PID: os.getpid(),
                 FaceKey.REQ_OBJ_ID: obj_id,

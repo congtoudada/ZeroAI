@@ -1,11 +1,13 @@
+import importlib
 import os
+import sys
 import time
 from multiprocessing import Process
 
 from loguru import logger
 
 from zero.core.component.helper.base_helper_comp import BaseHelperComponent
-from zero.core.info.stream_info import StreamInfo
+from zero.core.info.feature.stream_info import StreamInfo
 from zero.core.key.shared_key import SharedKey
 
 
@@ -28,7 +30,12 @@ class AlgorithmGroupComponent(BaseHelperComponent):
             lock = self.shared_data[SharedKey.STREAM_WAIT_COUNTER]
             logger.info(f"{self.pname} 启动算法: {comp['name']}")
             # TODO: 可以用反射优化该部分代码
-            if comp['name'] == "yolox":
+            if comp['name'] == 'stream':
+                from zero.core.component.feature.stream_comp import create_stream_process
+                Process(target=create_stream_process,
+                        args=(self.shared_data, comp['conf']),
+                        daemon=False).start()
+            elif comp['name'] == "yolox":
                 from yolox.zero.component.yolox_comp import create_yolox_process
                 Process(target=create_yolox_process,
                         args=(self.shared_data, comp['conf']),
@@ -48,6 +55,14 @@ class AlgorithmGroupComponent(BaseHelperComponent):
                 Process(target=create_count_face_process,
                         args=(self.shared_data, comp['conf']),
                         daemon=False).start()
+
+
+if __name__ == '__main__':
+    exp_file = "script/helloworld.py"
+    sys.path.append(os.path.dirname(exp_file))
+    current_exp = importlib.import_module(os.path.basename(exp_file).split(".")[0])
+    exp = current_exp.A()
+    exp.print()
 
 
 

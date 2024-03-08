@@ -17,8 +17,8 @@ from zero.utility.timer_kit import TimerKit
 
 
 class InsightComponent(BaseServiceComponent):
-    def __init__(self, global_shared_data, config_path: str):
-        super().__init__(global_shared_data)
+    def __init__(self, shared_data, config_path: str):
+        super().__init__(shared_data)
         self.config: InsightInfo = InsightInfo(ConfigKit.load(config_path))
         self.pname = f"[ {os.getpid()}:insight_face ]"
         self.req_queue = None
@@ -27,14 +27,13 @@ class InsightComponent(BaseServiceComponent):
                                           "database-{}.json".format(self.config.insight_rec_feature))
         self.face_model: FaceRecognizer = FaceRecognizer(self.config)
         self.update_count = 0
-        self.global_shared_data = self.shared_data
         self.timer = TimerKit()
 
     def on_start(self):
         super().on_start()
         # 初始化请求缓存
         self.req_queue = multiprocessing.Manager().Queue()
-        self.global_shared_data[self.req_key] = self.req_queue
+        self.shared_data[self.req_key] = self.req_queue
 
     def on_update(self) -> bool:
         if super().on_update():
@@ -62,10 +61,9 @@ class InsightComponent(BaseServiceComponent):
 
                 # per_id, score = 1, 0
                 # 响应输出结果
-                cam_dict: dict = self.global_shared_data[SharedKey.CAMERAS][cam_id]  # 找到摄像头对应的shared_data
                 rsp_key = FaceKey.RSP.name + self.config.insight_port + str(pid)
-                if cam_dict.__contains__(rsp_key):
-                    cam_dict[rsp_key].put({
+                if self.shared_data.__contains__(rsp_key):
+                    self.shared_data[rsp_key].put({
                         FaceKey.RSP_OBJ_ID: obj_id,
                         FaceKey.RSP_PER_ID: per_id,
                         FaceKey.RSP_SCORE: score
@@ -81,8 +79,8 @@ class InsightComponent(BaseServiceComponent):
         super().on_destroy()
 
 
-def create_insight_process(global_shared_data, config_path: str):
-    insightComp: InsightComponent = InsightComponent(global_shared_data, config_path)  # 创建组件
+def create_insight_process(shared_data, config_path: str):
+    insightComp: InsightComponent = InsightComponent(shared_data, config_path)  # 创建组件
     insightComp.start()  # 初始化
     insightComp.update()  # 算法逻辑循环
 

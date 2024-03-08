@@ -4,8 +4,11 @@ log:
   analysis: False
 stream:
   cam_id: 1  # 摄像头编号
-  url: res/videos/renlian/renlian1.mp4  # 取流地址
+  url: res/videos/renlian/renlian1.mp4  # 取流地址（输入）
+  output_port: camera1  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
   algorithm: # 算法配置
+#    - name: stream
+#      conf: conf/cam/stream2.yaml
     - name: yolox
       conf: conf/algorithm/detection/yolox/yolox_head.yaml
     - name: bytetrack

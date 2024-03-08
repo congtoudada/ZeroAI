@@ -2,7 +2,7 @@ INCLUDE:
   - conf/global/log.yaml
   - conf/global/visual.yaml
 log:
-  enable: False
+  enable: True
 yolox:
   args:
     name: null  # 通过模型名选择预置模型（建议使用exp_file自定义选择）

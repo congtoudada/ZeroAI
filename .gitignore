@@ -174,3 +174,4 @@ events.out.tfevents*
 /log
 /res
 /pretrained
+/output

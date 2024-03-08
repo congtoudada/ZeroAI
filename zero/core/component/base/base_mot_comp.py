@@ -1,26 +1,28 @@
-from zero.core.component.base.based_det_comp import BasedDetComponent
+from zero.core.component.based.based_det_comp import BasedDetComponent
+from zero.core.info.base.base_mot_info import BaseMOTInfo
 from zero.core.key.shared_key import SharedKey
 
 
 class BaseMOTComponent(BasedDetComponent):
     """
-    TODO: 多目标追踪算法基类（时间有限，未完待续）
+    TODO: 多目标追踪算法基类
     """
     def __init__(self, shared_data):
         super().__init__(shared_data)
-        self.output_port = ""  # 输出端口
+        self.config: BaseMOTInfo = None
         self.inference_outputs = None  # 推理结果
         self.output_mot_info = {}   # 进程间共享检测信息
 
     def on_start(self):
         super().on_start()
-        self.shared_data[SharedKey.MOT_INFO.name + self.output_port] = None
+        self.shared_data[self.config.MOT_INFO] = None
 
     def resolve_output(self, inference_outputs):
+        self.output_mot_info.clear()
         self.output_mot_info[SharedKey.MOT_ID] = self.current_frame_id
         self.output_mot_info[SharedKey.MOT_FRAME] = self.frame
         self.output_mot_info[SharedKey.MOT_OUTPUT] = self.on_resolve_output(inference_outputs)
-        self.shared_data[SharedKey.MOT_INFO.name + self.output_port] = self.output_mot_info  # 填充输出
+        self.shared_data[self.config.MOT_INFO] = self.output_mot_info  # 填充输出
 
     def get_color(self, idx):
         idx = idx * 3

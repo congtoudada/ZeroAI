@@ -4,7 +4,7 @@ from loguru import logger
 
 from zero.core.component.helper.base_helper_comp import BaseHelperComponent
 from zero.core.component.helper.face_process_helper_comp import FaceProcessHelperComponent
-from zero.core.info.face_helper_info import FaceHelperInfo
+from zero.core.info.feature.face_helper_info import FaceHelperInfo
 from zero.utility.config_kit import ConfigKit
 
 

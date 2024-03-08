@@ -11,8 +11,7 @@ from loguru import logger
 from zero.core.component.base.component import Component
 from zero.core.component.feature.stream_comp import create_stream_process
 from zero.core.component.helper.service_group_comp import ServiceGroupComponent
-from zero.core.info.app_info import AppInfo
-from zero.core.info.stream_info import StreamInfo
+from zero.core.info.feature.app_info import AppInfo
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit
 
@@ -27,9 +26,6 @@ class LauncherComponent(Component):
         self.service_group_comp = None
         self.pname = f"[ {os.getpid()}:main ]"
         self.global_shared_proxy = None  # 全局代理
-        self.cam_id_list = []  # 所有摄像头id
-        self.global_cameras = None  # 所有摄像头代理（Manger().dict弱引用）
-        self.cameras_ref = []   # 所有摄像头代理（强引用）
         self.esc_event = None
 
     def on_start(self):
@@ -47,24 +43,10 @@ class LauncherComponent(Component):
         signal.signal(signal.SIGTERM, self.handle_termination)
 
         # -------------------------------- 1.初始化共享内存 --------------------------------
-        # --- 服务类
         self.global_shared_proxy: dict = multiprocessing.Manager().dict()
+        self.global_shared_proxy[SharedKey.LOCK] = multiprocessing.Manager().Lock()
         self.global_shared_proxy[SharedKey.EVENT_ESC] = self.esc_event
         self.global_shared_proxy[SharedKey.WAIT_COUNTER] = 0
-        self.global_cameras = multiprocessing.Manager().dict()
-        self.global_shared_proxy[SharedKey.CAMERAS] = self.global_cameras
-        # --- 摄像头类
-        for cam in self.config.cam_list:
-            # 摄像头代理（对每台摄像头是隔离的）
-            shared_proxy: dict = multiprocessing.Manager().dict()
-            shared_proxy[SharedKey.EVENT_ESC] = self.esc_event
-            streamInfo = StreamInfo(ConfigKit.load(cam))
-            # global -> camera
-            self.global_cameras[streamInfo.stream_cam_id] = shared_proxy
-            self.cam_id_list.append(streamInfo.stream_cam_id)
-            self.cameras_ref.append(shared_proxy)  # 强引用，避免垃圾回收
-            # camera -> global
-            shared_proxy[SharedKey.STREAM_GLOBAL] = self.global_shared_proxy
 
         # -------------------------------- 2.初始化全局服务 --------------------------------
         self.service_group_comp = ServiceGroupComponent(self.global_shared_proxy, self.config)
@@ -74,13 +56,15 @@ class LauncherComponent(Component):
             time.sleep(0.2)
         # -------------------------------- 初始化全局服务End --------------------------------
 
-        # -------------------------------- 3.初始化视频流 --------------------------------
+        # -------------------------------- 3.初始化视频流 -----------------------------------
+        self.global_shared_proxy[SharedKey.STREAM_WAIT_COUNTER] = 0
+        self.global_shared_proxy[SharedKey.STREAM_WAIT_COUNTER_MAX] = 0
         for i, cam_config_path in enumerate(self.config.cam_list):
             logger.info(f"{self.pname} 初始化摄像头: {cam_config_path}")
-            cam_dict = self.global_cameras[self.cam_id_list[i]]
+            self.global_shared_proxy[SharedKey.STREAM_WAIT_COUNTER_MAX] += 1
             # --- 初始化每个摄像头的算法 ---
             Process(target=create_stream_process,
-                    args=(cam_dict, cam_config_path),
+                    args=(self.global_shared_proxy, cam_config_path),
                     daemon=False).start()
         # -------------------------------- 初始化视频流End --------------------------------------
 

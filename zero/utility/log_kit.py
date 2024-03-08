@@ -3,7 +3,7 @@ import time
 from loguru import logger
 from enum import Enum
 
-from zero.core.info.base_info import BaseInfo
+from zero.core.info.base.base_info import BaseInfo
 
 class LogKit:
     class Level(Enum):

@@ -18,12 +18,11 @@ class YoloxComponent(BaseDetComponent):
         super().__init__(shared_data)
         self.config: YoloxInfo = YoloxInfo(ConfigKit.load(config_path))
         self.pname = f"[ {os.getpid()}:yolox for {self.config.yolox_args_expn}]"
-        self.output_port = self.config.yolox_output_port
         # 自身定义
         self.output_dir = ""  # 输出目录
         self.predictor = None  # 推理模型
         self.timer = TimerKit()  # 计时器
-        self.scale = 1  # 结果缩放尺寸
+        self.scale = []  # 结果缩放尺寸
 
     def on_start(self):
         """
@@ -33,7 +32,8 @@ class YoloxComponent(BaseDetComponent):
         super().on_start()
         exp: Exp = get_exp(self.config.yolox_args_exp_file, self.config.yolox_args_name)
         # 设置输出文件夹
-        folder = os.path.splitext(os.path.basename(self.shared_data[SharedKey.STREAM_URL]))[0]
+        # folder = os.path.splitext(os.path.basename(self.shared_data[SharedKey.STREAM_URL]))[0]
+        folder = "output/yolox"
         self.output_dir = os.path.join(exp.output_dir, self.config.yolox_args_expn, folder)
         os.makedirs(self.output_dir, exist_ok=True)
         # 创建zero框架版的yolox目标检测器
@@ -43,9 +43,12 @@ class YoloxComponent(BaseDetComponent):
             SharedKey.DETECTION_FRAME: None,
             SharedKey.DETECTION_OUTPUT: []
         }
-        self.scale = min(self.config.yolox_args_tsize / float(self.shared_data[SharedKey.STREAM_ORIGINAL_HEIGHT]),
-                         self.config.yolox_args_tsize / float(self.shared_data[SharedKey.STREAM_ORIGINAL_WIDTH]))
-        self.shared_data[SharedKey.DETECTION_TEST_SIZE] = exp.test_size
+        for i in range(len(self.config.STREAM_ORIGINAL_WIDTH)):
+            height_key = self.config.STREAM_ORIGINAL_HEIGHT[i]
+            width_key = self.config.STREAM_ORIGINAL_WIDTH[i]
+            self.scale.append(min(self.config.yolox_args_tsize / float(self.shared_data[height_key]),
+                                  self.config.yolox_args_tsize / float(self.shared_data[width_key])))
+            self.shared_data[self.config.DETECTION_TEST_SIZE[i]] = exp.test_size
 
     def on_update(self) -> bool:
         """
@@ -93,7 +96,7 @@ class YoloxComponent(BaseDetComponent):
         :return:
         """
         outputs_cpu = inference_outputs.cpu().numpy()
-        bboxes = outputs_cpu[:, :4] / self.scale
+        bboxes = outputs_cpu[:, :4] / self.scale[self.cur_stream_idx]
         scores = outputs_cpu[:, 4] * outputs_cpu[:, 5]
         classes = outputs_cpu[:, 6]
         if scores.ndim == 1:
@@ -103,7 +106,7 @@ class YoloxComponent(BaseDetComponent):
 
     def _draw_vis(self):
         if self.inference_outputs is None:
-            cv2.imshow("yolox window", self.frame)
+            cv2.imshow(f"yolox window {self.cur_stream_idx}", self.frame)
         else:
             im = np.ascontiguousarray(np.copy(self.frame))
             # im_h, im_w = im.shape[:2]
@@ -113,13 +116,13 @@ class YoloxComponent(BaseDetComponent):
             line_thickness = 2
 
             cv2.putText(im, 'frame:%d video_fps:%.2f inference_fps:%.2f num:%d' %
-                        (self.current_frame_id,
+                        (self.current_frame_id[self.cur_stream_idx],
                          1. / max(1e-5, self.update_timer.average_time),
                          1. / max(1e-5, self.timer.average_time),
                          self.inference_outputs.shape[0]), (0, int(15 * text_scale)),
                         cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
             for i in range(self.inference_outputs.shape[0]):
-                tlbr = self.inference_outputs[i, :4] / self.scale
+                tlbr = self.inference_outputs[i, :4] / self.scale[self.cur_stream_idx]
                 x1, y1, w, h = tlbr[0], tlbr[1], tlbr[2] - tlbr[0], tlbr[3] - tlbr[1]
                 score = self.inference_outputs[i, 4] * self.inference_outputs[i, 5]
                 id_text = f"{score:.2f}"
@@ -129,7 +132,7 @@ class YoloxComponent(BaseDetComponent):
                               thickness=line_thickness)
                 cv2.putText(im, id_text, (intbox[0], intbox[1]), cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255),
                             thickness=text_thickness)
-            cv2.imshow("yolox window", im)
+            cv2.imshow(f"yolox window {self.cur_stream_idx}", im)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             self.config.yolox_vis = False

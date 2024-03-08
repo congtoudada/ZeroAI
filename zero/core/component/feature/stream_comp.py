@@ -6,7 +6,7 @@ import cv2
 from loguru import logger
 
 from zero.core.component.helper.algorithm_group_comp import AlgorithmGroupComponent
-from zero.core.info.stream_info import StreamInfo
+from zero.core.info.feature.stream_info import StreamInfo
 from zero.core.component.base.component import Component
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit
@@ -28,11 +28,6 @@ class StreamComponent(Component):
         self.drop_flag = 0  # 丢帧标记
         self.last_time = 0  # 上次读取视频流的时间
         self.stream_frame_info = {}
-        # callback(obj_id, per_id, score)
-        # self.face_helper = FaceProcessHelperComponent(shared_data,
-        #                                               self.config.face_helper,
-        #                                               self.config.stream_cam_id,
-        #                                               lambda obj_id, per_id, score: print(f"{obj_id} {per_id} {score}"))
 
     def on_start(self):
         """
@@ -46,28 +41,28 @@ class StreamComponent(Component):
             SharedKey.STREAM_FRAME_ID: 0,
             SharedKey.STREAM_FRAME: None
         }
-        self.shared_data[SharedKey.STREAM_FRAME_INFO] = self.stream_frame_info
-        self.shared_data[SharedKey.STREAM_ORIGINAL_WIDTH] = int(self.config.stream_width)
-        self.shared_data[SharedKey.STREAM_ORIGINAL_HEIGHT] = int(self.config.stream_height)
-        self.shared_data[SharedKey.STREAM_ORIGINAL_CHANNEL] = int(self.config.stream_channel)
-        self.shared_data[SharedKey.STREAM_ORIGINAL_FPS] = self.frame_fps
-        self.shared_data[SharedKey.STREAM_WAIT_COUNTER] = 0
-        # self.shared_data[SharedKey.STREAM_WAIT_MAX] = len(self.config.stream_algorithm)
-        self.shared_data[SharedKey.STREAM_URL] = self.config.stream_url
-        self.shared_data[SharedKey.STREAM_CAMERA_ID] = self.config.stream_cam_id
-        self.shared_data[SharedKey.STREAM_UPDATE_FPS] = self.config.stream_update_fps
+        self.shared_data[self.config.STREAM_FRAME_INFO] = self.stream_frame_info
+        self.shared_data[self.config.STREAM_ORIGINAL_WIDTH] = int(self.config.stream_width)
+        self.shared_data[self.config.STREAM_ORIGINAL_HEIGHT] = int(self.config.stream_height)
+        self.shared_data[self.config.STREAM_ORIGINAL_CHANNEL] = int(self.config.stream_channel)
+        self.shared_data[self.config.STREAM_ORIGINAL_FPS] = self.frame_fps
+        self.shared_data[self.config.STREAM_URL] = self.config.stream_url
+        self.shared_data[self.config.STREAM_CAMERA_ID] = self.config.stream_cam_id
+        self.shared_data[self.config.STREAM_UPDATE_FPS] = self.config.stream_update_fps
+        self.shared_data[SharedKey.STREAM_WAIT_COUNTER_MAX] += len(self.config.stream_algorithm)
+        # self.face_helper.start()
+        # img = cv2.imread('res/images/face/database/48-0001.jpg')
+        # self.face_helper.send(1, img)
 
+    def second_start(self):
         # 多进程启动算法
         self.algo_group_comp.start()
 
         # 等待所有算法初始化完成
-        while self.shared_data[SharedKey.STREAM_WAIT_COUNTER] < len(self.config.stream_algorithm):
+        while self.shared_data[SharedKey.STREAM_WAIT_COUNTER] < self.shared_data[SharedKey.STREAM_WAIT_COUNTER_MAX]:
             time.sleep(0.2)
 
         logger.info(f"{self.pname} 所有算法成功初始化！开始取流 URL: {self.config.stream_url} fps: {self.frame_fps}")
-        # self.face_helper.start()
-        # img = cv2.imread('res/images/face/database/48-0001.jpg')
-        # self.face_helper.send(1, img)
 
     def on_update(self) -> bool:
         """
@@ -84,8 +79,7 @@ class StreamComponent(Component):
                     self.stream_frame_info[SharedKey.STREAM_FRAME_ID] = self.success_frame
                     self.stream_frame_info[SharedKey.STREAM_FRAME] = frame.flatten()
                     # 填充输出
-                    self.shared_data[SharedKey.STREAM_FRAME_INFO] = self.stream_frame_info
-                    # self.shared_data[SharedKey.STREAM_ORIGINAL_FRAME] = frame
+                    self.shared_data[self.config.STREAM_FRAME_INFO] = self.stream_frame_info
                     if self.config.stream_delay:
                         time.sleep(1.0 / (self.frame_fps * self.config.stream_delay_speed))
                     self.analysis(self.success_frame)  # 分析报告
@@ -113,7 +107,10 @@ class StreamComponent(Component):
 def create_stream_process(shared_data, config_path: str):
     # 创建视频流组件
     streamComp: StreamComponent = StreamComponent(shared_data, config_path)
-    streamComp.start()  # 初始化
+    streamComp.start()  # 一阶段：初始化自身
+    # 在初始化结束通知给流进程
+    shared_data[SharedKey.STREAM_WAIT_COUNTER] += 1
+    streamComp.second_start()  # 二阶段：初始化算法
     streamComp.update()  # 算法逻辑循环
 
 

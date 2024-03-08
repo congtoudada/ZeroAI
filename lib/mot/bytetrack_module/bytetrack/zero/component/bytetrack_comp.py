@@ -16,15 +16,13 @@ class BytetrackComponent(BaseMOTComponent):
     def __init__(self, shared_data, config_path: str):
         super().__init__(shared_data)
         self.config: BytetrackInfo = BytetrackInfo(ConfigKit.load(config_path))
-        self.pname = f"[ {os.getpid()}:bytetrack for {self.config.bytetrack_input_port}]"
-        self.input_port = self.config.bytetrack_input_port
-        self.output_port = self.config.bytetrack_output_port
+        self.pname = f"[ {os.getpid()}:bytetrack from {self.config.input_port[0]}]"
         # 自身定义
         self.tracker = None
         self.timer = TimerKit()
-        self.width = 640
-        self.height = 640
-        self.test_size = 640  # 无用
+        # self.width = 640
+        # self.height = 640
+        # self.test_size = 640  # 无用
         self.online_tlwhs = []
         self.online_ltrbs = []
         self.online_ids = []
@@ -34,9 +32,9 @@ class BytetrackComponent(BaseMOTComponent):
     def on_start(self):
         super().on_start()
         self.tracker = BYTETracker(self.config, frame_rate=self.config.bytetrack_args_fps)
-        self.width = self.shared_data[SharedKey.STREAM_ORIGINAL_WIDTH]
-        self.height = self.shared_data[SharedKey.STREAM_ORIGINAL_HEIGHT]
-        self.test_size = self.shared_data[SharedKey.DETECTION_TEST_SIZE]
+        # self.width = self.shared_data[self.config.STREAM_ORIGINAL_WIDTH]
+        # self.height = self.shared_data[self.config.STREAM_ORIGINAL_HEIGHT]
+        # self.test_size = self.shared_data[self.config.DETECTION_TEST_SIZE]
 
     def on_update(self) -> bool:
         if super().on_update() and self.input_det is not None:

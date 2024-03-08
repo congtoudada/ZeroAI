@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from loguru import logger
 
-from zero.core.info.stream_info import StreamInfo
+from zero.core.info.feature.stream_info import StreamInfo
 from zero.core.deprecated.cache_key import CacheKey
 from zero.core.key.shared_key import SharedKey
 from zero.core.component.feature.stream_comp import get_stream_process
