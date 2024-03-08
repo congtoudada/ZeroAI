@@ -1,0 +1,7 @@
+# 是否使用opencv可视化（测试用）
+yolox:
+  vis: False
+bytetrack:
+  vis: False
+count:
+  vis: True

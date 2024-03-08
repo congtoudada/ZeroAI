@@ -1,9 +1,9 @@
 INCLUDE:
-  - conf/log/log.yaml
+  - conf/global/log.yaml
+  - conf/global/visual.yaml
 log:
   enable: False
 yolox:
-  vis: False  # 是否使用opencv可视化（测试用）
   args:
     name: null  # 通过模型名选择预置模型（建议使用exp_file自定义选择）
     camid: 0  # webcam demo camera id（含摄像头设备才需要，一般不设置）

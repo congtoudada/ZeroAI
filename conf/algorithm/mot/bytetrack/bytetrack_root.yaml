@@ -1,10 +1,10 @@
 INCLUDE:
-  - conf/log/log.yaml
+  - conf/global/log.yaml
+  - conf/global/visual.yaml
   - conf/algorithm/detection/detection_labels.yaml
 log:
   enable: True
 bytetrack:
-  vis: False  # 是否使用opencv可视化（测试用）
   args:
     fps: 30 # frame rate (fps)
     thresh: 0.5 # tracking confidence threshold

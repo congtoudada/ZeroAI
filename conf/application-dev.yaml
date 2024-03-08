@@ -1,5 +1,5 @@
 INCLUDE:
-  - conf/log/log.yaml
+  - conf/global/log.yaml
 cam_list:
   - conf/cam/stream1.yaml
 service: # 全局服务

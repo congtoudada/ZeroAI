@@ -1,0 +1,75 @@
+2024-03-08 12:15:17.471 | INFO     | zero.core.component.helper.service_group_comp:on_start:29 - [ 2200:app service ] 启动服务: insight
+2024-03-08 12:15:17.471 | INFO     | zero.core.component.helper.service_group_comp:on_start:29 - [ 2200:app service ] 启动服务: insight
+2024-03-08 12:15:28.370 | INFO     | zero.core.component.service.base_service_comp:on_start:14 - [ 13164:insight_face ] 成功初始化！
+2024-03-08 12:15:28.547 | INFO     | zero.core.component.feature.launcher_comp:on_start:79 - [ 2200:main ] 初始化摄像头: conf/cam/stream1.yaml
+2024-03-08 12:15:28.547 | INFO     | zero.core.component.feature.launcher_comp:on_start:79 - [ 2200:main ] 初始化摄像头: conf/cam/stream1.yaml
+2024-03-08 12:15:29.053 | INFO     | zero.core.component.helper.algorithm_group_comp:on_start:29 - [ 13268:camera1 ] 启动算法: yolox
+2024-03-08 12:15:29.053 | INFO     | zero.core.component.helper.algorithm_group_comp:on_start:29 - [ 13268:camera1 ] 启动算法: yolox
+2024-03-08 12:15:35.021 | INFO     | zero.core.component.helper.algorithm_group_comp:on_start:29 - [ 13268:camera1 ] 启动算法: bytetrack
+2024-03-08 12:15:35.021 | INFO     | zero.core.component.helper.algorithm_group_comp:on_start:29 - [ 13268:camera1 ] 启动算法: bytetrack
+2024-03-08 12:15:36.506 | INFO     | zero.core.component.base.based_stream_comp:start:60 - [ 24444:bytetrack for head] 成功初始化！
+2024-03-08 12:15:37.153 | INFO     | zero.core.component.helper.algorithm_group_comp:on_start:29 - [ 13268:camera1 ] 启动算法: count_face
+2024-03-08 12:15:37.153 | INFO     | zero.core.component.helper.algorithm_group_comp:on_start:29 - [ 13268:camera1 ] 启动算法: count_face
+2024-03-08 12:15:37.950 | INFO     | zero.core.component.base.based_stream_comp:start:60 - [ 5156:face helper ] 成功初始化！
+2024-03-08 12:15:37.950 | INFO     | zero.core.component.base.based_stream_comp:start:60 - [ 5156:face helper ] 成功初始化！
+2024-03-08 12:15:37.950 | INFO     | zero.core.component.base.based_stream_comp:start:60 - [ 5156:face helper ] 成功初始化！
+2024-03-08 12:15:38.007 | INFO     | zero.core.component.feature.stream_comp:on_start:67 - [ 13268:camera1 ] 所有算法成功初始化！开始取流 URL: res/videos/renlian/renlian1.mp4 fps: 30.0
+2024-03-08 12:15:38.007 | INFO     | zero.core.component.feature.stream_comp:on_start:67 - [ 13268:camera1 ] 所有算法成功初始化！开始取流 URL: res/videos/renlian/renlian1.mp4 fps: 30.0
+2024-03-08 12:15:44.888 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 3
+2024-03-08 12:15:44.888 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 3
+2024-03-08 12:15:44.888 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 3
+2024-03-08 12:15:44.960 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 3 1 0
+2024-03-08 12:15:44.960 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 3 1 0
+2024-03-08 12:15:44.960 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 3 1 0
+2024-03-08 12:15:46.352 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 3
+2024-03-08 12:15:46.352 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 3
+2024-03-08 12:15:46.352 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 3
+2024-03-08 12:15:46.427 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 3 47 0.6783185601234436
+2024-03-08 12:15:46.427 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 3 47 0.6783185601234436
+2024-03-08 12:15:46.427 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 3 47 0.6783185601234436
+2024-03-08 12:15:46.462 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 4
+2024-03-08 12:15:46.462 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 4
+2024-03-08 12:15:46.462 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 4
+2024-03-08 12:15:46.533 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 4 1 0
+2024-03-08 12:15:46.533 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 4 1 0
+2024-03-08 12:15:46.533 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 4 1 0
+2024-03-08 12:15:47.939 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 4
+2024-03-08 12:15:47.939 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 4
+2024-03-08 12:15:47.939 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 4
+2024-03-08 12:15:47.999 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 4 49 0.8093937635421753
+2024-03-08 12:15:47.999 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 4 49 0.8093937635421753
+2024-03-08 12:15:47.999 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 4 49 0.8093937635421753
+2024-03-08 12:15:49.063 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 1
+2024-03-08 12:15:49.063 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 1
+2024-03-08 12:15:49.063 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 1
+2024-03-08 12:15:49.125 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 1 48 0.5102677941322327
+2024-03-08 12:15:49.125 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 1 48 0.5102677941322327
+2024-03-08 12:15:49.125 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 1 48 0.5102677941322327
+2024-03-08 12:15:49.597 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 6
+2024-03-08 12:15:49.597 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 6
+2024-03-08 12:15:49.597 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 6
+2024-03-08 12:15:49.660 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 6 1 0
+2024-03-08 12:15:49.660 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 6 1 0
+2024-03-08 12:15:49.660 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 6 1 0
+2024-03-08 12:15:51.035 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 6
+2024-03-08 12:15:51.035 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 6
+2024-03-08 12:15:51.035 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 6
+2024-03-08 12:15:51.094 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 6 1 0
+2024-03-08 12:15:51.094 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 6 1 0
+2024-03-08 12:15:51.094 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 6 1 0
+2024-03-08 12:15:52.590 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 6
+2024-03-08 12:15:52.590 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 6
+2024-03-08 12:15:52.590 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 6
+2024-03-08 12:15:52.668 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 6 1 0
+2024-03-08 12:15:52.668 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 6 1 0
+2024-03-08 12:15:52.668 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 6 1 0
+2024-03-08 12:15:54.071 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 6
+2024-03-08 12:15:54.071 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 6
+2024-03-08 12:15:54.071 | INFO     | zero.core.component.helper.face_process_helper_comp:send:65 - [ 5156:face_helper ] 发送人脸识别请求: 6
+2024-03-08 12:15:54.149 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 6 1 0
+2024-03-08 12:15:54.149 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 6 1 0
+2024-03-08 12:15:54.149 | INFO     | zero.core.component.helper.face_helper_comp:face_callback:56 - [ 5156:face_helper ] 人脸响应: 6 1 0
+2024-03-08 12:15:55.639 | INFO     | zero.core.component.feature.launcher_comp:on_destroy:103 - 程序将在3s后退出！
+2024-03-08 12:15:55.639 | INFO     | zero.core.component.feature.launcher_comp:on_destroy:103 - 程序将在3s后退出！
+2024-03-08 12:15:55.639 | INFO     | zero.core.component.feature.launcher_comp:on_destroy:105 - 倒计时: 3
+2024-03-08 12:15:55.639 | INFO     | zero.core.component.feature.launcher_comp:on_destroy:105 - 倒计时: 3
