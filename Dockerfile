@@ -19,12 +19,13 @@ RUN apt-get update && apt-get install -y \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install torch==1.10.1+cu111 torchvision==0.11.2+cu111 torchaudio==0.10.1 -f https://download.pytorch.org/whl/cu111/torch_stable.html
+RUN pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip3 install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113
 
 RUN git clone https://github.com/congtoudada/ZeroAI.git \
     && cd ZeroAI \
     && pip3 install pip --upgrade \
-    && pip3 install -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html \
+    && pip3 install -r requirements.txt \
     && python3 installer.py \
     && pip3 install cython \
     && pip3 install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI' \

@@ -2,7 +2,7 @@ import os
 import subprocess
 
 # 定义要搜索的目录
-search_dir = 'script/'  # 修改为你的工程目录
+search_dir = './'  # 修改为你的工程目录
 
 # 递归搜索目录下的 setup.py 文件
 for root, dirs, files in os.walk(search_dir):
