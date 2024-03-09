@@ -1,6 +1,7 @@
 INCLUDE:
   - conf/global/log.yaml
   - conf/global/visual.yaml
+  - conf/global/save.yaml
 count:
   base: 0  # 检测基准 0:包围盒中心点 1:包围盒左上角
   reverse: False  # 默认从上到下为进入，从下到上为离开

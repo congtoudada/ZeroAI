@@ -5,7 +5,7 @@ import traceback
 import cv2
 from loguru import logger
 
-from zero.core.component.helper.algorithm_group_comp import AlgorithmGroupComponent
+from zero.core.component.helper.feature.algorithm_group_comp import AlgorithmGroupComponent
 from zero.core.info.feature.stream_info import StreamInfo
 from zero.core.component.base.component import Component
 from zero.core.key.shared_key import SharedKey

@@ -11,9 +11,9 @@ stream:
 #      conf: conf/cam/stream2.yaml
     - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py
       conf: conf/algorithm/detection/yolox/yolox_head.yaml
-    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py
-      conf: conf/algorithm/mot/bytetrack/bytetrack_head.yaml
+#    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py
+#      conf: conf/algorithm/mot/bytetrack/bytetrack_head.yaml
 #    - path: lib/business/count/component/count_comp.py
 #      conf: conf/algorithm/business/count/count_renlian.yaml
-    - path: lib/business/count/extension/count_face_comp.py
-      conf: conf/algorithm/business/count/count_face/count_face.yaml
+#    - path: lib/business/count/extension/count_face_comp.py
+#      conf: conf/algorithm/business/count/count_face/count_face.yaml

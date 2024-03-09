@@ -5,6 +5,9 @@ from zero.core.key.shared_key import SharedKey
 class BasedStreamInfo(BaseInfo):
     def __init__(self, data: dict = None):
         self.input_port = []  # 输入端口 (可能是数组，也可能是字符串）
+        self.save_video_width = 640  # 存储视频宽
+        self.save_video_height = 480  # 存储视频高
+        self.save_video_fps = 24  # 存储视频帧率
         super().__init__(data)
         # ----------------------------------------- input -----------------------------------------
         self.STREAM_FRAME_INFO = []

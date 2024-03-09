@@ -1,9 +1,11 @@
 import time
+from typing import List
 
 from loguru import logger
 import numpy as np
 
 from zero.core.component.base.component import Component
+from zero.core.component.helper.feature.save_video_helper_comp import SaveVideoHelperComponent
 from zero.core.info.based.based_stream_info import BasedStreamInfo
 from zero.core.key.shared_key import SharedKey
 from zero.utility.timer_kit import TimerKit

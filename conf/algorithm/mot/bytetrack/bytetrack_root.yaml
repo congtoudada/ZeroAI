@@ -1,6 +1,7 @@
 INCLUDE:
   - conf/global/log.yaml
   - conf/global/visual.yaml
+  - conf/global/save.yaml
   - conf/algorithm/detection/detection_labels.yaml
 log:
   enable: True

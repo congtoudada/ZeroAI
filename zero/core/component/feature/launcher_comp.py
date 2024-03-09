@@ -10,7 +10,7 @@ from loguru import logger
 
 from zero.core.component.base.component import Component
 from zero.core.component.feature.stream_comp import create_process
-from zero.core.component.helper.service_group_comp import ServiceGroupComponent
+from zero.core.component.helper.feature.service_group_comp import ServiceGroupComponent
 from zero.core.info.feature.app_info import AppInfo
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit

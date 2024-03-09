@@ -1,13 +1,10 @@
 import os
-from typing import Dict
 
 import cv2
 import numpy as np
-from loguru import logger
 
 from count.component.count_comp import CountComponent
-from zero.core.component.helper.face_helper_comp import FaceHelperComponent
-from zero.core.key.shared_key import SharedKey
+from zero.core.component.helper.feature.face_helper_comp import FaceHelperComponent
 
 
 class CountFaceComponent(CountComponent):

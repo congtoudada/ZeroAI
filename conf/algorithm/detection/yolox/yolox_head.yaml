@@ -7,7 +7,7 @@ yolox:
   args:
     expn: head  # 实验名称
     path: null  # 取流路径（为None则通过内部框架取流）
-    save_result: False # 是否存储视频
+    # save_result: False # 是否存储视频
     exp_file: conf/algorithm/detection/yolox/exps/yolox_s_head.py  # 通过.py选择模型
     ckpt: pretrained/detection/yolox/head/yolox_s.pth # 推理用模型权重文件
     conf: 0.67 # test conf

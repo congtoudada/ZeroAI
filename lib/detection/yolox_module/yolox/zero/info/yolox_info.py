@@ -6,7 +6,7 @@ class YoloxInfo(BaseDetInfo):
         self.yolox_vis = False  # 是否使用opencv可视化（测试用）
         self.yolox_args_expn = ""  # 实验名称
         self.yolox_args_path = None  # 取流路径（为None则通过内部框架取流）
-        self.yolox_args_save_result = False  # 是否存储视频
+        # self.yolox_args_save_result = False  # 是否存储视频
         self.yolox_args_exp_file = ""  # 通过.py选择模型
         self.yolox_args_ckpt = ""  # 推理用模型权重文件
         self.yolox_args_conf = 0.67  # test conf
@@ -18,6 +18,8 @@ class YoloxInfo(BaseDetInfo):
         self.yolox_args_fp16 = False  # Adopting mix precision evaluating.
         self.yolox_args_fuse = False  # Fuse conv and bn for testing.
         self.yolox_args_trt = False  # Using TensorRT model for testing.
+        self.yolox_save_video = False  # 是否存视频
+        self.yolox_output_dir = False  # 输出目录
         super().__init__(data)  # 前面是声明，一定要最后调用这段赋值
 
 

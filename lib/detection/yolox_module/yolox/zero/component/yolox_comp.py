@@ -8,6 +8,7 @@ from yolox.zero.component.predictor import create_zero_predictor
 from yolox.zero.info.yolox_info import YoloxInfo
 from zero.core.component.base.base_det_comp import BaseDetComponent
 from zero.core.component.feature.launcher_comp import LauncherComponent
+from zero.core.component.helper.feature.save_video_helper_comp import SaveVideoHelperComponent
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit
 from zero.utility.timer_kit import TimerKit
@@ -19,7 +20,6 @@ class YoloxComponent(BaseDetComponent):
         self.config: YoloxInfo = YoloxInfo(ConfigKit.load(config_path))
         self.pname = f"[ {os.getpid()}:yolox for {self.config.yolox_args_expn}]"
         # 自身定义
-        self.output_dir = ""  # 输出目录
         self.predictor = None  # 推理模型
         self.timer = TimerKit()  # 计时器
         self.scale = []  # 结果缩放尺寸
@@ -31,11 +31,6 @@ class YoloxComponent(BaseDetComponent):
         """
         super().on_start()
         exp: Exp = get_exp(self.config.yolox_args_exp_file, self.config.yolox_args_name)
-        # 设置输出文件夹
-        # folder = os.path.splitext(os.path.basename(self.shared_data[SharedKey.STREAM_URL]))[0]
-        folder = "output/yolox"
-        self.output_dir = os.path.join(exp.output_dir, self.config.yolox_args_expn, folder)
-        os.makedirs(self.output_dir, exist_ok=True)
         # 创建zero框架版的yolox目标检测器
         self.predictor = create_zero_predictor(self.config, exp, self.pname)
         self.output_detect_info = {
@@ -49,6 +44,18 @@ class YoloxComponent(BaseDetComponent):
             self.scale.append(min(self.config.yolox_args_tsize / float(self.shared_data[height_key]),
                                   self.config.yolox_args_tsize / float(self.shared_data[width_key])))
             self.shared_data[self.config.DETECTION_TEST_SIZE[i]] = exp.test_size
+            if self.config.yolox_save_video:
+                # 设置输出文件夹
+                # folder = os.path.splitext(os.path.basename(self.shared_data[SharedKey.STREAM_URL]))[0]
+                filename = os.path.basename(self.stream_url[i]).split('.')[0]
+                output_dir = os.path.join(self.config.yolox_output_dir, filename)
+                os.makedirs(output_dir, exist_ok=True)
+                output_path = os.path.join(output_dir, f"{filename}.mp4")
+                self.video_writer.append(
+                    SaveVideoHelperComponent(output_path, self.config.save_video_width,
+                                             self.config.save_video_height,
+                                             self.config.save_video_fps))
+                logger.info(f"{self.pname} 输出视频路径: {output_path}")
 
     def on_update(self) -> bool:
         """
@@ -66,7 +73,9 @@ class YoloxComponent(BaseDetComponent):
                 self.resolve_output(self.inference_outputs)  # 解析推理结果
             self.timer.toc()  # 计算推理开始到输出结果的耗时
             if self.config.yolox_vis:  # opencv可视化
-                self._draw_vis()
+                ret_img = self._draw_vis()
+                if self.config.yolox_save_video:
+                    self.video_writer[self.cur_stream_idx].write(ret_img)
         return False
 
     def on_analysis(self):
@@ -105,8 +114,10 @@ class YoloxComponent(BaseDetComponent):
         return np.concatenate((bboxes, scores, classes), axis=1)
 
     def _draw_vis(self):
+        ret_img = None
         if self.inference_outputs is None:
             cv2.imshow(f"yolox window {self.cur_stream_idx}", self.frame)
+            ret_img = self.frame
         else:
             im = np.ascontiguousarray(np.copy(self.frame))
             # im_h, im_w = im.shape[:2]
@@ -132,11 +143,13 @@ class YoloxComponent(BaseDetComponent):
                               thickness=line_thickness)
                 cv2.putText(im, id_text, (intbox[0], intbox[1]), cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255),
                             thickness=text_thickness)
+            ret_img = im
             cv2.imshow(f"yolox window {self.cur_stream_idx}", im)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             self.config.yolox_vis = False
             self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
+        return ret_img
 
 
 def create_process(shared_data, config_path: str):
