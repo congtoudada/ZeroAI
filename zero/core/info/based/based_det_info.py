@@ -5,6 +5,7 @@ from zero.core.key.shared_key import SharedKey
 class BasedDetInfo(BasedStreamInfo):
     def __init__(self, data: dict = None):
         self.input_port = []  # 输入端口
+        self.detection_labels = []  # 类别标签
         super().__init__(data)
         # ----------------------------------------- input -----------------------------------------
         self.DETECTION_INFO = f"{SharedKey.DETECTION_INFO.name}-{self.input_port[0]}"

@@ -5,9 +5,12 @@ from zero.core.key.shared_key import SharedKey
 class BasedStreamInfo(BaseInfo):
     def __init__(self, data: dict = None):
         self.input_port = []  # 输入端口 (可能是数组，也可能是字符串）
-        self.save_video_width = 640  # 存储视频宽
-        self.save_video_height = 480  # 存储视频高
-        self.save_video_fps = 24  # 存储视频帧率
+        self.stream_output_dir = "output/stream"  # 输出目录
+        self.stream_save_video_enable = False  # 是否存储视频
+        self.stream_save_video_width = 640  # 存储视频宽
+        self.stream_save_video_height = 480  # 存储视频高
+        self.stream_save_video_fps = 24  # 存储视频帧率
+        self.stream_draw_vis_enable = False  # 是否可视化
         super().__init__(data)
         # ----------------------------------------- input -----------------------------------------
         self.STREAM_FRAME_INFO = []

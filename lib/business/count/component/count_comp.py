@@ -59,8 +59,6 @@ class CountComponent(BasedMOTComponent):
             self.process_update()
             self.process_result()
             self.timer.toc()
-            if self.config.count_vis:
-                self._draw_vis()
             self.postprocess()
         return True
 
@@ -184,8 +182,11 @@ class CountComponent(BasedMOTComponent):
                 item.red_seq.pop(0)
                 item.green_seq.pop(0)
 
-    def _draw_vis(self):
-        im = np.ascontiguousarray(np.copy(self.frame))
+    def on_draw_vis(self, frame, vis=False, window_name="", is_copy=True):
+        if is_copy:
+            im = np.ascontiguousarray(np.copy(frame))
+        else:
+            im = frame
         text_scale = 1
         text_thickness = 1
         line_thickness = 2
@@ -229,14 +230,8 @@ class CountComponent(BasedMOTComponent):
                         (int(ltrb[0]), int(ltrb[1])),
                         cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
 
-        self.on_draw_vis(im)
-        cv2.imshow("count window", im)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            self.config.bytetrack_vis = False
-            self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
-
-    def on_draw_vis(self, im):
-        pass
+        # 可视化并返回
+        return super().on_draw_vis(im, vis, window_name)
 
     def _get_base(self, base, ltrb):
         """

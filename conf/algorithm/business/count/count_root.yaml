@@ -1,7 +1,12 @@
 INCLUDE:
   - conf/global/log.yaml
-  - conf/global/visual.yaml
-  - conf/global/save.yaml
+  - conf/global/output.yaml
+stream:
+  output_dir: output/business/count  # 输出目录
+  save_video:
+    enable: False  # 是否保存视频
+  draw_vis:
+    enable: False  # 是否可视化
 count:
   base: 0  # 检测基准 0:包围盒中心点 1:包围盒左上角
   reverse: False  # 默认从上到下为进入，从下到上为离开

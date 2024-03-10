@@ -15,17 +15,11 @@ class BaseDetComponent(BasedStreamComponent):
         self.config: BaseDetInfo = None
         self.inference_outputs = None  # 推理结果
         self.output_detect_info = {}   # 进程间共享检测信息
-        self.video_writer: List[SaveVideoHelperComponent] = []  # 存储视频组件
 
     def on_start(self):
         super().on_start()
         for info_key in self.config.DETECTION_INFO:
             self.shared_data[info_key] = None
-
-    def on_destroy(self):
-        for vid in self.video_writer:
-            vid.destroy()
-        super().on_destroy()
 
     def resolve_output(self, inference_outputs):
         self.output_detect_info.clear()

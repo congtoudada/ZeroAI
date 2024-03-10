@@ -7,8 +7,6 @@ from yolox.exp import get_exp
 from yolox.zero.component.predictor import create_zero_predictor
 from yolox.zero.info.yolox_info import YoloxInfo
 from zero.core.component.base.base_det_comp import BaseDetComponent
-from zero.core.component.feature.launcher_comp import LauncherComponent
-from zero.core.component.helper.feature.save_video_helper_comp import SaveVideoHelperComponent
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit
 from zero.utility.timer_kit import TimerKit
@@ -44,18 +42,6 @@ class YoloxComponent(BaseDetComponent):
             self.scale.append(min(self.config.yolox_args_tsize / float(self.shared_data[height_key]),
                                   self.config.yolox_args_tsize / float(self.shared_data[width_key])))
             self.shared_data[self.config.DETECTION_TEST_SIZE[i]] = exp.test_size
-            if self.config.yolox_save_video:
-                # 设置输出文件夹
-                # folder = os.path.splitext(os.path.basename(self.shared_data[SharedKey.STREAM_URL]))[0]
-                filename = os.path.basename(self.stream_url[i]).split('.')[0]
-                output_dir = os.path.join(self.config.yolox_output_dir, filename)
-                os.makedirs(output_dir, exist_ok=True)
-                output_path = os.path.join(output_dir, f"{filename}.mp4")
-                self.video_writer.append(
-                    SaveVideoHelperComponent(output_path, self.config.save_video_width,
-                                             self.config.save_video_height,
-                                             self.config.save_video_fps))
-                logger.info(f"{self.pname} 输出视频路径: {output_path}")
 
     def on_update(self) -> bool:
         """
@@ -72,10 +58,6 @@ class YoloxComponent(BaseDetComponent):
             if self.inference_outputs is not None:
                 self.resolve_output(self.inference_outputs)  # 解析推理结果
             self.timer.toc()  # 计算推理开始到输出结果的耗时
-            if self.config.yolox_vis:  # opencv可视化
-                ret_img = self._draw_vis()
-                if self.config.yolox_save_video:
-                    self.video_writer[self.cur_stream_idx].write(ret_img)
         return False
 
     def on_analysis(self):
@@ -113,13 +95,11 @@ class YoloxComponent(BaseDetComponent):
             classes = np.expand_dims(classes, axis=1)
         return np.concatenate((bboxes, scores, classes), axis=1)
 
-    def _draw_vis(self):
-        ret_img = None
-        if self.inference_outputs is None:
-            cv2.imshow(f"yolox window {self.cur_stream_idx}", self.frame)
-            ret_img = self.frame
-        else:
-            im = np.ascontiguousarray(np.copy(self.frame))
+    def on_draw_vis(self, frame, vis=False, window_name="", is_copy=True):
+        im = frame
+        # 结果可视化
+        if self.inference_outputs is not None:
+            im = np.ascontiguousarray(np.copy(frame))
             # im_h, im_w = im.shape[:2]
             # scale = min(self.config.yolox_args_tsize / im_h, self.config.yolox_args_tsize / im_w)
             text_scale = 1
@@ -136,20 +116,16 @@ class YoloxComponent(BaseDetComponent):
                 tlbr = self.inference_outputs[i, :4] / self.scale[self.cur_stream_idx]
                 x1, y1, w, h = tlbr[0], tlbr[1], tlbr[2] - tlbr[0], tlbr[3] - tlbr[1]
                 score = self.inference_outputs[i, 4] * self.inference_outputs[i, 5]
-                id_text = f"{score:.2f}"
+                cls = int(self.inference_outputs[i, 6])
+                id_text = f"{score:.2f}({self.config.detection_labels[cls]})"
                 intbox = tuple(map(int, (x1, y1, x1 + w, y1 + h)))
                 cv2.rectangle(im, intbox[0:2], intbox[2:4],
                               color=(0, 0, 255),  # bgr
                               thickness=line_thickness)
                 cv2.putText(im, id_text, (intbox[0], intbox[1]), cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255),
                             thickness=text_thickness)
-            ret_img = im
-            cv2.imshow(f"yolox window {self.cur_stream_idx}", im)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            self.config.yolox_vis = False
-            self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
-        return ret_img
+        # 可视化并返回
+        return super().on_draw_vis(im, vis, window_name)
 
 
 def create_process(shared_data, config_path: str):
@@ -157,7 +133,3 @@ def create_process(shared_data, config_path: str):
     yoloxComp.start()  # 初始化
     yoloxComp.update()  # 算法逻辑循环
 
-
-if __name__ == '__main__':
-    launcher = LauncherComponent("conf/application-dev.yaml")
-    launcher.start()

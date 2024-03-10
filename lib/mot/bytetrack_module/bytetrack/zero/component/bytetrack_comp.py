@@ -42,8 +42,6 @@ class BytetrackComponent(BaseMOTComponent):
             self.inference_outputs = self.tracker.update(self.input_det)
             self.resolve_output(self.inference_outputs)  # 解析推理结果(基于目标检测，故一定存在目标)
             self.timer.toc()
-            if self.config.bytetrack_vis:
-                self._draw_vis()
         return False
 
     def on_analysis(self):
@@ -87,12 +85,11 @@ class BytetrackComponent(BaseMOTComponent):
         classes = np.array(self.online_classes).reshape(-1, 1)
         return np.concatenate((ltrbs, scores, classes, ids), axis=1)
 
-    def _draw_vis(self):
+    def on_draw_vis(self, frame, vis=False, window_name="", is_copy=True):
+        im = frame
         online_targets: List[STrack] = self.inference_outputs
-        if online_targets is None:
-            cv2.imshow("bytetrack window", self.frame)
-        else:
-            im = np.ascontiguousarray(np.copy(self.frame))
+        if online_targets is not None:
+            im = np.ascontiguousarray(np.copy(frame))
             # im_h, im_w = im.shape[:2]
             # scale = min(self.config.yolox_args_tsize / im_h, self.config.yolox_args_tsize / im_w)
             text_scale = 1
@@ -119,11 +116,7 @@ class BytetrackComponent(BaseMOTComponent):
                 cv2.rectangle(im, intbox[0:2], intbox[2:4], color=color, thickness=line_thickness)
                 cv2.putText(im, id_text, (intbox[0], intbox[1]), cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255),
                             thickness=text_thickness)
-            cv2.imshow("bytetrack window", im)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            self.config.bytetrack_vis = False
-            self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
+        return super().on_draw_vis(im, vis, window_name)
 
 
 def create_process(shared_data, config_path: str):

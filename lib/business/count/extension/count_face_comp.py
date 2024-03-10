@@ -50,8 +50,8 @@ class CountFaceComponent(CountComponent):
     def on_create_obj(self, obj):
         obj.__setattr__("last_face_req", self.current_frame_id)
 
-    def on_draw_vis(self, im):
-        super().on_draw_vis(im)
+    def on_draw_vis(self, frame, vis=False, window_name="", is_copy=True):
+        im = np.ascontiguousarray(np.copy(self.frame))
         face_dict = self.helper.get_face_dict()
         # 参考线
         point1 = (0, int(self.helper.config.face_cull_up_y * self.stream_height))
@@ -66,6 +66,8 @@ class CountFaceComponent(CountComponent):
             cv2.putText(im, f"{face_dict[key]['per_id']}",
                         (int((ltrb[0] + ltrb[2]) / 2), int(self.item_dict[key].ltrb[1])),
                         cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
+        # 可视化并返回
+        return super().on_draw_vis(im, vis, window_name, False)  # 父类没有必要继续copy
 
     def face_callback(self, obj_id, per_id, score):
         pass

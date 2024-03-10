@@ -1,10 +1,7 @@
 INCLUDE:
-  - conf/global/log.yaml
-  - conf/global/visual.yaml
-  - conf/global/save.yaml
-  - conf/algorithm/detection/detection_labels.yaml
-log:
-  enable: True
+  - conf/algorithm/mot/mot_root.yaml
+stream:
+  output_dir: output/mot/bytetrack  # 输出目录
 bytetrack:
   args:
     fps: 30 # frame rate (fps)

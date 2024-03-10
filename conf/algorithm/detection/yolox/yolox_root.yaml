@@ -1,9 +1,8 @@
 INCLUDE:
-  - conf/global/log.yaml
-  - conf/global/visual.yaml
-  - conf/global/save.yaml
-log:
-  enable: True
+  - conf/algorithm/detection/detection_root.yaml
+  - conf/algorithm/detection/detection_labels.yaml
+stream:
+  output_dir: output/detection/yolox  # 输出目录
 yolox:
   args:
     name: null  # 通过模型名选择预置模型（建议使用exp_file自定义选择）

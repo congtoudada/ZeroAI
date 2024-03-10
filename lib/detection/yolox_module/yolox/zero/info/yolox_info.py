@@ -3,7 +3,6 @@ from zero.core.info.base.base_det_info import BaseDetInfo
 
 class YoloxInfo(BaseDetInfo):
     def __init__(self, data: dict = None):
-        self.yolox_vis = False  # 是否使用opencv可视化（测试用）
         self.yolox_args_expn = ""  # 实验名称
         self.yolox_args_path = None  # 取流路径（为None则通过内部框架取流）
         # self.yolox_args_save_result = False  # 是否存储视频

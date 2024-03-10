@@ -25,7 +25,6 @@ class BasedDetComponent(BasedStreamComponent):
         self.stream_cam_id = self.stream_cam_id[0]
         self.current_frame_id = self.current_frame_id[0]
 
-
     def on_resolve_stream(self) -> bool:
         """
         # output shape: [n, 6]

@@ -5,6 +5,7 @@ from zero.core.key.shared_key import SharedKey
 class BaseDetInfo(BasedStreamInfo):
     def __init__(self, data: dict = None):
         self.output_port = ""  # 输出端口
+        self.detection_labels = []  # 类别标签
         super().__init__(data)
         # ----------------------------------------- output -----------------------------------------
         # 算法输出结果 shape: [n, 6]
