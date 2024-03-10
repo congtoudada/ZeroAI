@@ -4,7 +4,7 @@ log:
   analysis: False
 stream:
   cam_id: 2  # 摄像头编号
-  url: res/videos/renlian/renlian1.mp4  # 取流地址（输入）
+  url: res/videos/renlian/test.mp4  # 取流地址（输入）
   output_port: camera2  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO+camera2
   algorithm: [] # 算法配置
 #    - name: yolox

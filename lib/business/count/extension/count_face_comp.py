@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 from count.component.count_comp import CountComponent
-from zero.core.component.helper.feature.face_helper_comp import FaceHelperComponent
+from insight.zero.component.face_helper_comp import FaceHelperComponent
 
 
 class CountFaceComponent(CountComponent):

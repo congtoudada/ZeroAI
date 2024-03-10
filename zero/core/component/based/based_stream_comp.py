@@ -87,6 +87,13 @@ class BasedStreamComponent(Component):
             self._tic = not self._tic
         return ret
 
+    def on_draw_vis(self, frame, vis=False, window_name="window", is_copy=True):
+        if vis and frame is not None:
+            cv2.imshow(window_name, frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
+        return frame
+
     def start(self):
         super().start()
         logger.info(f"{self.pname} 成功初始化！")
@@ -107,13 +114,6 @@ class BasedStreamComponent(Component):
             if self.esc_event.is_set():
                 self.destroy()
                 return
-
-    def on_draw_vis(self, frame, vis=False, window_name="window", is_copy=True):
-        if vis and frame is not None:
-            cv2.imshow(window_name, frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
-        return frame
 
     def save_video(self, frame, vid_writer: SaveVideoHelperComponent):
         if frame is not None:

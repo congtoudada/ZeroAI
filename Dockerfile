@@ -26,10 +26,10 @@ RUN git clone https://github.com/congtoudada/ZeroAI.git \
     && cd ZeroAI \
     && pip3 install pip --upgrade \
     && pip3 install -r requirements.txt \
-    && python3 installer.py \
     && pip3 install cython \
     && pip3 install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI' \
     && pip3 install cython_bbox gdown \
+    && python3 installer.py \
     && ldconfig \
     && pip cache purge
 
