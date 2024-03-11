@@ -35,13 +35,14 @@ ZeroAI是一个由**配置文件驱动**的**组件式**，基于**视频流**�
     - [2.单目标检测算法跑多个视频流](#2单目标检测算法跑多个视频流)
     - [3.计数的同时人脸识别](#3计数的同时人脸识别)
   - [四、关键概念](#四关键概念)
-    - [1.Component 分类](#1component-分类)
-    - [2.Component 生命周期函数](#2component-生命周期函数)
-    - [3.Info 配置信息](#3info-配置信息)
-    - [4.Config 配置](#4config-配置)
-    - [5.Port 端口](#5port-端口)
-    - [6.共享内存（可选）](#6共享内存可选)
-    - [7.共享内存Key（可选）](#7共享内存key可选)
+    - [1.框架图示](#1框架图示)
+    - [2.Component 分类](#2component-分类)
+    - [3.Component 生命周期函数](#3component-生命周期函数)
+    - [4.Info 配置信息](#4info-配置信息)
+    - [5.Config 配置](#5config-配置)
+    - [6.Port 端口](#6port-端口)
+    - [7.共享内存（可选）](#7共享内存可选)
+    - [8.共享内存Key（可选）](#8共享内存key可选)
       - [SharedKey参考](#sharedkey参考)
       - [FaceKey参考](#facekey参考)
   - [五、自定义组件](#五自定义组件)
@@ -54,6 +55,7 @@ ZeroAI是一个由**配置文件驱动**的**组件式**，基于**视频流**�
       - [6.最终效果](#6最终效果)
     - [进阶：框架源码参考](#进阶框架源码参考)
   - [TODO](#todo)
+
 
 ## 一、工程目录结构
 
@@ -242,7 +244,22 @@ stream:
 
 ## 四、关键概念
 
-### 1.Component 分类
+### 1.框架图示
+
+框架流程纵向流程图
+
+![第一阶段纵向图](README.assets/第一阶段纵向图.jpg)
+
+框架流程横向示意图
+
+![第一阶段横向图](README.assets/第一阶段横向图.jpg)
+
+> Tips：
+>
+> * 每个Component通常对应一个Info，用于存储配置参数。
+> * **Based**xxx，通常说明组件的**输入**来自哪里；**Base**xxx，通常说明组件**输出**到哪里。
+
+### 2.Component 分类
 
 |          | 基础组件                                                     | 算法组件                         | 服务组件                               | 帮助组件                                                    |
 | -------- | ------------------------------------------------------------ | -------------------------------- | -------------------------------------- | ----------------------------------------------------------- |
@@ -256,7 +273,7 @@ stream:
 
 > Tips：流组件本身既是基础组件也是算法组件，可以从`application.yaml`的`cam_list`项配置，也可以从`stream.yaml`的`algorithm`项配置，效果一样。这里为了一致性，把流组件归类为基础组件。
 
-### 2.Component 生命周期函数
+### 3.Component 生命周期函数
 
 * `__init__`：构造函数。主要用于声明变量或进行简单初始化。
 * `on_start`：初始化时调用一次。主要用于复杂的初始化工作。
@@ -300,20 +317,7 @@ class Component(ABC):
 > * 某些组件可能有自己单独的生命周期函数
 > * 帮助类组件设计得十分灵活，主要由其他组件驱动，因此可以不遵循组件生命周期
 
-框架流程纵向图
-
-![第一阶段纵向图](README.assets/第一阶段纵向图.jpg)
-
-框架流程横向图
-
-![第一阶段横向图](README.assets/第一阶段横向图.jpg)
-
-> Tips：
->
-> * 每个Component通常对应一个Info，用于存储配置参数。
-> * **Based**xxx，通常说明组件的**输入**来自哪里；**Base**xxx，通常说明组件**输出**到哪里。
-
-### 3.Info 配置信息
+### 4.Info 配置信息
 
 通常每一个Component都对应一个Info文件，用于存放从配置文件中读取的配置信息，共享内存的Key等。使用Info文件可以有效避免手动输入字符串导致的错拼、漏拼的问题。
 
@@ -331,7 +335,7 @@ class BasedDetInfo(BasedStreamInfo):
 
 > Tips：切记，除非你明确知道后果，如果需要加载配置文件的内容，需将`super().__init__(data)`放在变量声明的最后。
 
-### 4.Config 配置
+### 5.Config 配置
 
 参考SpringBoot配置规则，编写自定义解析模块：
 
@@ -389,7 +393,7 @@ class YoloxComponent(BaseDetComponent):
         ...
 ```
 
-### 5.Port 端口
+### 6.Port 端口
 
 端口的目的是为了能复用组件的输入和输出
 
@@ -405,14 +409,14 @@ class YoloxComponent(BaseDetComponent):
 3. BaseMOTComponent：来自检测模型的输出`input_port: camera1-yolox` --> 追踪模型输出`output_port: camera1-bytetrack`
 4. CountComponent：来自追踪模型的输出`input_port: camera1-bytetrack` --> 计数业务输出`output_port: None`
 
-### 6.共享内存（可选）
+### 7.共享内存（可选）
 
 基于`multiprocessing.Manager().dict()`（按照普通dict使用即可）实现进程间通信，进程安全
 
 * `shared_data`：摄像头独享，用于单个视频流内算法的通信
 * `global_shared_data`：全局共享内存，所有摄像头共享，利用`camera_id`可以访问到特定摄像头的`shared_data`
 
-### 7.共享内存Key（可选）
+### 8.共享内存Key（可选）
 
 共享内存基于`dict`，因此需要有Key，为了避免繁琐的字符串拼写，所有Key使用枚举管理
 
