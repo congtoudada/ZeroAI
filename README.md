@@ -111,7 +111,7 @@ python3 bin/main_dev.py
 
 安装环境后，运行`bin/main_dev.py`即可可视化目标检测算法
 
-<img src="/congtoudada/ZeroAI/README.assets/GIF 2024-3-11 11-31-49.gif" alt="GIF 2024-3-11 11-31-49" />
+<img src="/congtoudada/ZeroAI/main/README.assets/GIF 2024-3-11 11-31-49.gif" alt="GIF 2024-3-11 11-31-49" />
 
 ### 2.单目标检测算法跑多个视频流
 
