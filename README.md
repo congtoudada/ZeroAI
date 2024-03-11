@@ -111,7 +111,7 @@ python3 bin/main_dev.py
 
 安装环境后，运行`bin/main_dev.py`即可可视化目标检测算法
 
-![GIF 2024-3-11 11-31-49](https://bed-1303313513.cos.ap-nanjing.myqcloud.com/images/GIF%202024-3-11%2011-31-49.gif?q-sign-algorithm=sha1&q-ak=AKID3uVpsfCSSCgtpTryymMgla9SVJrBF4e0&q-sign-time=1710128212;8999999999&q-key-time=1710128212;8999999999&q-header-list=host&q-url-param-list=&q-signature=9391279f5ba7df7e4afbe26e9a3a2047ead84df9)
+<img src="https://www.icongbao.com/show/GIF%202024-3-11%2011-31-49.gif" alt="GIF 2024-3-11 11-31-49" />
 
 ### 2.单目标检测算法跑多个视频流
 
@@ -150,8 +150,7 @@ stream:
 
 <hr>
 2.运行：`python bin/main_dev.py`
-
-![GIF 2024-3-11 11-36-12](https://bed-1303313513.cos.ap-nanjing.myqcloud.com/images/GIF%202024-3-11%2011-36-12.gif?q-sign-algorithm=sha1&q-ak=AKID3uVpsfCSSCgtpTryymMgla9SVJrBF4e0&q-sign-time=1710128219;8999999999&q-key-time=1710128219;8999999999&q-header-list=host&q-url-param-list=&q-signature=9c23f8e7cb5536e05724458cc9b77fd106bb4df2)
+<img src="https://www.icongbao.com/show/GIF%202024-3-11%2011-36-12.gif" alt="GIF 2024-3-11 11-36-12" />
 
 ### 3.计数的同时人脸识别
 
@@ -186,7 +185,7 @@ stream:
 
 2.运行：`python bin/main_dev.py`
 
-![GIF 2024-3-11 11-34-29](https://bed-1303313513.cos.ap-nanjing.myqcloud.com/images/GIF%202024-3-11%2011-34-29.gif?q-sign-algorithm=sha1&q-ak=AKID3uVpsfCSSCgtpTryymMgla9SVJrBF4e0&q-sign-time=1710128224;9000000000&q-key-time=1710128224;9000000000&q-header-list=host&q-url-param-list=&q-signature=5fd5d20eb26ba7edc02f41f0b4bfc88787365b01)
+<img src="https://www.icongbao.com/show/GIF%202024-3-11%2011-34-29.gif" alt="GIF 2024-3-11 11-34-29" />
 
 解释：
 
@@ -821,7 +820,7 @@ python bin/main_dev.yaml
 
 实时取流并打印日志信息
 
-![GIF 2024-3-11 11-33-32](https://bed-1303313513.cos.ap-nanjing.myqcloud.com/images/GIF%202024-3-11%2011-33-32.gif?q-sign-algorithm=sha1&q-ak=AKID3uVpsfCSSCgtpTryymMgla9SVJrBF4e0&q-sign-time=1710128228;8999999999&q-key-time=1710128228;8999999999&q-header-list=host&q-url-param-list=&q-signature=57d39db88709b5b6bfc7639d9e0a1c8d89add7e8)
+<img src="https://www.icongbao.com/show/GIF%202024-3-11%2011-33-32.gif" alt="GIF 2024-3-11 11-33-32" />
 
 导出成本地视频
 
