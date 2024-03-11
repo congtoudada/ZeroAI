@@ -111,7 +111,7 @@ python3 bin/main_dev.py
 
 安装环境后，运行`bin/main_dev.py`即可可视化目标检测算法
 
-![GIF 2024-3-11 11-09-05](https://bed-1303313513.cos.ap-nanjing.myqcloud.com/images/GIF%202024-3-11%2011-09-05.gif?q-sign-algorithm=sha1&q-ak=AKID3uVpsfCSSCgtpTryymMgla9SVJrBF4e0&q-sign-time=1710127568;8999999999&q-key-time=1710127568;8999999999&q-header-list=host&q-url-param-list=&q-signature=53ddc490a899def640fbba2fc1c8125b1ee620de)
+![GIF 2024-3-11 11-31-49](https://bed-1303313513.cos.ap-nanjing.myqcloud.com/images/GIF%202024-3-11%2011-31-49.gif?q-sign-algorithm=sha1&q-ak=AKID3uVpsfCSSCgtpTryymMgla9SVJrBF4e0&q-sign-time=1710128212;8999999999&q-key-time=1710128212;8999999999&q-header-list=host&q-url-param-list=&q-signature=9391279f5ba7df7e4afbe26e9a3a2047ead84df9)
 
 ### 2.单目标检测算法跑多个视频流
 
@@ -149,10 +149,9 @@ stream:
 
 
 <hr>
-
 2.运行：`python bin/main_dev.py`
 
-![GIF 2024-3-11 10-40-33](https://bed-1303313513.cos.ap-nanjing.myqcloud.com/images/GIF%202024-3-11%2010-40-33.gif?q-sign-algorithm=sha1&q-ak=AKID3uVpsfCSSCgtpTryymMgla9SVJrBF4e0&q-sign-time=1710127581;9000000000&q-key-time=1710127581;9000000000&q-header-list=host&q-url-param-list=&q-signature=837f917d239cccc8756f6688feab8906255b2e98)
+![GIF 2024-3-11 11-36-12](https://bed-1303313513.cos.ap-nanjing.myqcloud.com/images/GIF%202024-3-11%2011-36-12.gif?q-sign-algorithm=sha1&q-ak=AKID3uVpsfCSSCgtpTryymMgla9SVJrBF4e0&q-sign-time=1710128219;8999999999&q-key-time=1710128219;8999999999&q-header-list=host&q-url-param-list=&q-signature=9c23f8e7cb5536e05724458cc9b77fd106bb4df2)
 
 ### 3.计数的同时人脸识别
 
@@ -187,7 +186,7 @@ stream:
 
 2.运行：`python bin/main_dev.py`
 
-![GIF 2024-3-11 10-43-17](https://bed-1303313513.cos.ap-nanjing.myqcloud.com/images/GIF%202024-3-11%2010-43-17.gif?q-sign-algorithm=sha1&q-ak=AKID3uVpsfCSSCgtpTryymMgla9SVJrBF4e0&q-sign-time=1710127588;8999999999&q-key-time=1710127588;8999999999&q-header-list=host&q-url-param-list=&q-signature=584f2d99b25a529710f93fd1dd056a1c87e4739c)
+![GIF 2024-3-11 11-34-29](https://bed-1303313513.cos.ap-nanjing.myqcloud.com/images/GIF%202024-3-11%2011-34-29.gif?q-sign-algorithm=sha1&q-ak=AKID3uVpsfCSSCgtpTryymMgla9SVJrBF4e0&q-sign-time=1710128224;9000000000&q-key-time=1710128224;9000000000&q-header-list=host&q-url-param-list=&q-signature=5fd5d20eb26ba7edc02f41f0b4bfc88787365b01)
 
 解释：
 
@@ -822,7 +821,7 @@ python bin/main_dev.yaml
 
 实时取流并打印日志信息
 
-![GIF 2024-3-11 10-41-26](https://bed-1303313513.cos.ap-nanjing.myqcloud.com/images/GIF%202024-3-11%2010-41-26.gif?q-sign-algorithm=sha1&q-ak=AKID3uVpsfCSSCgtpTryymMgla9SVJrBF4e0&q-sign-time=1710127601;8999999999&q-key-time=1710127601;8999999999&q-header-list=host&q-url-param-list=&q-signature=08c85269fb186b9cdaaca9678fd0b0fdeffa2ec8)
+![GIF 2024-3-11 11-33-32](https://bed-1303313513.cos.ap-nanjing.myqcloud.com/images/GIF%202024-3-11%2011-33-32.gif?q-sign-algorithm=sha1&q-ak=AKID3uVpsfCSSCgtpTryymMgla9SVJrBF4e0&q-sign-time=1710128228;8999999999&q-key-time=1710128228;8999999999&q-header-list=host&q-url-param-list=&q-signature=57d39db88709b5b6bfc7639d9e0a1c8d89add7e8)
 
 导出成本地视频
 
