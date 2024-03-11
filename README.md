@@ -105,7 +105,105 @@ python3 bin/main_dev.py
 
 ## 三、效果演示
 
-数据涉密，暂不演示
+>数据涉密，勿外传，后期有新测试数据会替换
+
+### 1.默认运行
+
+安装环境后，运行`bin/main_dev.py`即可可视化目标检测算法
+
+![GIF 2024-3-11 11-09-05](README.assets/GIF 2024-3-11 11-09-05.gif)
+
+### 2.单目标检测算法跑多个视频流
+
+1.替换配置文件内容
+
+位置：`conf/application-dev.yaml`
+
+确保获取两个视频流，在这两个文件内可以设置取流地址
+
+```yaml
+cam_list:
+  - conf/cam/stream1.yaml
+  - conf/cam/stream2.yaml
+```
+
+位置：`conf/cam/stream1.yaml`
+
+设置流配置文件内的yolox的配置文件
+
+```yaml
+algorithm:     
+	- path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # 使用yolox目标检测
+		conf: conf/algorithm/detection/yolox/yolox_person.yaml  # yolox配置文件
+```
+
+位置：`conf/algorithm/detection/detection_root.yaml`
+
+确保检测组件的可视化功能是开启的
+
+```yaml
+stream:
+  draw_vis:
+    enable: True  # 是否可视化
+```
+
+
+<hr>
+
+2.运行：`python bin/main_dev.py`
+
+![GIF 2024-3-11 10-40-33](README.assets/GIF 2024-3-11 10-40-33.gif)
+
+### 3.计数的同时人脸识别
+
+1.替换配置文件内容
+
+位置：`conf/cam/stream1.yaml`
+
+开启目标检测，多目标追踪，计数+人脸识别算法
+
+```yaml
+stream:
+  algorithm: # 算法配置
+    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py
+      conf: conf/algorithm/detection/yolox/yolox_head.yaml  # 此处替换为检测人头的权重
+    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py
+      conf: conf/algorithm/mot/bytetrack/bytetrack_head.yaml
+    - path: lib/business/count/extension/count_face_comp.py
+      conf: conf/algorithm/business/count/count_face/count_face.yaml
+```
+
+位置：`conf/algorithm/business/count/count_root.yaml`
+
+开启人脸计数算法的可视化
+
+```yaml
+stream:
+  draw_vis:
+    enable: True  # 是否可视化
+```
+
+> Tips：记得关闭`conf/algorithm/detection/detection_root.yaml`的可视化，否则会显示两个窗口哦
+
+2.运行：`python bin/main_dev.py`
+
+![GIF 2024-3-11 10-43-17](README.assets/GIF 2024-3-11 10-43-17.gif)
+
+解释：
+
+* video_fps：视频帧率，实际使用时是读一帧丢一帧。正常视频流是24-30fps，因此该数值只要满足12-15fps即可
+
+* inference_fps：是自定义范围测试的fps，上图仅限计数组件本身耗时，不包括目标检测和目标追踪
+
+* 灰线：人脸识别范围线，进入该区域将进行人脸识别，识别成陌生人的对象会继续识别直到消失
+
+* 红蓝线：计数参考线，当人从红线上方穿过蓝线下方时会进行计数
+
+* 人头包围框之上的两个数字：
+
+  * 左：对象id
+
+  * 右：人脸id（1表示陌生人）
 
 ## 四、关键概念
 
@@ -724,7 +822,7 @@ python bin/main_dev.yaml
 
 实时取流并打印日志信息
 
-![GIF 2024-3-11 1-00-01](README.assets/GIF 2024-3-11 1-00-01.gif)
+![GIF 2024-3-11 10-41-26](README.assets/GIF 2024-3-11 10-41-26.gif)
 
 导出成本地视频
 
@@ -754,4 +852,3 @@ python bin/main_dev.yaml
 * 拓展算法
 * 接入Web后端
 * 支持Tensor RT
-* 效果演示

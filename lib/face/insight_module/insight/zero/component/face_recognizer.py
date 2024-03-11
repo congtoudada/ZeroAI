@@ -75,6 +75,8 @@ class FaceRecognizer(object):
     def search_face_image(self, raw_image, vis=False):
         try:
             # image = image_utils.read_image_ch(image_path)
+            if raw_image is None:
+                return 1, 0
             image = image_utils.resize_image(raw_image, size=(None, 640))
             image, face_info = self.search_face_task(image, vis=vis)
             if len(face_info['label']) > 0:

@@ -20,7 +20,8 @@ class BasedStreamComponent(Component):
     def __init__(self, shared_data):
         super().__init__(shared_data)
         self.config: BasedStreamInfo = None  # 由子类完成初始化
-        self.frame = None
+        self.frame = None  # 当前帧
+        self.current_frame_id = []  # 当前帧序号
         self.update_timer = TimerKit()  # 计算两帧时间
         self._tic = False
         self.cur_stream_idx = 0  # 当前取流索引
@@ -31,13 +32,15 @@ class BasedStreamComponent(Component):
         self.stream_url = []
         self.stream_cam_id = []
         self.update_fps = []
-        self.current_frame_id = []
         self.video_writer: List[SaveVideoHelperComponent] = []  # 存储视频组件
         self.window_name = []  # 窗口名
 
     def on_start(self):
         super().on_start()
         for i in range(len(self.config.input_port)):
+            if not self.shared_data.__contains__(self.config.STREAM_ORIGINAL_WIDTH[i]):
+                logger.error(f"{self.pname} 初始化错误，请检查输入端口: {self.config.input_port[i]}")
+                break
             self.stream_width.append(int(self.shared_data[self.config.STREAM_ORIGINAL_WIDTH[i]]))
             self.stream_height.append(int(self.shared_data[self.config.STREAM_ORIGINAL_HEIGHT[i]]))
             self.stream_channel.append(int(self.shared_data[self.config.STREAM_ORIGINAL_CHANNEL[i]]))

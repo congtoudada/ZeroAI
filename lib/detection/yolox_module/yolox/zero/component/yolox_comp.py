@@ -117,7 +117,10 @@ class YoloxComponent(BaseDetComponent):
                 x1, y1, w, h = tlbr[0], tlbr[1], tlbr[2] - tlbr[0], tlbr[3] - tlbr[1]
                 score = self.inference_outputs[i, 4] * self.inference_outputs[i, 5]
                 cls = int(self.inference_outputs[i, 6])
-                id_text = f"{score:.2f}({self.config.detection_labels[cls]})"
+                if cls < len(self.config.detection_labels):
+                    id_text = f"{score:.2f}({self.config.detection_labels[cls]})"
+                else:
+                    id_text = f"{score:.2f}(object)"
                 intbox = tuple(map(int, (x1, y1, x1 + w, y1 + h)))
                 cv2.rectangle(im, intbox[0:2], intbox[2:4],
                               color=(0, 0, 255),  # bgr
