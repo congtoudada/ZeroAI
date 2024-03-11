@@ -111,7 +111,7 @@ python3 bin/main_dev.py
 
 安装环境后，运行`bin/main_dev.py`即可可视化目标检测算法
 
-<img src="https://www.icongbao.com/show/GIF%202024-3-11%2011-31-49.gif" alt="GIF 2024-3-11 11-31-49" />
+<img src="/congtoudada/ZeroAI/README.assets/GIF 2024-3-11 11-31-49.gif" alt="GIF 2024-3-11 11-31-49" />
 
 ### 2.单目标检测算法跑多个视频流
 
@@ -147,9 +147,10 @@ stream:
     enable: True  # 是否可视化
 ```
 
-
 <hr>
+
 2.运行：`python bin/main_dev.py`
+
 <img src="https://www.icongbao.com/show/GIF%202024-3-11%2011-36-12.gif" alt="GIF 2024-3-11 11-36-12" />
 
 ### 3.计数的同时人脸识别
