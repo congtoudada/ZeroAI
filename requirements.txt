@@ -6,7 +6,7 @@ loguru
 scikit-image
 tqdm
 torchvision>=0.10.0
-Pillow==9.2.0
+Pillow
 thop
 ninja
 tabulate

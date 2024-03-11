@@ -145,7 +145,7 @@ docker run --name zero-ai --gpus all -it --rm `
 --net=host --privileged zeroai:latest
 
 # 启动sample算法(容器内运行)
-python3 bin/main_dev.py
+python3 bin/main.py
 ```
 
 > Tips：
@@ -164,17 +164,68 @@ python3 bin/main_dev.py
 
 ## 三、效果演示
 
->非最终效果，后期有新测试数据会替换
+>Tips：非最终效果，后期有新测试数据会替换
 
-### 1.默认运行
+### 3.计数的同时人脸识别
 
-安装环境后，运行`bin/main_dev.py`即可可视化目标检测算法
+安装环境后，运行`bin/main.py`即可
 
-<img src="https://github.com/congtoudada/ZeroAI/blob/main/README.assets/GIF%202024-3-11%2011-31-49.gif?raw=true" alt="GIF 2024-3-11 11-31-49" />
+<img src="https://github.com/congtoudada/ZeroAI/blob/main/README.assets/GIF%202024-3-11%2011-34-29.gif?raw=true" alt="GIF 2024-3-11 11-34-29" />
+
+解释：
+
+* video_fps：视频帧率，实际使用时是读一帧丢一帧。正常视频流是24-30fps，因此该数值只要满足12-15fps即可
+
+* inference_fps：是自定义范围测试的fps，上图仅限计数组件本身耗时，不包括目标检测和目标追踪
+
+* 灰线：人脸识别范围线，进入该区域将进行人脸识别，识别成陌生人的对象会继续识别直到消失
+
+* 红蓝线：计数参考线，当人从红线上方穿过蓝线下方时会进行计数
+
+* 人头包围框之上的两个数字：
+
+  * 左：对象id
+
+  * 右：人脸id（1表示陌生人）
+
+<hr>
+
+具体做法
+
+> 1.替换配置文件内容
+
+位置：`conf/cam/stream1.yaml`
+
+开启目标检测，多目标追踪，计数+人脸识别算法
+
+```yaml
+stream:
+  algorithm: # 算法配置
+    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py
+      conf: conf/algorithm/detection/yolox/yolox_head.yaml  # 此处替换为检测人头的权重
+    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py
+      conf: conf/algorithm/mot/bytetrack/bytetrack_head.yaml
+    - path: lib/business/count/extension/count_face_comp.py
+      conf: conf/algorithm/business/count/count_face/count_face.yaml
+```
+
+位置：`conf/algorithm/business/count/count_root.yaml`
+
+开启人脸计数算法的可视化
+
+```yaml
+stream:
+  draw_vis:
+    enable: True  # 是否可视化
+```
+
+> Tips：记得关闭`conf/algorithm/detection/detection_root.yaml`的可视化，否则会显示两个窗口哦
+
+> 2.运行：`python bin/main.py`
 
 ### 2.单目标检测算法跑多个视频流
 
-1.替换配置文件内容
+> 1.替换配置文件内容
 
 位置：`conf/application-dev.yaml`
 
@@ -207,61 +258,9 @@ stream:
 ```
 
 <hr>
-
-2.运行：`python bin/main_dev.py`
+> 2.运行：`python bin/main.py`
 
 <img src="https://github.com/congtoudada/ZeroAI/blob/main/README.assets/GIF%202024-3-11%2011-36-12.gif?raw=true" alt="GIF 2024-3-11 11-36-12" />
-
-### 3.计数的同时人脸识别
-
-1.替换配置文件内容
-
-位置：`conf/cam/stream1.yaml`
-
-开启目标检测，多目标追踪，计数+人脸识别算法
-
-```yaml
-stream:
-  algorithm: # 算法配置
-    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py
-      conf: conf/algorithm/detection/yolox/yolox_head.yaml  # 此处替换为检测人头的权重
-    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py
-      conf: conf/algorithm/mot/bytetrack/bytetrack_head.yaml
-    - path: lib/business/count/extension/count_face_comp.py
-      conf: conf/algorithm/business/count/count_face/count_face.yaml
-```
-
-位置：`conf/algorithm/business/count/count_root.yaml`
-
-开启人脸计数算法的可视化
-
-```yaml
-stream:
-  draw_vis:
-    enable: True  # 是否可视化
-```
-
-> Tips：记得关闭`conf/algorithm/detection/detection_root.yaml`的可视化，否则会显示两个窗口哦
-
-2.运行：`python bin/main_dev.py`
-
-<img src="https://github.com/congtoudada/ZeroAI/blob/main/README.assets/GIF%202024-3-11%2011-34-29.gif?raw=true" alt="GIF 2024-3-11 11-34-29" />
-
-解释：
-
-* video_fps：视频帧率，实际使用时是读一帧丢一帧。正常视频流是24-30fps，因此该数值只要满足12-15fps即可
-
-* inference_fps：是自定义范围测试的fps，上图仅限计数组件本身耗时，不包括目标检测和目标追踪
-
-* 灰线：人脸识别范围线，进入该区域将进行人脸识别，识别成陌生人的对象会继续识别直到消失
-
-* 红蓝线：计数参考线，当人从红线上方穿过蓝线下方时会进行计数
-
-* 人头包围框之上的两个数字：
-
-  * 左：对象id
-
-  * 右：人脸id（1表示陌生人）
 
 ## 四、关键概念
 
@@ -875,7 +874,7 @@ stream:
 在工程根目录（ZeroAI）运行命令
 
 ```sh
-python bin/main_dev.yaml
+python bin/main.yaml
 ```
 
 #### 6.最终效果
