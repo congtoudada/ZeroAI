@@ -134,12 +134,33 @@ docker build -t zeroai:latest .
 mkdir pretrained
 mkdir res
 
-# 运行容器
-docker run --name zero-ai --gpus all -it --rm -v ${PWD}\pretrained:/workspace/ZeroAI/pretrained -v ${PWD}\res:/workspace/ZeroAI/res -v ${PWD}\log:/workspace/ZeroAI/log -v ${PWD}\output:/workspace/ZeroAI/output -e DISPLAY=host.docker.internal:0 --device /dev/video0:/dev/video0:mwr --net=host --privileged zeroai:latest
+# 运行容器(Windows)
+docker run --name zero-ai --gpus all -it --rm `
+-v ${PWD}\conf:/workspace/ZeroAI/conf `
+-v ${PWD}\pretrained:/workspace/ZeroAI/pretrained `
+-v ${PWD}\res:/workspace/ZeroAI/res `
+-v ${PWD}\log:/workspace/ZeroAI/log `
+-v ${PWD}\output:/workspace/ZeroAI/output `
+-e DISPLAY=host.docker.internal:0 --device /dev/video0:/dev/video0:mwr `
+--net=host --privileged zeroai:latest
 
-# 启动sample算法
+# 启动sample算法(容器内运行)
 python3 bin/main_dev.py
 ```
+
+> Tips：
+>
+> ```sh
+> # 运行容器(Linux)
+> docker run --name zero-ai --gpus all -it --rm \
+> -v $PWD/conf:/workspace/ZeroAI/conf \
+> -v $PWD/pretrained:/workspace/ZeroAI/pretrained \
+> -v $PWD/res:/workspace/ZeroAI/res \
+> -v $PWD/log:/workspace/ZeroAI/log \
+> -v $PWD/output:/workspace/ZeroAI/output \
+> -e DISPLAY=host.docker.internal:0 --device /dev/video0:/dev/video0:mwr \
+> --net=host --privileged zeroai:latest
+> ```
 
 ## 三、效果演示
 

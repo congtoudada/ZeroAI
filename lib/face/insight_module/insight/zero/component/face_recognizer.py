@@ -49,8 +49,11 @@ class FaceRecognizer(object):
         :return:
         """
         face_info = self.detect_search(bgr, max_face=-1, vis=False)
-        image = self.draw_result("Recognizer", image=bgr, face_info=face_info,
-                                 thickness=thickness, fontScale=fontScale, delay=delay, vis=vis)
+        if vis:
+            image = self.draw_result("Recognizer", image=bgr, face_info=face_info,
+                                     thickness=thickness, fontScale=fontScale, delay=delay, vis=vis)
+        else:
+            image = None
         return image, face_info
 
     def search_face_path(self, image_path, vis=False):

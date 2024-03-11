@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/tensorrt:21.09-py3
+FROM nvcr.io/nvidia/tensorrt:22.12-py3
 
 ENV DEBIAN_FRONTEND=noninteractive
 ARG USERNAME=user
@@ -20,25 +20,18 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
-RUN pip3 install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113
+RUN pip3 install torch==1.12.1+cu113 torchvision==0.13.1+cu113 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113
 
 RUN git clone https://github.com/congtoudada/ZeroAI.git \
     && cd ZeroAI \
     && pip3 install pip --upgrade \
     && pip3 install -r requirements.txt \
-    && pip3 install cython \
-    && pip3 install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI' \
-    && pip3 install cython_bbox gdown \
     && python3 installer.py \
     && ldconfig \
     && pip cache purge
 
-RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt \
+RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt.git \
     && cd torch2trt \
-    && git checkout 0400b38123d01cc845364870bdf0a0044ea2b3b2 \
-    # https://github.com/NVIDIA-AI-IOT/torch2trt/issues/619
-    && wget https://github.com/NVIDIA-AI-IOT/torch2trt/commit/8b9fb46ddbe99c2ddf3f1ed148c97435cbeb8fd3.patch \
-    && git apply 8b9fb46ddbe99c2ddf3f1ed148c97435cbeb8fd3.patch \
     && python3 setup.py install
 
 RUN echo "root:root" | chpasswd \
