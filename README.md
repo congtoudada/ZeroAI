@@ -22,6 +22,8 @@ ZeroAI是一个由**配置文件驱动**的**组件式**，基于**视频流**�
   * 框架预提供了丰富的组件，可以很轻松地根据需要接入自己的业务
   * 配备贴心的教程文档，助力开发人员快速上手
 
+>Tips：所有资源和权重私聊本人获取，不公开
+
 # 文档目录
 
 - [ZeroAI（持续更新中）](#zeroai持续更新中)
@@ -29,9 +31,9 @@ ZeroAI是一个由**配置文件驱动**的**组件式**，基于**视频流**�
   - [一、工程目录结构](#一工程目录结构)
   - [二、安装](#二安装)
     - [1.虚拟环境安装](#1虚拟环境安装)
-    - [2.Docker 安装](#2docker-安装)
+    - [2.Docker安装](#2docker安装)
   - [三、效果演示](#三效果演示)
-    - [1.计数的同时人脸识别](#1计数的同时人脸识别)
+    - [1.实时计数与人脸识别](#1实时计数与人脸识别)
     - [2.单目标检测算法跑多个视频流](#2单目标检测算法跑多个视频流)
   - [四、关键概念](#四关键概念)
     - [1.框架图示](#1框架图示)
@@ -90,8 +92,6 @@ ZeroAI是一个由**配置文件驱动**的**组件式**，基于**视频流**�
 
 ## 二、安装
 
-所有测试资源和权重私聊本人获取，不公开
-
 ### 1.虚拟环境安装
 
 
@@ -108,6 +108,9 @@ git clone htcondatps://github.com/congtoudada/ZeroAI.git
 cd ZeroAI
 pip install -r requirements.txt
 python installer.py
+
+# 运行默认示例
+python bin/main.py
 ```
 
 > Tips：
@@ -115,11 +118,9 @@ python installer.py
 > * conda镜像源参考：https://blog.csdn.net/weixin_43702653/article/details/125351698
 > * pip镜像源参考：https://blog.csdn.net/chengyikang20/article/details/127455339
 
-### 2.Docker 安装
+### 2.Docker安装
 
-> Tips：时间有限，目前只测试了Windows上Docker的安装运行，Linux基本适用，可能在图形显示上略有差异
-
-【可选】安装VcXsrv：使得容器能够在Windows上显示图形，否则不要勾选算法可视化（默认关闭，不影响）
+安装VcXsrv：使得容器能够在Windows上显示图形（若不安装需手动关闭配置文件中可视化选项，通常在算法的root.yaml配置内，将`stream_draw_vis_enalbe`设为False）
 
 * 教程：https://www.bilibili.com/read/cv15359444/?from=search（仅看`→配置VcXsrv`）
 
@@ -140,14 +141,15 @@ docker run --name zero-ai --gpus all -it --rm `
 -v ${PWD}\res:/workspace/ZeroAI/res `
 -v ${PWD}\log:/workspace/ZeroAI/log `
 -v ${PWD}\output:/workspace/ZeroAI/output `
--e DISPLAY=host.docker.internal:0 --device /dev/video0:/dev/video0:mwr `
+-e DISPLAY=host.docker.internal:0 `
+--device /dev/video0:/dev/video0:mwr `
 --net=host --privileged zeroai:latest
 
-# 启动sample算法(容器内运行)
-python3 bin/main.py
+# 运行默认示例(容器内运行)
+sudo python3 bin/main.py
 ```
 
-> Tips：
+> Tips：目前只测试了Windows上Docker的安装运行，Linux后期再测，二者可能在图形显示上略有差异
 >
 > ```sh
 > # 运行容器(Linux)
@@ -157,7 +159,8 @@ python3 bin/main.py
 > -v $PWD/res:/workspace/ZeroAI/res \
 > -v $PWD/log:/workspace/ZeroAI/log \
 > -v $PWD/output:/workspace/ZeroAI/output \
-> -e DISPLAY=host.docker.internal:0 --device /dev/video0:/dev/video0:mwr \
+> -e DISPLAY=host.docker.internal:0 \
+> --device /dev/video0:/dev/video0:mwr \
 > --net=host --privileged zeroai:latest
 > ```
 
@@ -165,9 +168,9 @@ python3 bin/main.py
 
 >Tips：非最终效果，后期有新测试数据会替换
 
-### 1.计数的同时人脸识别
+### 1.实时计数与人脸识别
 
-安装环境后，运行`bin/main.py`即可
+安装环境后，输入`bin/main.py`即可运行该默认示例
 
 <img src="https://github.com/congtoudada/ZeroAI/blob/main/README.assets/GIF%202024-3-11%2011-34-29.gif?raw=true" alt="GIF 2024-3-11 11-34-29" />
 
@@ -191,7 +194,7 @@ python3 bin/main.py
 
 具体做法
 
-> 1.替换配置文件内容
+> **1.替换配置文件内容**
 
 位置：`conf/cam/stream1.yaml`
 
@@ -200,11 +203,11 @@ python3 bin/main.py
 ```yaml
 stream:
   algorithm: # 算法配置
-    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py
-      conf: conf/algorithm/detection/yolox/yolox_head.yaml  # 此处替换为检测人头的权重
-    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py
+    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # yolox
+      conf: conf/algorithm/detection/yolox/yolox_head.yaml
+    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py  # bytetrack
       conf: conf/algorithm/mot/bytetrack/bytetrack_head.yaml
-    - path: lib/business/count/extension/count_face_comp.py
+    - path: lib/business/count/extension/count_face_comp.py  # count+face
       conf: conf/algorithm/business/count/count_face/count_face.yaml
 ```
 
@@ -218,13 +221,13 @@ stream:
     enable: True  # 是否可视化
 ```
 
-> Tips：记得关闭`conf/algorithm/detection/detection_root.yaml`的可视化，否则会显示两个窗口哦
+> **2.运行：`python bin/main.py`**
 
-> 2.运行：`python bin/main.py`
+> Tips：按`Ctrl+C`等待3s后程序会全部退出，如果存在图形界面按`q`也可退出
 
 ### 2.单目标检测算法跑多个视频流
 
-> 1.替换配置文件内容
+> **1.替换配置文件内容**
 
 位置：`conf/application-dev.yaml`
 
@@ -238,7 +241,7 @@ cam_list:
 
 位置：`conf/cam/stream1.yaml`
 
-设置流配置文件内的yolox的配置文件
+开启yolox目标检测
 
 ```yaml
 algorithm:     
@@ -257,7 +260,8 @@ stream:
 ```
 
 <hr>
-> 2.运行：`python bin/main.py`
+
+> **2.运行：`python bin/main.py`**
 
 <img src="https://github.com/congtoudada/ZeroAI/blob/main/README.assets/GIF%202024-3-11%2011-36-12.gif?raw=true" alt="GIF 2024-3-11 11-36-12" />
 
@@ -265,11 +269,11 @@ stream:
 
 ### 1.框架图示
 
-框架流程纵向流程图
+框架纵向流程图：展示了框架从开启到运行的各个阶段
 
 ![第一阶段纵向图](README.assets/第一阶段纵向图.jpg)
 
-框架流程横向示意图
+框架横向示意图：横向展示了框架内预定义的所有组件
 
 ![第一阶段横向图](README.assets/第一阶段横向图.jpg)
 
@@ -424,7 +428,7 @@ class YoloxComponent(BaseDetComponent):
 下面展示配置文件中计数算法的（依赖视频流、目标检测、目标追踪）完整端口链：
 
 1. StreamComponent：取流`stream_url: res/videos/renlian/renlian1.mp4` --> 视频流输出`stream_output_port: camera1`
-2. BaseDetComponent：来自camera1的输出`input_port: [camera1]` --> 检测模型`output_port: yolox`
+2. BaseDetComponent：来自视频流的输出`input_port: [camera1]` --> 检测模型`output_port: yolox`
 3. BaseMOTComponent：来自检测模型的输出`input_port: camera1-yolox` --> 追踪模型输出`output_port: camera1-bytetrack`
 4. CountComponent：来自追踪模型的输出`input_port: camera1-bytetrack` --> 计数业务输出`output_port: None`
 
