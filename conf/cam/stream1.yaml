@@ -7,15 +7,15 @@ stream:
   url: res/videos/renlian/renlian1.mp4  # 取流地址（输入）
   output_port: camera1  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
   algorithm: # 算法配置
-#    - path: samples/lib/business/print_stream/component/print_stream_comp.py
-#      conf: samples/conf/algorithm/print_stream/print_stream.yaml
-#    - path: zero/core/component/feature/stream_comp.py
-#      conf: conf/cam/stream2.yaml
-    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py
+    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # yolox
       conf: conf/algorithm/detection/yolox/yolox_head.yaml
-#    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py
+#    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py  # bytetrack
 #      conf: conf/algorithm/mot/bytetrack/bytetrack_head.yaml
-#    - path: lib/business/count/component/count_comp.py
-#      conf: conf/algorithm/business/count/count_renlian.yaml
-#    - path: lib/business/count/extension/count_face_comp.py
+#    - path: lib/business/count/extension/count_face_comp.py  # count+face
 #      conf: conf/algorithm/business/count/count_face/count_face.yaml
+#    - path: lib/business/count/component/count_comp.py  # count
+#      conf: conf/algorithm/business/count/count_renlian.yaml
+#    - path: samples/lib/business/print_stream/component/print_stream_comp.py  # sample
+#      conf: samples/conf/algorithm/print_stream/print_stream.yaml
+#    - path: zero/core/component/feature/stream_comp.py  # stream
+#      conf: conf/cam/stream2.yaml

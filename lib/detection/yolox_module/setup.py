@@ -57,7 +57,7 @@ setuptools.setup(
     author="basedet team",
     python_requires=">=3.6",
     # long_description=long_description,
-    ext_modules=get_extensions(),
+    # ext_modules=get_extensions(),
     classifiers=["Programming Language :: Python :: 3", "Operating System :: OS Independent"],
     cmdclass={"build_ext": torch.utils.cpp_extension.BuildExtension},
     packages=setuptools.find_namespace_packages(),

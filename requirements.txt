@@ -1,12 +1,12 @@
 # count
-numpy
+numpy==1.23.2
 torch>=1.7
 opencv-python
 loguru
 scikit-image
 tqdm
 torchvision>=0.10.0
-Pillow
+Pillow==9.2.0
 thop
 ninja
 tabulate
@@ -37,3 +37,7 @@ basetrainer
 pybaseutils
 toolz
 
+# pycocotools
+cython
+pycocotools
+cython_bbox

@@ -60,25 +60,26 @@ ZeroAI是一个由**配置文件驱动**的**组件式**，基于**视频流**�
 
 ### 1.虚拟环境安装
 
+
 ```sh
 # 创建虚拟环境并激活
 conda create -n zeroai python=3.9 -y
 conda activate zeroai
 
-# 安装pytorch
+# 安装pytorch CUDA11.3
 conda install pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit=11.3 -c pytorch
 
-# 安装requirement.txt
+# 安装requirement.txt和自定义包
 git clone htcondatps://github.com/congtoudada/ZeroAI.git
 cd ZeroAI
 pip install -r requirements.txt
-python setup.py develop
-
-# 安装其他依赖
-
+python installer.py
 ```
 
-> Tips：windows下安装cython-bbox失败：https://blog.csdn.net/weixin_53111016/article/details/125756800
+> Tips：
+>
+> * conda镜像源参考：https://blog.csdn.net/weixin_43702653/article/details/125351698
+> * pip镜像源参考：https://blog.csdn.net/chengyikang20/article/details/127455339
 
 ### 2.Docker 安装
 
