@@ -82,7 +82,7 @@ python setup.py develop
 
 > Tips：时间有限，目前只测试了Windows上Docker的安装运行，Linux基本适用，可能在图形显示上略有差异
 
-【可选】安装VcXsrv：使得容器能够在Windows上显示图形，不安装运行不可勾选算法可视化（默认关闭，不影响）
+【可选】安装VcXsrv：使得容器能够在Windows上显示图形，否则不要勾选算法可视化（默认关闭，不影响）
 
 * 教程：https://www.bilibili.com/read/cv15359444/?from=search（仅看`→配置VcXsrv`）
 
@@ -105,13 +105,13 @@ python3 bin/main_dev.py
 
 ## 三、效果演示
 
->数据涉密，勿外传，后期有新测试数据会替换
+>非最终效果，后期有新测试数据会替换
 
 ### 1.默认运行
 
 安装环境后，运行`bin/main_dev.py`即可可视化目标检测算法
 
-<img src="/congtoudada/ZeroAI/main/README.assets/GIF 2024-3-11 11-31-49.gif" alt="GIF 2024-3-11 11-31-49" />
+<img src="https://github.com/congtoudada/ZeroAI/blob/main/README.assets/GIF%202024-3-11%2011-31-49.gif?raw=true" alt="GIF 2024-3-11 11-31-49" />
 
 ### 2.单目标检测算法跑多个视频流
 
@@ -151,7 +151,7 @@ stream:
 
 2.运行：`python bin/main_dev.py`
 
-<img src="https://www.icongbao.com/show/GIF%202024-3-11%2011-36-12.gif" alt="GIF 2024-3-11 11-36-12" />
+<img src="https://github.com/congtoudada/ZeroAI/blob/main/README.assets/GIF%202024-3-11%2011-36-12.gif?raw=true" alt="GIF 2024-3-11 11-36-12" />
 
 ### 3.计数的同时人脸识别
 
@@ -186,7 +186,7 @@ stream:
 
 2.运行：`python bin/main_dev.py`
 
-<img src="https://www.icongbao.com/show/GIF%202024-3-11%2011-34-29.gif" alt="GIF 2024-3-11 11-34-29" />
+<img src="https://github.com/congtoudada/ZeroAI/blob/main/README.assets/GIF%202024-3-11%2011-34-29.gif?raw=true" alt="GIF 2024-3-11 11-34-29" />
 
 解释：
 
@@ -821,7 +821,7 @@ python bin/main_dev.yaml
 
 实时取流并打印日志信息
 
-<img src="https://www.icongbao.com/show/GIF%202024-3-11%2011-33-32.gif" alt="GIF 2024-3-11 11-33-32" />
+<img src="https://github.com/congtoudada/ZeroAI/blob/main/README.assets/GIF%202024-3-11%2011-33-32.gif?raw=true" alt="GIF 2024-3-11 11-33-32" />
 
 导出成本地视频
 
