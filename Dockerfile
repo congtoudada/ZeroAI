@@ -24,7 +24,7 @@ RUN pip3 install torch==1.12.1+cu113 torchvision==0.13.1+cu113 torchaudio==0.12.
 
 RUN git clone https://github.com/congtoudada/ZeroAI.git \
     && cd ZeroAI \
-    && git checkout de94dcaae67fa8109bfe42dad8ed1e447a52af18 \
+    && git checkout d38d38cabd333f9945e1868d5b8ccce586a876ad \
     && pip3 install pip --upgrade \
     && pip3 install -r requirements.txt \
     && python3 installer.py \
