@@ -1,5 +1,5 @@
 """
-计数绘制线工具: q退出,s保存
+计数绘制线工具: q退出,s保存extract_frames.py
 """
 import os.path
 import signal
