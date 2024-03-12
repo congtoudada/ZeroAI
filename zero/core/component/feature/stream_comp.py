@@ -77,7 +77,10 @@ class StreamComponent(Component):
                     self.success_frame = (self.success_frame + 1) % sys.maxsize
                     frame = cv2.resize(frame, (self.config.stream_width, self.config.stream_height))
                     self.stream_frame_info[SharedKey.STREAM_FRAME_ID] = self.success_frame
+                    # self.stream_frame_info[SharedKey.STREAM_FRAME_TIME] = time.time()
+                    # self.stream_frame_info[SharedKey.STREAM_FRAME] = frame
                     self.stream_frame_info[SharedKey.STREAM_FRAME] = frame.flatten()
+                    # self.stream_frame_info[SharedKey.STREAM_FRAME] = cv2.imencode(".jpg", frame)[1].tobytes()
                     # 填充输出
                     self.shared_data[self.config.STREAM_FRAME_INFO] = self.stream_frame_info
                     if self.config.stream_delay:

@@ -23,6 +23,7 @@ class SharedKey(Enum):
     STREAM_FRAME_INFO = 103  # 视频流信息 (package)
     STREAM_FRAME_ID = 104  # 原始图像ID（每次成功读取新的FRAME都会更新ID，避免算法重复处理相同帧）
     STREAM_FRAME = 105  # 原始图像
+    # STREAM_FRAME_TIME = 113  # Time测试
     # ---
     STREAM_ORIGINAL_WIDTH = 106  # 原始图像宽
     STREAM_ORIGINAL_HEIGHT = 107  # 原始图像高
