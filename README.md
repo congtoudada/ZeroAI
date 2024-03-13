@@ -104,7 +104,7 @@ conda activate zeroai
 conda install pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit=11.3 -c pytorch
 
 # 安装requirement.txt和自定义包
-git clone htcondatps://github.com/congtoudada/ZeroAI.git
+git clone https://github.com/congtoudada/ZeroAI.git
 cd ZeroAI
 pip install -r requirements.txt
 python installer.py
