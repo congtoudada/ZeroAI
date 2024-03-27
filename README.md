@@ -913,4 +913,5 @@ python bin/main.yaml
 * 找工作（游戏开发）
 * 拓展算法
 * 接入Web后端
-* 支持Tensor RT
+* Tensor RT、Cython加速
+  * Cython参考：https://www.bilibili.com/video/BV16a411y7wT
