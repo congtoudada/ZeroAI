@@ -914,4 +914,4 @@ python bin/main.yaml
 * 拓展算法
 * 接入Web后端
 * Tensor RT、Cython加速
-  * Cython参考：https://www.bilibili.com/video/BV16a411y7wT
+  * Cython参考：https://www.bilibili.com/video/BV1NF411i74S?p=1
