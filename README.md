@@ -225,40 +225,6 @@ stream:
 
 > Tips：按`Ctrl+C`等待3s后程序会全部退出，如果存在图形界面按`q`也可退出
 
-### 2.单目标检测算法
-
-> **1.替换配置文件内容**
-
-位置：`conf/application-dev.yaml`
-
-确保获取两个视频流，在这两个文件内可以设置取流地址
-
-```yaml
-cam_list:
-  - conf/cam/stream1.yaml
-  - conf/cam/stream2.yaml
-```
-
-位置：`conf/cam/stream1.yaml`
-
-开启yolox目标检测
-
-```yaml
-algorithm:     
- - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # 使用yolox目标检测
-   conf: conf/algorithm/detection/yolox/yolox_person.yaml  # yolox配置文件
-```
-
-位置：`conf/algorithm/detection/detection_root.yaml`
-
-确保检测组件的可视化功能是开启的
-
-```yaml
-stream:
-  draw_vis:
-    enable: True  # 是否可视化
-```
-
 ### 3.单目标检测算法跑多个视频流
 
 > **1.替换配置文件内容**
