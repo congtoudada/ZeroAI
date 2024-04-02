@@ -5,8 +5,7 @@ from loguru import logger
 
 from zero.core.component.base.component import Component
 from zero.core.info.feature.face_helper_info import FaceHelperInfo
-from zero.core.key.face_key import FaceKey
-from zero.core.key.shared_key import SharedKey
+from insight.zero.key.face_key import FaceKey
 from zero.utility.config_kit import ConfigKit
 
 

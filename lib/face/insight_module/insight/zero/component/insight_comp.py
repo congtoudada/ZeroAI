@@ -10,8 +10,7 @@ import numpy as np
 from insight.zero.component.face_recognizer import FaceRecognizer
 from insight.zero.info.insight_info import InsightInfo
 from zero.core.component.service.base_service_comp import BaseServiceComponent
-from zero.core.key.face_key import FaceKey
-from zero.core.key.shared_key import SharedKey
+from insight.zero.key.face_key import FaceKey
 from zero.utility.config_kit import ConfigKit
 from zero.utility.timer_kit import TimerKit
 
