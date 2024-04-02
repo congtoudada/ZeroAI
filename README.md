@@ -939,4 +939,3 @@ python bin/main.yaml
 * 接入Web后端
 * Tensor RT、Cython加速
   * Cython参考：https://www.bilibili.com/video/BV1NF411i74S?p=1
-* 锁分支测试
