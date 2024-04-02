@@ -50,18 +50,17 @@ class StreamComponent(Component):
         self.shared_data[self.config.STREAM_CAMERA_ID] = self.config.stream_cam_id
         self.shared_data[self.config.STREAM_UPDATE_FPS] = self.config.stream_update_fps
         self.shared_data[SharedKey.STREAM_WAIT_COUNTER_MAX] += len(self.config.stream_algorithm)
+        # 在初始化结束通知给流进程
+        self.shared_data[SharedKey.STREAM_WAIT_COUNTER] += 1
         # self.face_helper.start()
         # img = cv2.imread('res/images/face/database/48-0001.jpg')
         # self.face_helper.send(1, img)
-
-    def second_start(self):
-        # 多进程启动算法
+        # ------------------------ 多进程启动算法 ------------------------
+        time.sleep(0.1)
         self.algo_group_comp.start()
-
         # 等待所有算法初始化完成
         while self.shared_data[SharedKey.STREAM_WAIT_COUNTER] < self.shared_data[SharedKey.STREAM_WAIT_COUNTER_MAX]:
             time.sleep(0.2)
-
         logger.info(f"{self.pname} 所有算法成功初始化！开始取流 URL: {self.config.stream_url} fps: {self.frame_fps}")
 
     def on_update(self) -> bool:
@@ -110,10 +109,7 @@ class StreamComponent(Component):
 def create_process(shared_data, config_path: str):
     # 创建视频流组件
     streamComp: StreamComponent = StreamComponent(shared_data, config_path)
-    streamComp.start()  # 一阶段：初始化自身
-    # 在初始化结束通知给流进程
-    shared_data[SharedKey.STREAM_WAIT_COUNTER] += 1
-    streamComp.second_start()  # 二阶段：初始化算法
+    streamComp.start()  # 初始化
     streamComp.update()  # 算法逻辑循环
 
 

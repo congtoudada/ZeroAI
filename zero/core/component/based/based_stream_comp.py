@@ -73,15 +73,18 @@ class BasedStreamComponent(Component):
                 frame_info = self.shared_data[info_key]
                 if frame_info is not None and self.current_frame_id[i] != int(frame_info[SharedKey.STREAM_FRAME_ID]):
                     self.current_frame_id[i] = int(frame_info[SharedKey.STREAM_FRAME_ID])
-                    self.frame = frame_info[SharedKey.STREAM_FRAME]
+                    # self.frame = np.reshape(np.ascontiguousarray(np.copy(frame_info[SharedKey.STREAM_FRAME])),
+                    #                         (self.stream_height[i], self.stream_width[i], self.stream_channel[i]))
+                    self.frame = np.reshape(frame_info[SharedKey.STREAM_FRAME],
+                                            (self.stream_height[i], self.stream_width[i], self.stream_channel[i]))
+
+                    # self.frame = frame_info[SharedKey.STREAM_FRAME]
                     # self.frame = np.copy(frame_info[SharedKey.STREAM_FRAME])
                     # self.frame = np.ascontiguousarray(np.copy(frame_info[SharedKey.STREAM_FRAME]))
                     # self.frame = np.frombuffer(frame_info[SharedKey.STREAM_FRAME], dtype=np.uint8)\
                     #     .reshape((self.stream_height[i], self.stream_width[i], self.stream_channel[i]))
                     # self.frame = np.copy(frame_info[SharedKey.STREAM_FRAME])\
                     #     .reshape((self.stream_height[i], self.stream_width[i], self.stream_channel[i]))
-                    self.frame = np.reshape(np.ascontiguousarray(np.copy(frame_info[SharedKey.STREAM_FRAME])),
-                                            (self.stream_height[i], self.stream_width[i], self.stream_channel[i]))
                     # image_np = np.frombuffer(frame_info[SharedKey.STREAM_FRAME], np.uint8)
                     # 将NumPy数组解码为图片格式
                     # self.frame = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
