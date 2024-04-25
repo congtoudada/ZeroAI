@@ -13,8 +13,3 @@ class BaseServiceComponent(Component):
         logger.info(f"{self.pname} 成功初始化！")
         # 只要是服务组件，在初始化结束都必须通知给主进程
         self.shared_data[SharedKey.WAIT_COUNTER] += 1
-
-    def broadcast(self, key, value):
-        for cam_dict in self.shared_data[SharedKey.CAMERAS]:
-            cam_dict[key] = value
-
