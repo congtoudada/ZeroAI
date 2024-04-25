@@ -169,7 +169,7 @@ docs/api
 *.engine
 *.mnn
 events.out.tfevents*
-
+src/
 /test
 /log
 /res
