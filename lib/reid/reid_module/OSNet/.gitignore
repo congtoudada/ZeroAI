@@ -171,9 +171,5 @@ docs/api
 *.jpg
 *.png
 events.out.tfevents*
-src/
-/test
-/log
-/res
-/pretrained
-/output
+
+log/

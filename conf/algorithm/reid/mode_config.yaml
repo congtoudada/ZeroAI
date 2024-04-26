@@ -1,0 +1,10 @@
+config_file:
+  'conf/algorithm/reid/dut_test_1c.yaml'
+transforms:
+  - "random_flip"
+  - "random_erase"
+root: "res/Reid/datasets/dut_test"
+model:
+  load_weights: "pretrained/reid/2024_4_23_reid.pth"
+test:
+  evaluate: true

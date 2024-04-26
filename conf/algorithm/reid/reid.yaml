@@ -1,0 +1,5 @@
+INCLUDE:
+  - conf/algorithm/reid/reid_root.yaml
+
+reid:
+  port: reid1
