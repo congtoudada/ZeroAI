@@ -166,7 +166,7 @@ class Engine(object):
             )
 
         if test_only:
-            self.test(
+            results=self.test(
                 dist_metric=dist_metric,
                 normalize_feature=normalize_feature,
                 visrank=visrank,
@@ -178,7 +178,7 @@ class Engine(object):
             )
             #return
             #pzy
-            return self.test()
+            return results
 
         if self.writer is None:
             self.writer = SummaryWriter(log_dir=save_dir)
@@ -377,11 +377,11 @@ class Engine(object):
             
             
             # 打印出gallery_image_names的总行数（n）
-            # print("Total number of queries (n):", len(n_topn_gallery_image_names)) #20
+            #print("Total number of queries (n):", len(n_topn_gallery_image_names)) #20
             # 打印每一行的长度（应该每行都是topn）
-            # for i, names in enumerate(n_topn_gallery_image_names):
-            #     print(f"Number of image paths for query {i+1} (should be topn):", len(names)) #每一行都是10+1=11
-
+            #for i, names in enumerate(n_topn_gallery_image_names):
+            #    print(f"Number of image paths for query {i+1} (should be topn):", len(names)) #每一行都是10+1=11
+            
             if self.writer is not None:
                 self.writer.add_scalar(f'Test/{name}/rank1', rank1, self.epoch)
                 self.writer.add_scalar(f'Test/{name}/mAP', mAP, self.epoch)
@@ -431,14 +431,13 @@ class Engine(object):
 
         print('Extracting features from query set ...')
         qf, q_pids, q_camids = _feature_extraction(query_loader)
-        print(q_pids,q_pids.shape)
-        print(q_camids,q_camids.shape)  
+        print(q_pids,q_pids.shape,"engine.py __Line434")
+        print(q_camids,q_camids.shape,"engine.py __Line435")  
         print('Done, obtained {}-by-{} matrix'.format(qf.size(0), qf.size(1)))
 
         print('Extracting features from gallery set ...')
         gf, g_pids, g_camids = _feature_extraction(gallery_loader)
         print('Done, obtained {}-by-{} matrix'.format(gf.size(0), gf.size(1)))
-
         print('Speed: {:.4f} sec/batch'.format(batch_time.avg))
 
         if normalize_feature:
@@ -473,7 +472,7 @@ class Engine(object):
 
         # 使用新函数获取topn匹配项
         topn_matches = _get_top_n_matches(distmat, topn)
-        print(topn_matches.shape) #[n,topn]
+        #print(topn_matches.shape) #[n,topn]
         #######------------------###############
         print('Computing CMC and mAP ...')
         cmc, mAP = metrics.evaluate_rank(
@@ -505,7 +504,7 @@ class Engine(object):
         
         #但是结果值返回rank1(cmc[0])和mAP
         #print(topn_matches,"!!!!!!!!!!!!!!!!!!!scripts/torchreid/engine/engine.py Line455")
-        return topn_matches, cmc[0], mAP 
+        return topn_matches, cmc[0], mAP
 
     def compute_loss(self, criterion, outputs, targets):
         if isinstance(outputs, (tuple, list)):

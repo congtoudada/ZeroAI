@@ -18,7 +18,7 @@ loss:
     label_smooth: True
 
 train:
-  optim: 'amsgrad'xv
+  optim: 'amsgrad'
   lr: 0.0015
   max_epoch: 250
   batch_size: 64
@@ -33,14 +33,3 @@ test:
   evaluate: False
   eval_freq: -1
   rerank: False
-
-root: datasets/dut_test
-transforms:
-  - random_flip
-  - random_erase
-
-model:
-  load_weights: /export/home/.cache/torch/chekpoints/osnet_x1_0_market_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_labelsmooth_flip.pth
-
-test:
-  evaluate: True

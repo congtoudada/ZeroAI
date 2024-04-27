@@ -1,0 +1,46 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python 调试程序: 当前文件",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "scripts/main.py",
+            "console": "integratedTerminal",
+            "args": ["--config-file", "configs/im_osnet_x1_0_softmax_256x128_amsgrad_cosine.yaml",
+             "--transforms","random_flip random_erase",
+             "--root","datasets/"]
+        },
+        {
+            "name": "Python 调试程序: 94.4",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "scripts/main.py",
+            "console": "integratedTerminal",
+            "args": ["--config-file", "configs/im_osnet_x1_0_softmax_256x128_amsgrad_cosine.yaml",
+             "--transforms","random_flip random_erase",
+             "--root","datasets/",
+            "model.load_weights","/export/home/.cache/torch/chekpoints/osnet_x1_0_market_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_labelsmooth_flip.pth",
+            "test.evaluate","True"]
+        },
+        {
+            "name": "Python 调试程序: dut_test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "scripts/main.py",
+            "console": "integratedTerminal",
+            "args": ["--config-file", "configs/dut_test_1c.yaml",
+             "--transforms","random_flip random_erase",
+             "--root","datasets/dut_test",
+            "model.load_weights","/export/home/.cache/torch/checkpoints/osnet_x1_0_market_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_labelsmooth_flip.pth",
+            "test.evaluate","True"]
+        },
+        {
+            "name": "Python 调试程序: reid类",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "scripts/reid.py",
+            "console": "integratedTerminal"
+        }
+    ]
+}

@@ -42,7 +42,7 @@ class Market1501(ImageDataset):
 
         self.train_dir = osp.join(self.data_dir, 'bounding_box_train')
         self.query_dir = osp.join(self.data_dir, 'query')
-        self.gallery_dir = osp.join(self.data_dir, 'bounding_box_test')
+        self.gallery_dir = osp.join(self.data_dir, 'bounding_box_test')#market1501里面的三个文件夹
         self.extra_gallery_dir = osp.join(self.data_dir, 'images')
         self.market1501_500k = market1501_500k
 
@@ -53,7 +53,7 @@ class Market1501(ImageDataset):
             required_files.append(self.extra_gallery_dir)
         self.check_before_run(required_files)
 
-        train = self.process_dir(self.train_dir, relabel=True)
+        train = self.process_dir(self.train_dir, relabel=True) #为什么训练relabe是true  其他时候是false
         query = self.process_dir(self.query_dir, relabel=False)
         gallery = self.process_dir(self.gallery_dir, relabel=False)
         if self.market1501_500k:
@@ -62,20 +62,20 @@ class Market1501(ImageDataset):
         super(Market1501, self).__init__(train, query, gallery, **kwargs)
 
     def process_dir(self, dir_path, relabel=False):
-        img_paths = glob.glob(osp.join(dir_path, '*.jpg'))
-        pattern = re.compile(r'([-\d]+)_c(\d)')
+        img_paths = glob.glob(osp.join(dir_path, '*.jpg'))#查找指定目录dir_path下所有以.jpg结尾的文件，并将文件路径存储在img_paths列表中
+        pattern = re.compile(r'([-\d]+)_c(\d)') #使用正则表达式创建一个模式，用于匹配文件名中的PID和camid
 
         pid_container = set()
         for img_path in img_paths:
-            pid, _ = map(int, pattern.search(img_path).groups())
+            pid, _ = map(int, pattern.search(img_path).groups()) #使用正则表达式模式匹配当前图像路径img_path中的PID，并将其转换为整数赋值给pid。下划线_用于忽略camid。
             if pid == -1:
                 continue # junk images are just ignored
-            pid_container.add(pid)
-        pid2label = {pid: label for label, pid in enumerate(pid_container)}
+            pid_container.add(pid) #将非垃圾图像的PID添加到pid_container集合中。
+        pid2label = {pid: label for label, pid in enumerate(pid_container)} #根据pid_container中的PID创建一个字典pid2label，将每个PID映射为一个唯一的标签。
 
         data = []
         for img_path in img_paths:
-            pid, camid = map(int, pattern.search(img_path).groups())
+            pid, camid = map(int, pattern.search(img_path).groups())#从当前图像路径中提取PID和camid，并将它们转换为整数赋值给pid和camid。
             if pid == -1:
                 continue # junk images are just ignored
             assert 0 <= pid <= 1501 # pid == 0 means background
@@ -83,6 +83,6 @@ class Market1501(ImageDataset):
             camid -= 1 # index starts from 0
             if relabel:
                 pid = pid2label[pid]
-            data.append((img_path, pid, camid))
+            data.append((img_path, pid, camid)) #将包含图像路径、PID和camid的元组添加到data列表中。
 
         return data
