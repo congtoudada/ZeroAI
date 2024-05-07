@@ -407,7 +407,7 @@ class Engine(object):
         use_metric_cuhk03=False,
         ranks=[1, 5, 10, 20],
         rerank=False,
-        topn=10  #pzy 添加一个参数来指定topn 
+        topn=5  #pzy 添加一个参数来指定topn 
     ):
         batch_time = AverageMeter()
 

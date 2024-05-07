@@ -218,10 +218,13 @@ def main():
     #engine.run(**engine_run_kwargs(cfg))
     n_topn_gallery_image_names, rank1, mAP = engine.run(**engine_run_kwargs(cfg))
    
-    #需求2
-    print(n_topn_gallery_image_names) 
-    #需求1
-    print(find_indices_with_target_pid(n_topn_gallery_image_names, '02'))
+    #需求:
+    for row in n_topn_gallery_image_names:
+        # 使用生成器表达式将元组中的每个元素转换为字符串
+        print(' '.join(str(item) for item in row))
+    
+    #暂时不用，可能有问题 
+    #print(find_indices_with_target_pid(n_topn_gallery_image_names, '03'))
     
 if __name__ == '__main__':
     main()

@@ -31,8 +31,8 @@ class Reid:
         self.parser.add_argument('-t','--targets',type=str,nargs='+',help='target datasets (delimited by space)')
         self.parser.add_argument('--config-file', type=str, default='conf/algorithm/reid/dut_test_1c.yaml', help='path to config file')
         self.parser.add_argument('--transforms', type=str, nargs='+', default=['random_flip', 'random_erase'], help='data augmentation')
-        self.parser.add_argument('--root', type=str, default='res/Reid/datasets/dut_test/', help='path to data root')
-        self.parser.add_argument('--model_weights', type=str, default='pretrained/reid/osnet_x1_0_market_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_labelsmooth_flip.pth', help='path to model weights')
+        self.parser.add_argument('--root', type=str, default='C:\\file\\dataset\\dut_test', help='path to data root')
+        self.parser.add_argument('--model_weights', type=str, default='C:\\file\\checkpoint\\osnet_x1_0_market_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_labelsmooth_flip.pth', help='path to model weights')
         self.parser.add_argument('--test_evaluate', action='store_true', default=True, help='whether to perform evaluation')
         self.args = self.parser.parse_args()
 
@@ -98,10 +98,14 @@ class Reid:
         engine = self.build_engine(cfg, datamanager, model, optimizer, scheduler)
         # engine.run(**engine_run_kwargs(cfg))
         n_topn_gallery_image_names, rank1, mAP = engine.run(**engine_run_kwargs(cfg))
-        # 需求2
-        print(n_topn_gallery_image_names)
-        # 需求1
-        print(self.find_indices_with_target_pid(n_topn_gallery_image_names, '03'))
+
+        #需求:
+        for row in n_topn_gallery_image_names:
+            # 使用生成器表达式将元组中的每个元素转换为字符串
+            print(' '.join(str(item) for item in row))
+        
+        #暂时不用，可能有问题 
+        #print(find_indices_with_target_pid(n_topn_gallery_image_names, '03'))
 
         
     def find_indices_with_target_pid(self,filenames, target_pid):
@@ -212,9 +216,9 @@ class Reid:
             assert cfg.train.fixbase_epoch == 0, \
                 'The output of classifier is not included in the computational graph'
 
-reid_instance = Reid()
-reid_instance.run()
+
         
     
-#if __name__ == '__main__':
-
+if __name__ == '__main__':
+    reid_instance = Reid()
+    reid_instance.run()
