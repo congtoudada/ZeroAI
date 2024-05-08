@@ -4,7 +4,6 @@ import os.path as osp
 import argparse
 import torch
 import torch.nn as nn
-#
 #sys.path.insert(0, "/root/user66/anaconda3/envs/zuyi")
 sys.path.append("/user66/zuyi/OSNet/torchreid")
 #print(sys.path)
@@ -22,6 +21,9 @@ from default_config import (
     imagedata_kwargs, optimizer_kwargs, videodata_kwargs, engine_run_kwargs,
     get_default_config, lr_scheduler_kwargs
 )
+from pprint import pprint
+import os
+import shutil
 
 class Reid:
     def __init__(self):
@@ -35,8 +37,8 @@ class Reid:
         self.parser.add_argument('--model_weights', type=str, default='C:\\file\\checkpoint\\osnet_x1_0_market_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_labelsmooth_flip.pth', help='path to model weights')
         self.parser.add_argument('--test_evaluate', action='store_true', default=True, help='whether to perform evaluation')
         self.args = self.parser.parse_args()
-
-    def run(self):
+        
+    def run(self,demo_data):
         cfg = get_default_config()
         cfg.use_gpu = torch.cuda.is_available()
         if self.args.config_file:
@@ -46,9 +48,18 @@ class Reid:
         set_random_seed(cfg.train.seed)
         self.check_cfg(cfg)
         
-        #print(self.args.config_file,self.args.root,self.args.test_evaluate,"Line47")
-        #print(cfg.test.evaluate, cfg.model.load_weights)
+        print(self.args.config_file,self.args.root,self.args.test_evaluate,"Line47")
+        print(cfg.test.evaluate, cfg.model.load_weights)
+        pprint(cfg)
         
+        # 如果 demo_data 是目录，则调用 replace_query_contents_with_directory 方法。
+        self.query_dir = os.path.join(cfg.data.root, 'market1501', 'query')
+        if os.path.isdir(demo_data):
+            print(demo_data,"调试代码待删除")
+            self.replace_query_contents_with_directory(demo_data)
+        else:
+            print(f"The demo_data {demo_data} is not a directory.")
+
         
         log_name = 'test.log' if cfg.test.evaluate else 'train.log'
         log_name += time.strftime('-%Y-%m-%d-%H-%M-%S')
@@ -99,38 +110,14 @@ class Reid:
         # engine.run(**engine_run_kwargs(cfg))
         n_topn_gallery_image_names, rank1, mAP = engine.run(**engine_run_kwargs(cfg))
 
-        #需求:
+        # 需求:
         for row in n_topn_gallery_image_names:
             # 使用生成器表达式将元组中的每个元素转换为字符串
             print(' '.join(str(item) for item in row))
         
-        #暂时不用，可能有问题 
+        # 暂时不用，可能有问题 
         #print(find_indices_with_target_pid(n_topn_gallery_image_names, '03'))
 
-        
-    def find_indices_with_target_pid(self,filenames, target_pid):
-        indices = []
-        for index, row in enumerate(filenames):
-            # 确保row是一个列表并且至少有一个元素
-            if not isinstance(row, list) or not row:
-                continue  # 如果不是列表或列表为空，则跳过此项
-            
-            # 获取每一行的第n+1个元素（因为每一行首个元素是query，第二个开始才是gallery），即第topn个检索项的地址，先设置topn=1，所以是[1+1-1]=[1]也就是第二列
-            filename = row[1]
-            # 确保filename是一个字符串
-            if not isinstance(filename, str):
-                continue  # 如果不是字符串，则跳过此项
-            
-            # 分割文件名以获取'/'后的最后一部分
-            parts = filename.split('/')
-            # 获取路径的最后一部分，其中包含'xx'部分
-            last_part = parts[-1]
-            # 分割最后一部分以'_'并获取'xx'部分
-            xx_part = last_part.split('_')[0]
-            # 检查'xx'部分是否与传入的target_pid相等
-            if xx_part == target_pid:
-                indices.append(index)
-        return indices
 
     def build_datamanager(self,cfg):
         if cfg.data.type == 'image':
@@ -215,10 +202,69 @@ class Reid:
         if cfg.loss.name == 'triplet' and cfg.loss.triplet.weight_x == 0:
             assert cfg.train.fixbase_epoch == 0, \
                 'The output of classifier is not included in the computational graph'
+                
+    # 请注意，这段代码假设 self.query_dir 已经被定义，并且 cfg.data.root 是一个有效的路径。
+    # 此外，这段代码将复制目录中的所有文件，而不会检查文件类型。如果您需要复制特定类型的文件（例如，只复制 .jpg 图片），您需要在复制之前添加适当的文件类型检查。
+    def replace_query_contents_with_directory(self, directory_path):
+        """
+        清空 query 目录并将指定目录中的所有文件复制到该目录。
+        """
+        if not os.path.exists(directory_path):
+            print(f"Error: The directory path provided ({directory_path}) does not exist.")
+            return
+
+        if not os.path.exists(self.query_dir):
+            os.makedirs(self.query_dir)
+
+        # 清空 query 目录
+        for filename in os.listdir(self.query_dir):
+            file_to_delete = os.path.join(self.query_dir, filename)
+            try:
+                if os.path.isfile(file_to_delete) or os.path.islink(file_to_delete):
+                    os.unlink(file_to_delete)
+                elif os.path.isdir(file_to_delete):
+                    shutil.rmtree(file_to_delete)
+            except Exception as e:
+                print(f"Failed to delete {file_to_delete}. Reason: {e}")
+
+        # 复制新的文件到 query 目录
+        for filename in os.listdir(directory_path):
+            file_to_copy = os.path.join(directory_path, filename)
+            if os.path.isfile(file_to_copy):
+                try:
+                    shutil.copy(file_to_copy, self.query_dir)
+                    print(f"File {file_to_copy} has been copied to {self.query_dir}.")
+                except Exception as e:
+                    print(f"Failed to copy {file_to_copy} to {self.query_dir}. Reason: {e}")
+    
+    def find_indices_with_target_pid(self,filenames, target_pid):
+        indices = []
+        for index, row in enumerate(filenames):
+            # 确保row是一个列表并且至少有一个元素
+            if not isinstance(row, list) or not row:
+                continue  # 如果不是列表或列表为空，则跳过此项
+            
+            # 获取每一行的第n+1个元素（因为每一行首个元素是query，第二个开始才是gallery），即第topn个检索项的地址，先设置topn=1，所以是[1+1-1]=[1]也就是第二列
+            filename = row[1]
+            # 确保filename是一个字符串
+            if not isinstance(filename, str):
+                continue  # 如果不是字符串，则跳过此项
+            
+            # 分割文件名以获取'/'后的最后一部分
+            parts = filename.split('/')
+            # 获取路径的最后一部分，其中包含'xx'部分
+            last_part = parts[-1]
+            # 分割最后一部分以'_'并获取'xx'部分
+            xx_part = last_part.split('_')[0]
+            # 检查'xx'部分是否与传入的target_pid相等
+            if xx_part == target_pid:
+                indices.append(index)
+        return indices
 
 
         
     
 if __name__ == '__main__':
     reid_instance = Reid()
-    reid_instance.run()
+    demo_data = r"C:\Users\zuyi\Downloads\10_c1s1_000290_00.jpg"
+    reid_instance.run(demo_data)
