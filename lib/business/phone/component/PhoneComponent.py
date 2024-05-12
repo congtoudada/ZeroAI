@@ -19,10 +19,22 @@ class PhoneComponent(BasedMultiDetComponent):
         self.pname = f"[ {os.getpid()}:phone ]"
 
     def on_update(self) -> bool:
+        """
+        # detection output shape: [n, 6]
+        # n: n个对象
+        # [0,1,2,3]: tlbr bboxes (基于视频流分辨率)
+        #   [0]: x1
+        #   [1]: y1
+        #   [2]: x2
+        #   [3]: y2
+        # [4]: 置信度
+        # [5]: 类别 (下标从0开始)
+        """
         if super().on_update() and self.input_det is not None:
-            for i in range(len(self.input_det)):
-                for j in range(len(self.input_det[0])):
-                    logger.info(f"来自{self.config.input_port[i]}端口，检测类别" + self.input_det[i][j][5])
+            for i in range(len(self.input_det)):  # 遍历内一个检测模型的输出
+                if self.input_det[i] is not None:
+                    for j in range(len(self.input_det[i])):  # 遍历每一个对象
+                        logger.info(f"来自{self.config.input_port[i]}端口，检测类别: {self.input_det[i][j][5]} 包围盒第1个索引: {self.input_det[i][j][1]}")
         return False
 
     def on_analysis(self):
