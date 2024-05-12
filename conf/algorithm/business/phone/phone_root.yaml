@@ -1,0 +1,2 @@
+INCLUDE:
+  - conf/global/log.yaml
