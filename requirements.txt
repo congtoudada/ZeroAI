@@ -41,3 +41,6 @@ toolz
 cython
 pycocotools
 cython_bbox
+
+# video_stream
+mediapipe
