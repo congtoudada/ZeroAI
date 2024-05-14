@@ -49,7 +49,8 @@ class BasedMultiDetComponent(BasedStreamComponent):
                                     (self.stream_height, self.stream_width, self.stream_channel))  # 更新帧
             for i in range(self.ports_len):
                 det_output = self.shared_data[self.config.DETECTION_INFO[i]]  # 取出每一个目标检测算法的检测结果
-                self.input_det[i] = det_output[SharedKey.DETECTION_OUTPUT]  # 更新结果
+                if det_output is not None:
+                    self.input_det[i] = det_output[SharedKey.DETECTION_OUTPUT]  # 更新结果
             return True
         else:
             return False
