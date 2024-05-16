@@ -50,7 +50,7 @@ class BasedStreamComponent(Component):
             self.stream_url.append(self.shared_data[self.config.STREAM_URL[i]])
             self.stream_cam_id.append(self.shared_data[self.config.STREAM_CAMERA_ID[i]])
             self.update_fps.append(self.shared_data[self.config.STREAM_UPDATE_FPS[i]])
-            self.window_name.append(os.path.basename(self.shared_data[self.config.STREAM_URL[i]]).split('.')[0] + str(i))
+            self.window_name.append(os.path.basename(self.shared_data[self.config.STREAM_URL[i]]).split('.')[0] + ":" + self.pname)
             self.current_frame_id.append(0)
             if self.config.stream_save_video_enable:
                 # 设置输出文件夹
