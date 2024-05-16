@@ -20,7 +20,7 @@ class dut_test(ImageDataset):
         - images: 12936 (train) + 3368 (query) + 15913 (gallery).
     """
     _junk_pids = [0, -1]
-    dataset_dir = 'market1501'
+    dataset_dir = 'tmp_file'
     dataset_url = 'http://188.138.127.15:81/Datasets/Market-1501-v15.09.15.zip'
 
     def __init__(self, root='', market1501_500k=False, **kwargs):
@@ -59,7 +59,7 @@ class dut_test(ImageDataset):
         if self.market1501_500k:
             gallery += self.process_dir(self.extra_gallery_dir, relabel=False)
 
-        super(Market1501, self).__init__(train, query, gallery, **kwargs)
+        super(dut_test, self).__init__(train, query, gallery, **kwargs)
 
     def process_dir(self, dir_path, relabel=False):
         img_paths = glob.glob(osp.join(dir_path, '*.jpg'))
