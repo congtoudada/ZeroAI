@@ -1,11 +1,11 @@
-INCLUDE:
-  - conf/global/log.yaml
-reid:
-  - conf/algorithm/reid/mode_config.yaml
-  - port: reid1
+# INCLUDE:
+#   - conf/global/log.yaml
+# reid:
+#   - conf/algorithm/reid/mode_config.yaml
+#   - port: reid1
 
-database:
-  - res/Reid  # 特征库位置
-  # reconstruct_file: bin/runtime/face.pkl  # 人脸标识文件路径（该文件用于通知重建特征库）
+# database:
+#   - res/Reid  # 特征库位置
+#   # reconstruct_file: bin/runtime/face.pkl  # 人脸标识文件路径（该文件用于通知重建特征库）
 
 

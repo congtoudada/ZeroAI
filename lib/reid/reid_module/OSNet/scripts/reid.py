@@ -38,7 +38,7 @@ class Reid:
         self.parser.add_argument('--test_evaluate', action='store_true', default=True, help='whether to perform evaluation')
         self.args = self.parser.parse_args()
         
-    def run(self,demo_data):
+    def run(self,demo_data1,demo_data2):
         cfg = get_default_config()
         cfg.use_gpu = torch.cuda.is_available()
         if self.args.config_file:
@@ -48,18 +48,29 @@ class Reid:
         set_random_seed(cfg.train.seed)
         self.check_cfg(cfg)
         
-        print(self.args.config_file,self.args.root,self.args.test_evaluate,"Line47")
+        print(self.args.config_file,self.args.root,self.args.test_evaluate,"调试Line47")
         print(cfg.test.evaluate, cfg.model.load_weights)
         pprint(cfg)
+        print(dir(self),"line54调试待删除")
         
-        # 如果 demo_data 是目录，则调用 replace_query_contents_with_directory 方法。
-        self.query_dir = os.path.join(cfg.data.root, 'market1501', 'query')
-        if os.path.isdir(demo_data):
-            print(demo_data,"调试代码待删除")
-            self.replace_query_contents_with_directory(demo_data)
+        # 如果 demo_data1 是目录，则调用 replace_query_contents_with_directory 方法。
+            #自己定义一个self.query_dir
+        self.query_dir = os.path.join(cfg.data.root, 'tmp_file', 'query')
+        if os.path.isdir(demo_data1):
+            print(demo_data1,"调试代码待删除")
+            self.replace_query_contents_with_directory(demo_data1, self.query_dir)
         else:
-            print(f"The demo_data {demo_data} is not a directory.")
+            print(f"The demo_data1 {demo_data1} is not a directory.")
+        # 如果 demo_data2 是目录，则调用 replace_query_contents_with_directory 方法。
+            #自己定义一个self.query_dir
+        self.gallery_dir = os.path.join(cfg.data.root, 'tmp_file', 'bounding_box_test')
+        if os.path.isdir(demo_data2):
+            print(demo_data2,"调试代码待删除")
+            self.replace_query_contents_with_directory(demo_data2, self.gallery_dir)
+        else:
+            print(f"The demo_data2 {demo_data2} is not a directory.")
 
+        print(dir(self),"line73调试待删除")
         
         log_name = 'test.log' if cfg.test.evaluate else 'train.log'
         log_name += time.strftime('-%Y-%m-%d-%H-%M-%S')
@@ -206,22 +217,22 @@ class Reid:
             assert cfg.train.fixbase_epoch == 0, \
                 'The output of classifier is not included in the computational graph'
                 
-    # 请注意，这段代码假设 self.query_dir 已经被定义，并且 cfg.data.root 是一个有效的路径。
+    # 请注意，这段代码假设 directory_path 已经被定义，并且 cfg.data.root 是一个有效的路径。
     # 此外，这段代码将复制目录中的所有文件，而不会检查文件类型。如果您需要复制特定类型的文件（例如，只复制 .jpg 图片），您需要在复制之前添加适当的文件类型检查。
-    def replace_query_contents_with_directory(self, directory_path):
+    def replace_query_contents_with_directory(self, directory_path, target_directory):
         """
-        清空 query 目录并将指定目录中的所有文件复制到该目录。
+        清空 target_directory 目录并将指定目录中的所有文件复制到该目录。
         """
         if not os.path.exists(directory_path):
             print(f"Error: The directory path provided ({directory_path}) does not exist.")
             return
 
-        if not os.path.exists(self.query_dir):
-            os.makedirs(self.query_dir)
+        if not os.path.exists(target_directory):
+            os.makedirs(target_directory)
 
-        # 清空 query 目录
-        for filename in os.listdir(self.query_dir):
-            file_to_delete = os.path.join(self.query_dir, filename)
+        # 清空 target_directory 目录
+        for filename in os.listdir(target_directory):
+            file_to_delete = os.path.join(target_directory, filename)
             try:
                 if os.path.isfile(file_to_delete) or os.path.islink(file_to_delete):
                     os.unlink(file_to_delete)
@@ -230,15 +241,16 @@ class Reid:
             except Exception as e:
                 print(f"Failed to delete {file_to_delete}. Reason: {e}")
 
-        # 复制新的文件到 query 目录
+        # 复制新的文件到 target_directory 目录
         for filename in os.listdir(directory_path):
             file_to_copy = os.path.join(directory_path, filename)
             if os.path.isfile(file_to_copy):
                 try:
-                    shutil.copy(file_to_copy, self.query_dir)
-                    print(f"File {file_to_copy} has been copied to {self.query_dir}.")
+                    shutil.copy(file_to_copy, target_directory)
+                    print(f"File {file_to_copy} has been copied to {target_directory}.")
                 except Exception as e:
-                    print(f"Failed to copy {file_to_copy} to {self.query_dir}. Reason: {e}")
+                    print(f"Failed to copy {file_to_copy} to {target_directory}. Reason: {e}")
+
     
     def find_indices_with_target_pid(self, filenames, target_pid):
         indices = []
@@ -274,5 +286,5 @@ class Reid:
     
 if __name__ == '__main__':
     reid_instance = Reid()
-    demo_data = r"C:\Users\zuyi\Downloads\10_c1s1_000290_00.jpg"
-    reid_instance.run(demo_data)
+    demo_data1 = r"C:\Users\zuyi\Downloads\10_c1s1_000290_00.jpg"
+    reid_instance.run(demo_data1)

@@ -4,8 +4,8 @@ model:
 
 data:
   type: 'image'
-  sources: ['market1501']
-  targets: ['market1501']
+  sources: ['dut_test']
+  targets: ['dut_test']
   height: 256
   width: 128
   combineall: False
