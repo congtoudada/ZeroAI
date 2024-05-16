@@ -1,0 +1,4 @@
+INCLUDE:
+  - conf/algorithm/mot/bytetrack/bytetrack_root.yaml
+input_port: camera1-yolox1  # 存在时序关系，只能单输入
+output_port: camera1-bytetrack1

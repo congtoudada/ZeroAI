@@ -7,12 +7,13 @@ from loguru import logger
 from bytetrack.zero.tracker.byte_tracker import BYTETracker, STrack
 from phone.info.PhoneInfo import PhoneInfo
 from zero.core.component.based.based_multi_det_comp import BasedMultiDetComponent
+from zero.core.component.based.based_multi_mot_comp import BasedMultiMOTComponent
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit
 from zero.utility.timer_kit import TimerKit
 
 
-class PhoneComponent(BasedMultiDetComponent):
+class PhoneComponent(BasedMultiMOTComponent):
     def __init__(self, shared_data, config_path: str):
         super().__init__(shared_data)
         self.config: PhoneInfo = PhoneInfo(ConfigKit.load(config_path))
@@ -20,7 +21,7 @@ class PhoneComponent(BasedMultiDetComponent):
 
     def on_update(self) -> bool:
         """
-        # detection output shape: [n, 6]
+        # mot output shape: [n, 7]
         # n: n个对象
         # [0,1,2,3]: tlbr bboxes (基于视频流分辨率)
         #   [0]: x1
@@ -29,18 +30,18 @@ class PhoneComponent(BasedMultiDetComponent):
         #   [3]: y2
         # [4]: 置信度
         # [5]: 类别 (下标从0开始)
+        # [6]: id
         """
-        if super().on_update() and self.input_det is not None:
-            for i in range(len(self.input_det)):  # 遍历内一个检测模型的输出
-                if self.input_det[i] is not None:
-                    for j in range(len(self.input_det[i])):  # 遍历每一个对象
-                        logger.info(f"来自{self.config.input_port[i]}端口，检测类别: {self.input_det[i][j][5]} 包围盒第1个索引: {self.input_det[i][j][1]}")
+        if super().on_update() and self.input_mot is not None:
+            for i in range(len(self.input_mot)):  # 遍历内一个检测模型的输出
+                if self.input_mot[i] is not None:
+                    for j in range(len(self.input_mot[i])):  # 遍历每一个对象
+                        logger.info(f"来自{self.config.input_port[i]}端口，检测类别: {self.input_mot[i][j][5]} obj_id: {self.input_mot[i][j][6]}")
         return False
 
     def on_analysis(self):
         logger.info(f"{self.pname} video fps: {1. / max(1e-5, self.update_timer.average_time):.2f}"
                     f" inference fps: {1. / max(1e-5, self.timer.average_time):.2f}")
-
 
 
 def create_process(shared_data, config_path: str):

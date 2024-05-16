@@ -2,6 +2,6 @@ INCLUDE:
   - conf/algorithm/business/phone/phone_root.yaml
 
 input_port:
-  - camera1-yolox1
-  - camera1-yolox2
+  - camera1-bytetrack1
+  - camera1-bytetrack2
 output_port: None  # 不需要输出
