@@ -2,7 +2,7 @@ import os
 import cv2
 import numpy as np
 from loguru import logger
-from conf.algorithm.detection.yolox.exps.yolox_s_head import Exp
+from conf.dev.algorithm.detection.yolox.exps.yolox_s_head import Exp
 from yolox.exp import get_exp
 from yolox.zero.component.predictor import create_zero_predictor
 from yolox.zero.info.yolox_info import YoloxInfo

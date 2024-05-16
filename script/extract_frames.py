@@ -31,9 +31,9 @@ def extract():
         mapp = str(film.name).split(".")[0]
         step_index = 0
         while success:
-            # name = f"{path_frames}{mapp}/{count}.jpg"
-            # name = "{}{}/{:03d}.jpg".format(path_frames, mapp, count) # "{:03d}.jpg".format(frames)
-            # name = "{}{}/{}_{}.jpg".format(path_frames, mapp, mapp, count)  # "{:03d}.jpg".format(frames)
+            # name = f"{path_frames}{mapp}/{count_face}.jpg"
+            # name = "{}{}/{:03d}.jpg".format(path_frames, mapp, count_face) # "{:03d}.jpg".format(frames)
+            # name = "{}{}/{}_{}.jpg".format(path_frames, mapp, mapp, count_face)  # "{:03d}.jpg".format(frames)
             name = "{}{}/{}_{}.jpg".format(path_frames, mapp, mapp, count)  # "{:03d}.jpg".format(frames)
             if not os.path.isdir(f"{path_frames}{mapp}"):
                 print(f"{path_frames}{mapp}")

@@ -14,8 +14,8 @@ from zero.utility.yaml_kit import YamlKit
 cap = cv2.VideoCapture("res/videos/renlian/renlian1.mp4")  # 打开本地视频
 expect_preview = (1280, 720)  # 期望分辨率
 frame_index = 50  # 替换为你想要读取的帧索引
-input_file = "conf/algorithm/business/count/count_renlian.yaml"  # 与output不一致，每次可以在结果集基础上预览
-output_file = "script/output/count/drawn_points.yaml"  # 输出路径
+input_file = "conf/algorithm/business/count_face/count_head1.yaml"  # 与output不一致，每次可以在结果集基础上预览
+output_file = "script/output/count_face/drawn_points.yaml"  # 输出路径
 auto_save = True
 mode_str = ['red', 'green']
 mode_idx = 1  # 0:red 1:green
@@ -110,12 +110,12 @@ def pre_process(frame, input_file):
     if os.path.exists(input_file):
         # local_dict: dict = YamlKit.read_yaml(input_file)
         local_dict: dict = ConfigKit.load(input_file)
-        if not local_dict.__contains__("count"):
+        if not local_dict.__contains__("count_face"):
             return
-        if local_dict['count'].__contains__('red'):
-            pre_process_draw(frame, local_dict['count']['red'], (0, 0, 255))
-        if local_dict['count'].__contains__('green'):
-            pre_process_draw(frame, local_dict['count']['green'], (0, 255, 0))
+        if local_dict['count_face'].__contains__('red'):
+            pre_process_draw(frame, local_dict['count_face']['red'], (0, 0, 255))
+        if local_dict['count_face'].__contains__('green'):
+            pre_process_draw(frame, local_dict['count_face']['green'], (0, 255, 0))
 
 
 def pre_process_draw(frame, points, color):
@@ -140,7 +140,7 @@ def save_points():
     for point in drawn_points:
         result.append(f"{1.0 * point[0]/expect_preview[0]:.3f},{1.0 * point[1]/expect_preview[1]:.3f}")
     YamlKit.write_yaml(output_file, {
-        'count': {mode_str[mode_idx]: result}
+        'count_face': {mode_str[mode_idx]: result}
     })
     print(f"Drawn points saved to {output_file}")
 

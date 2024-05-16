@@ -1,4 +1,4 @@
-# count
+# count_face
 numpy==1.23.2
 torch>=1.7
 opencv-python

@@ -43,6 +43,20 @@ class PhoneComponent(BasedMultiMOTComponent):
         logger.info(f"{self.pname} video fps: {1. / max(1e-5, self.update_timer.average_time):.2f}"
                     f" inference fps: {1. / max(1e-5, self.timer.average_time):.2f}")
 
+    def on_draw_vis(self, frame, vis=False, window_name="", is_copy=True):
+        for i in range(len(self.input_mot)):  # 遍历内一个检测模型的输出
+            if self.input_mot[i] is not None:
+                for obj in self.input_mot[i]:  # 遍历每一个对象
+                    ltrb = obj[:4]
+                    obj_id = int(obj[6])
+                    cv2.rectangle(frame, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
+                                  color=(0, 0, 255), thickness=1)
+                    cv2.putText(frame, f"{obj_id}",
+                                (int(ltrb[0]), int(ltrb[1])),
+                                cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
+        # 可视化并返回
+        return super().on_draw_vis(frame, vis, window_name)
+
 
 def create_process(shared_data, config_path: str):
     phoneComp: PhoneComponent = PhoneComponent(shared_data, config_path)  # 创建组件

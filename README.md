@@ -204,11 +204,11 @@ sudo python3 bin/main.py
 stream:
   algorithm: # 算法配置
     - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # yolox
-      conf: conf/algorithm/detection/yolox/yolox_head.yaml
+      conf: conf/algorithm/detection/yolox/yolox_head_1-1.yaml
     - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py  # bytetrack
-      conf: conf/algorithm/mot/bytetrack/bytetrack_head.yaml
-    - path: lib/business/count/extension/count_face_comp.py  # count+face
-      conf: conf/algorithm/business/count/count_face/count_face.yaml
+      conf: conf/algorithm/mot/bytetrack/bytetrack_head_1-1-1.yaml
+    - path: lib/business/count_face/extension/count_face_comp.py  # count_face+face
+      conf: conf/algorithm/business/count_face/count_face/count_head_face1.yaml
 ```
 
 位置：`conf/algorithm/business/count/count_root.yaml`
@@ -235,8 +235,8 @@ stream:
 
 ```yaml
 cam_list:
-  - conf/cam/stream1.yaml
-  - conf/cam/stream2.yaml
+  - conf/cam/stream4.yaml
+  - conf/cam/stream4.yaml
 ```
 
 <hr>
@@ -248,16 +248,16 @@ cam_list:
 ```yaml
 algorithm:     
  - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # 使用yolox目标检测
-   conf: conf/algorithm/detection/yolox/yolox_person.yaml  # yolox配置文件
+   conf: conf/algorithm/detection/yolox/yolox_person_1-1.yaml  # yolox配置文件
 ```
 
 确定输出端口
 
 ```yaml
-# stream1.yaml
+# stream4.yaml
 output_port: camera1  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
 
-# stream2.yaml
+# stream4.yaml
 output_port: camera2  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO+camera2
 ```
 
@@ -862,7 +862,7 @@ setuptools.setup(
     version="0.1.0",
     author="cong tou",
     python_requires=">=3.6",
-    long_description="count algorithm",
+    long_description="count_face algorithm",
     classifiers=["Programming Language :: Python :: 3", "Operating System :: OS Independent"],
     packages=setuptools.find_namespace_packages(),
 )

@@ -1,0 +1,5 @@
+INCLUDE:
+  - conf/dev/algorithm/mot/bytetrack/bytetrack_root.yaml
+  - conf/dev/algorithm/detection/labels/detection_labels_helmet.yaml
+input_port: camera1-yolox_helmet1  # 存在时序关系，只能单输入
+output_port: camera1-bytetrack_helmet1

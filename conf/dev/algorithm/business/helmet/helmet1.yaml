@@ -1,0 +1,5 @@
+INCLUDE:
+  - conf/dev/algorithm/business/helmet/helmet_root.yaml
+
+input_port: camera1-bytetrack_helmet1
+output_port: None  # 不需要输出
