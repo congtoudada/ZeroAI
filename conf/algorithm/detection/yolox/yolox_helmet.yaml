@@ -11,7 +11,7 @@ yolox:
     # save_result: False # 是否存储视频
     exp_file: conf\algorithm\detection\yolox\exps\yolox_s_helmet.py  # 通过.py选择模型
     ckpt: pretrained\detection\yolox\helmet\best_ckpt0512.pth # 推理用模型权重文件
-    conf: 0.5 # test conf
+    conf: 0.25 # test conf
 
 
 

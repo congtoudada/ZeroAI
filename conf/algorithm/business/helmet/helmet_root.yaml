@@ -1,0 +1,8 @@
+INCLUDE:
+    - conf/global/log.yaml
+input_port: camera1-bytetrack
+output_port: None  # 不需要输出
+
+helmet:
+  valid_count: 10
+  lost_frames: 60
