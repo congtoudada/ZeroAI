@@ -4,18 +4,18 @@ INCLUDE:
 log:
   analysis: False
 stream:
-  cam_id: 1  # 摄像头编号
+  cam_id: 3  # 摄像头编号
   url: res/videos/phone/phone.mp4  # 取流地址（输入）
-  output_port: camera1  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
+  output_port: camera3  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
   algorithm: # 算法配置
     - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # yolox(人)
-      conf: conf/dev/algorithm/detection/yolox/yolox_person_1-1.yaml
+      conf: conf/dev/algorithm/detection/yolox/yolox_person_3-1.yaml
     - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # yolox(手机)
-      conf: conf/dev/algorithm/detection/yolox/yolox_phone_1-1.yaml
+      conf: conf/dev/algorithm/detection/yolox/yolox_phone_3-1.yaml
     - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py  # bytetrack(人)
-      conf: conf/dev/algorithm/mot/bytetrack/bytetrack_person_1-1-1.yaml
+      conf: conf/dev/algorithm/mot/bytetrack/bytetrack_person_3-1-1.yaml
     - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py  # bytetrack(手机)
-      conf: conf/dev/algorithm/mot/bytetrack/bytetrack_phone_1-1-1.yaml
+      conf: conf/dev/algorithm/mot/bytetrack/bytetrack_phone_3-1-1.yaml
     - path: lib/business/phone/component/PhoneComponent.py  # 手机检测业务
-      conf: conf/dev/algorithm/business/phone/phone1.yaml
+      conf: conf/dev/algorithm/business/phone/phone3.yaml
 

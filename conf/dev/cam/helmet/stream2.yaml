@@ -4,13 +4,13 @@ INCLUDE:
 log:
   analysis: False
 stream:
-  cam_id: 1  # 摄像头编号
+  cam_id: 2  # 摄像头编号
   url: res/videos/helmet/test0511.mp4  # 取流地址（输入）
-  output_port: camera1  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
+  output_port: camera2  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
   algorithm: # 算法配置
     - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # yolox
-      conf: conf/dev/algorithm/detection/yolox/yolox_helmet_1-1.yaml
+      conf: conf/dev/algorithm/detection/yolox/yolox_helmet_2-1.yaml
     - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py  # bytetrack
-      conf: conf/dev/algorithm/mot/bytetrack/bytetrack_helmet_1-1-1.yaml
+      conf: conf/dev/algorithm/mot/bytetrack/bytetrack_helmet_2-1-1.yaml
     - path: lib/business/helmet/component/HelmetComponent.py  # helmet
-      conf: conf/dev/algorithm/business/helmet/helmet1.yaml
+      conf: conf/dev/algorithm/business/helmet/helmet2.yaml

@@ -248,7 +248,7 @@ cam_list:
 ```yaml
 algorithm:     
  - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # 使用yolox目标检测
-   conf: conf/algorithm/detection/yolox/yolox_person_1-1.yaml  # yolox配置文件
+   conf: conf/algorithm/detection/yolox/yolox_person_3-1.yaml  # yolox配置文件
 ```
 
 确定输出端口

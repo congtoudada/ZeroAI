@@ -2,7 +2,7 @@ INCLUDE:
   - conf/dev/algorithm/detection/yolox/yolox_root.yaml
   - conf/dev/algorithm/detection/labels/detection_labels_helmet.yaml
 input_port:  # 输入端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
-  - camera1
+  - camera2
 output_port: yolox_helmet1  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1-yolox
 yolox:
   args:

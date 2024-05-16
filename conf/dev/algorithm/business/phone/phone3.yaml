@@ -2,6 +2,6 @@ INCLUDE:
   - conf/dev/algorithm/business/phone/phone_root.yaml
 
 input_port:
-  - camera1-bytetrack_person1
-  - camera1-bytetrack_phone1
+  - camera3-bytetrack_person1
+  - camera3-bytetrack_phone1
 output_port: None  # 不需要输出
