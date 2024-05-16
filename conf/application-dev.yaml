@@ -3,7 +3,7 @@ INCLUDE:
 cam_list:
   - conf/cam/stream1.yaml
 #  - conf/cam/stream2.yaml
-service: # 全局服务
-  - path: lib/face/insight_module/insight/zero/component/insight_comp.py
-    conf: conf/algorithm/face/insight/insight.yaml
+service: [] # 全局服务
+#  - path: lib/face/insight_module/insight/zero/component/insight_comp.py
+#    conf: conf/algorithm/face/insight/insight.yaml
 

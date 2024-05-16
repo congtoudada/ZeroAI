@@ -1,0 +1,15 @@
+INCLUDE:
+  - conf/cam/stream_root.yaml
+log:
+  analysis: False
+stream:
+  cam_id: 1  # 摄像头编号
+  url: res/videos/phone/phone.mp4  # 取流地址（输入）
+  output_port: camera1  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
+  algorithm:
+    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # 使用yolox目标检测
+      conf: conf/algorithm/detection/yolox/yolox_person.yaml  # yolox配置文件
+    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # 使用yolox目标检测
+      conf: conf/algorithm/detection/yolox/yolox_phone.yaml  # yolox配置文件
+#    - path: lib/business/phone/component/PhoneComponent.py  # phone
+#      conf: conf/algorithm/business/phone/phone.yaml

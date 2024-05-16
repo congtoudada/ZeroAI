@@ -33,8 +33,8 @@ class Reid:
         self.parser.add_argument('-t','--targets',type=str,nargs='+',help='target datasets (delimited by space)')
         self.parser.add_argument('--config-file', type=str, default='conf/algorithm/reid/dut_test_1c.yaml', help='path to config file')
         self.parser.add_argument('--transforms', type=str, nargs='+', default=['random_flip', 'random_erase'], help='data augmentation')
-        self.parser.add_argument('--root', type=str, default='C:\\file\\dataset\\dut_test', help='path to data root')
-        self.parser.add_argument('--model_weights', type=str, default='C:\\file\\checkpoint\\osnet_x1_0_market_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_labelsmooth_flip.pth', help='path to model weights')
+        self.parser.add_argument('--root', type=str, default='C:\\Users\\13220\\Desktop\\linshi\\shuju\\dut_test', help='path to data root')
+        self.parser.add_argument('--model_weights', type=str, default='C:\\Users\\13220\\Desktop\\linshi\\checkpoint\\osnet_x1_0_market_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_labelsmooth_flip.pth', help='path to model weights')
         self.parser.add_argument('--test_evaluate', action='store_true', default=True, help='whether to perform evaluation')
         self.args = self.parser.parse_args()
         

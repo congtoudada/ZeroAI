@@ -1,0 +1,6 @@
+detection:
+  labels:
+    #- person
+    - wrong
+    - right
+    - no-hat
