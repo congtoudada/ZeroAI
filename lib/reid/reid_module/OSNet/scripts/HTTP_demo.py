@@ -25,6 +25,7 @@ def my_algorithm(demo_data_directory):
 @app.route('/process', methods=['POST'])
 def process_request():
     # 获取JSON数据
+    #示例：curl -X POST -H "Content-Type: application/json" -d "{\"demo_data\": \"C:/Users/zuyi/Downloads/demo_data\"}" http://127.0.0.1:5000/process
     data = request.get_json()
     
     # 检查 'demo_data' 键是否存在，并且是一个字符串
@@ -37,9 +38,10 @@ def process_request():
         return jsonify({"error": f"'{demo_data_directory}' is not a valid directory path."}), 400
     
     # 运行算法
+    #print("http_demo,line41,调试待删除")
     result = my_algorithm(demo_data_directory)
-    
-    # 把结果转换为JSON，返回
+    #3print(result,"http_demo,line43,调试待删除")
+    # 把结果转换为JSON，返回给客户端
     return jsonify(result)
 
 

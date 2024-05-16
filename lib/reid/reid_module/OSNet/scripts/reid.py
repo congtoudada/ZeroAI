@@ -110,13 +110,16 @@ class Reid:
         # engine.run(**engine_run_kwargs(cfg))
         n_topn_gallery_image_names, rank1, mAP = engine.run(**engine_run_kwargs(cfg))
 
+
         # 需求:
-        for row in n_topn_gallery_image_names:
-            # 使用生成器表达式将元组中的每个元素转换为字符串
-            print(' '.join(str(item) for item in row))
+        # for row in n_topn_gallery_image_names:
+        #     # 使用生成器表达式将元组中的每个元素转换为字符串
+        #     print(' '.join(str(item) for item in row))
         
         # 暂时不用，可能有问题 
         #print(find_indices_with_target_pid(n_topn_gallery_image_names, '03'))
+        formatted_rows = self.get_formatted_rows(n_topn_gallery_image_names)
+        return formatted_rows
 
 
     def build_datamanager(self,cfg):
@@ -237,7 +240,7 @@ class Reid:
                 except Exception as e:
                     print(f"Failed to copy {file_to_copy} to {self.query_dir}. Reason: {e}")
     
-    def find_indices_with_target_pid(self,filenames, target_pid):
+    def find_indices_with_target_pid(self, filenames, target_pid):
         indices = []
         for index, row in enumerate(filenames):
             # 确保row是一个列表并且至少有一个元素
@@ -260,6 +263,11 @@ class Reid:
             if xx_part == target_pid:
                 indices.append(index)
         return indices
+    
+    def get_formatted_rows(self, n_topn_gallery_image_names):
+        # 使用列表推导式来构建每一行的字符串表示
+        formatted_rows = [' '.join(str(item) for item in row) for row in n_topn_gallery_image_names]
+        return formatted_rows
 
 
         
