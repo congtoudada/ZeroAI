@@ -106,7 +106,8 @@ class BytetrackComponent(BaseMOTComponent):
                 x1, y1, w, h = tlwh
                 intbox = tuple(map(int, (x1, y1, x1 + w, y1 + h)))
                 obj_id = int(self.online_ids[i])
-                if self.online_scores is not None:
+                cls = int(self.online_classes[i])
+                if self.online_scores is not None and cls < len(self.config.detection_labels):
                     id_text = '{}:{:.2f}({})'.format(int(obj_id), self.online_scores[i],
                                                      self.config.detection_labels[int(self.online_classes[i])])
                 else:
