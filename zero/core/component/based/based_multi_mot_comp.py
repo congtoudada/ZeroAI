@@ -44,7 +44,7 @@ class BasedMultiMOTComponent(BasedMultiDetComponent):
             for i in range(self.ports_len):
                 mot_output = self.shared_data[self.config.MOT_INFO[i]]  # 取出每一个目标检测算法的检测结果
                 if mot_output is not None:
-                    self.input_mot[i] = mot_output[SharedKey.DETECTION_OUTPUT]  # 更新结果
+                    self.input_mot[i] = mot_output[SharedKey.MOT_OUTPUT]  # 更新结果
             return True
         else:
             return False

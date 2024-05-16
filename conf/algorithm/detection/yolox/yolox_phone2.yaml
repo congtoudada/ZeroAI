@@ -1,6 +1,6 @@
 INCLUDE:
   - conf/algorithm/detection/yolox/yolox_root.yaml
-  - conf/algorithm/detection/detection_labels_phone2.yaml
+  - conf/algorithm/detection/detection_labels.yaml
 input_port:  # 输入端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
   - camera1
   # - camera2

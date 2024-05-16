@@ -8,8 +8,12 @@ stream:
   output_port: camera1  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
   algorithm:
     - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # 使用yolox目标检测
-      conf: conf/algorithm/detection/yolox/yolox_person.yaml  # yolox配置文件
-    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # 使用yolox目标检测
-      conf: conf/algorithm/detection/yolox/yolox_phone.yaml  # yolox配置文件
+      conf: conf/algorithm/detection/yolox/yolox_phone1.yaml  # yolox配置文件
+#    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # 使用yolox目标检测
+#      conf: conf/algorithm/detection/yolox/yolox_phone2.yaml  # yolox配置文件
+    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py  # bytetrack
+      conf: conf/algorithm/mot/bytetrack/bytetrack_phone1.yaml
+#    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py  # bytetrack
+#      conf: conf/algorithm/mot/bytetrack/bytetrack_phone2.yaml
 #    - path: lib/business/phone/component/PhoneComponent.py  # phone
 #      conf: conf/algorithm/business/phone/phone.yaml

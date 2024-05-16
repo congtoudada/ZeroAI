@@ -8,5 +8,5 @@ stream:
   save_video:
     enable: False  # 是否保存视频
   draw_vis:
-    enable: True  # 是否可视化
+    enable: False  # 是否可视化
 
