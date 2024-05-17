@@ -124,7 +124,7 @@ class CountComponent(BasedMOTComponent):
                 vec3d = (item.base_x - self.red_points[i][0], item.base_y - self.red_points[i][1], 0)
                 vec3d_length = np.linalg.norm(vec3d)
                 if abs(vec3d_length) > epsilon:
-                    vec3d = vec3d / vec3d_length
+                    # vec3d = vec3d / vec3d_length
                     dot_ret = np.dot(self.red_vecs[i], vec3d)
                     cross_ret = np.cross(self.red_vecs[i], vec3d)[dot_ret > epsilon, 2]  # (n, 1) n为red_vec
                     self.temp_red_result.append(cross_ret)
@@ -132,7 +132,7 @@ class CountComponent(BasedMOTComponent):
                 vec3d = (item.base_x - self.green_points[i][0], item.base_y - self.green_points[i][1], 0)
                 vec3d_length = np.linalg.norm(vec3d)
                 if abs(vec3d_length) > epsilon:
-                    vec3d = vec3d / vec3d_length
+                    # vec3d = vec3d / vec3d_length
                     dot_ret = np.dot(self.green_vecs[i], vec3d)
                     cross_ret = np.cross(self.green_vecs[i], vec3d)[dot_ret > 0, 2]
                     self.temp_green_result.append(cross_ret)
