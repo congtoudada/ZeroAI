@@ -5,10 +5,12 @@ import cv2
 import numpy as np
 from loguru import logger
 
+from common.warn_kit import WarnKit
 from intrude.component.intrude_item import IntrudeItem
 from intrude.info.intrude_info import IntrudeInfo
 from zero.core.component.based.based_mot_comp import BasedMOTComponent
 from zero.utility.config_kit import ConfigKit
+from zero.utility.img_kit import ImgKit
 from zero.utility.object_pool import ObjectPool
 from zero.utility.timer_kit import TimerKit
 
@@ -66,14 +68,16 @@ class IntrudeComponent(BasedMOTComponent):
                 else:  # 已经记录过
                     in_warn = self.is_in_warn(ltrb)  # 判断是否处于警戒区
                     self.data_dict[obj_id].update(self.current_frame_id, in_warn)
-                self.postprocess_item(self.data_dict[obj_id])
+                self.postprocess_item(self.data_dict[obj_id], ltrb)
             self.timer.toc()
             return True
         return False
 
-    def postprocess_item(self, intrude_item: IntrudeItem):
+    def postprocess_item(self, intrude_item: IntrudeItem, ltrb):
         if not intrude_item.has_warn and intrude_item.get_valid_count() >= self.config.intrude_valid_count:
             logger.info("入侵异常")
+            shot_img = ImgKit.crop_img(self.frame, ltrb)
+            WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, 4, 1, shot_img)
             intrude_item.has_warn = True
 
     def preprocess(self):

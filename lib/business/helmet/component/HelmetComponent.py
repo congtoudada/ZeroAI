@@ -1,12 +1,14 @@
 import os
 from typing import Dict
 
+from common.warn_kit import WarnKit
 from helmet.component.HelmetItem import HelmetItem
 from helmet.info.HelmetInfo import HelmetInfo
 from zero.core.component.based.based_mot_comp import BasedMOTComponent
 from zero.utility.config_kit import ConfigKit
 from loguru import logger
 
+from zero.utility.img_kit import ImgKit
 from zero.utility.object_pool import ObjectPool
 
 
@@ -45,15 +47,17 @@ class HelmetComponent(BasedMOTComponent):
                     self.data_dict[obj_id] = item
                 else:  # 已经记录过
                     self.data_dict[obj_id].update(self.current_frame_id, cls)
-                self.postprocess_item(self.data_dict[obj_id])
+                self.postprocess_item(self.data_dict[obj_id], ltrb)
             return True
         return False
 
-    def postprocess_item(self, helmet_item: HelmetItem):
+    def postprocess_item(self, helmet_item: HelmetItem, ltrb):
         if not helmet_item.has_warn and helmet_item.get_valid_count() >= self.config.helmet_valid_count:
             if helmet_item.cls == 0 or helmet_item.cls == 2:
-                logger.info("安全帽佩戴异常")
+                logger.info(f"安全帽佩戴异常: {helmet_item.cls}")
                 helmet_item.has_warn = True
+                shot_img = ImgKit.crop_img(self.frame, ltrb)
+                WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, 2, 1, shot_img)
 
     def preprocess(self):
         # 清空长期未更新点
