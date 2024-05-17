@@ -1,4 +1,5 @@
 import os
+import time
 from typing import Dict
 
 import cv2
@@ -11,7 +12,9 @@ from count.info.count_info import CountInfo
 from zero.core.component.based.based_mot_comp import BasedMOTComponent
 from zero.core.key.shared_key import SharedKey
 from zero.utility.config_kit import ConfigKit
+from zero.utility.img_kit import ImgKit
 from zero.utility.timer_kit import TimerKit
+from zero.utility.web_kit import WebKit
 
 
 class CountComponent(BasedMOTComponent):
@@ -176,8 +179,10 @@ class CountComponent(BasedMOTComponent):
                 ret = self._get_dir(item.red_seq[0] == 0, self.config.count_reverse)
                 if ret:
                     self.in_count += 1
+                    self.send_result(1, item.ltrb)
                 else:
                     self.out_count += 1
+                    self.send_result(2, item.ltrb)
                 # 重置计数器
                 item.red_seq.pop(0)
                 item.green_seq.pop(0)
@@ -264,6 +269,31 @@ class CountComponent(BasedMOTComponent):
     def on_analysis(self):
         logger.info(f"{self.pname} video fps: {1. / max(1e-5, self.update_timer.average_time):.2f}"
                     f" count calculate fps: {1. / max(1e-5, self.timer.average_time):.2f}")
+
+    def send_result(self, status: int, ltrb):
+        """
+        结果通知
+        :param status: 1进2出
+        :param ltrb: 裁剪用ltrb
+        :return:
+        """
+        # 导出图
+        time_str = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())
+        status_str = "In" if status == 1 else "Out"
+        img_path = os.path.join(self.output_dir, f"{time_str}_{status_str}.jpg")
+        img_shot = ImgKit.crop_img(self.frame, ltrb)
+        cv2.imwrite(img_path, img_shot)
+        logger.info(f"{self.pname}存图成功，路径: {img_path}")
+        # 通知后端
+        data = {
+            "recordTime": time_str,
+            "camId": self.stream_cam_id,
+            "status": status,
+            "shotImg": img_path
+        }
+        WebKit.post(f"{WebKit.Prefix_url}/count", data)
+        logger.info(f"{self.pname}发送后端请求，路径: {WebKit.Prefix_url}/count")
+
 
 
 def create_process(shared_data, config_path: str):
