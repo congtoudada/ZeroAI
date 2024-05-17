@@ -1,5 +1,5 @@
 INCLUDE:
   - conf/dev/algorithm/business/card/zone/card_points.yaml
   - conf/dev/algorithm/business/card/card_root.yaml
-input_port: camera4-bytetrack_person2
+input_port: camera4-bytetrack_person1
 output_port: None  # 不需要输出

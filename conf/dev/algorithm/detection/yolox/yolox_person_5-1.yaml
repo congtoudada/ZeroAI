@@ -2,8 +2,8 @@ INCLUDE:
   - conf/dev/algorithm/detection/yolox/yolox_root.yaml
   - conf/dev/algorithm/detection/labels/detection_labels_person.yaml
 input_port:  # 输入端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
-  - camera4
-output_port: yolox_person2  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1-yolox
+  - camera5
+output_port: yolox_person1  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1-yolox
 yolox:
   args:
     expn: person  # 实验名称

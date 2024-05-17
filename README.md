@@ -235,8 +235,8 @@ stream:
 
 ```yaml
 cam_list:
-  - conf/cam/stream4.yaml
-  - conf/cam/stream4.yaml
+  - conf/cam/stream5.yaml
+  - conf/cam/stream5.yaml
 ```
 
 <hr>
@@ -254,10 +254,10 @@ algorithm:
 确定输出端口
 
 ```yaml
-# stream4.yaml
+# stream5.yaml
 output_port: camera1  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
 
-# stream4.yaml
+# stream5.yaml
 output_port: camera2  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO+camera2
 ```
 

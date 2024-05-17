@@ -1,0 +1,16 @@
+# 计数-人脸摄像头1
+INCLUDE:
+  - conf/dev/cam/stream_root.yaml
+log:
+  analysis: False
+stream:
+  cam_id: 5  # 摄像头编号
+  url: res/videos/card/False_one.mp4  # 取流地址（输入）
+  output_port: camera5  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
+  algorithm: # 算法配置
+    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # yolox
+      conf: conf/dev/algorithm/detection/yolox/yolox_person_5-1.yaml
+    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py  # bytetrack
+      conf: conf/dev/algorithm/mot/bytetrack/bytetrack_person_5-1-1.yaml
+    - path: lib/business/intrude/component/intrude_comp.py  # 入侵检测
+      conf: conf/dev/algorithm/business/intrude/intrude5.yaml

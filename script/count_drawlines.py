@@ -14,8 +14,8 @@ from zero.utility.yaml_kit import YamlKit
 cap = cv2.VideoCapture("res/videos/renlian/renlian1.mp4")  # 打开本地视频
 expect_preview = (1280, 720)  # 期望分辨率
 frame_index = 50  # 替换为你想要读取的帧索引
-input_file = "conf/algorithm/business/count_face/count_head1.yaml"  # 与output不一致，每次可以在结果集基础上预览
-output_file = "script/output/count_face/drawn_points.yaml"  # 输出路径
+input_file = "script/output/count/drawn_points.yaml"  # 与output不一致，每次可以在结果集基础上预览
+output_file = "script/output/count/drawn_points.yaml"  # 输出路径
 auto_save = True
 mode_str = ['red', 'green']
 mode_idx = 1  # 0:red 1:green

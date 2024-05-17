@@ -9,8 +9,8 @@ stream:
   output_port: camera4  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
   algorithm: # 算法配置
     - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # yolox
-      conf: conf/dev/algorithm/detection/yolox/yolox_person_4-2.yaml
+      conf: conf/dev/algorithm/detection/yolox/yolox_person_4-1.yaml
     - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py  # bytetrack
-      conf: conf/dev/algorithm/mot/bytetrack/bytetrack_person_4-2-2.yaml
+      conf: conf/dev/algorithm/mot/bytetrack/bytetrack_person_4-1-1.yaml
     - path: lib/business/card/component/card_comp.py
-      conf: conf/dev/algorithm/business/card/card4-2.yaml
+      conf: conf/dev/algorithm/business/card/card4.yaml
