@@ -53,6 +53,7 @@ class IntrudeComponent(BasedMOTComponent):
         """
         if super().on_update() and self.input_mot is not None:
             self.preprocess()
+            self.timer.tic()
             for obj in self.input_mot:
                 ltrb = obj[:4]
                 conf = obj[4]
@@ -66,6 +67,7 @@ class IntrudeComponent(BasedMOTComponent):
                     in_warn = self.is_in_warn(ltrb)  # 判断是否处于警戒区
                     self.data_dict[obj_id].update(self.current_frame_id, in_warn)
                 self.postprocess_item(self.data_dict[obj_id])
+            self.timer.toc()
             return True
         return False
 

@@ -1,7 +1,7 @@
 INCLUDE:
     - conf/dev/global/log.yaml
 stream:
-  output_dir: output/business/helmet  # 输出目录
+  output_dir: output/business/intrude  # 输出目录
   save_video:
     enable: False  # 是否保存视频
   draw_vis:
