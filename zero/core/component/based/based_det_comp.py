@@ -24,6 +24,7 @@ class BasedDetComponent(BasedStreamComponent):
         self.stream_url = self.stream_url[0]
         self.stream_cam_id = self.stream_cam_id[0]
         self.current_frame_id = self.current_frame_id[0]
+        self.output_dir = self.output_dir[0]
 
     def on_resolve_stream(self) -> bool:
         """
