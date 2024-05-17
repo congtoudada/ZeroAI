@@ -111,8 +111,6 @@ class CountComponent(BasedMOTComponent):
         处理结果
         :return:
         """
-        red_result = []
-        green_result = []
         for item in self.item_dict.values():
             if not item.enable:  # 不是有效点，则跳过
                 continue
@@ -120,22 +118,24 @@ class CountComponent(BasedMOTComponent):
             self.temp_red_result.clear()
             self.temp_green_result.clear()
             # 收集红绿信号（线上为0，线下为1，无效-1）
-            for i in range(self.red_points.__len__() - 1):  # 最后一个点不计算
+            for i in range(len(self.red_points) - 1):  # 最后一个点不计算
                 vec3d = (item.base_x - self.red_points[i][0], item.base_y - self.red_points[i][1], 0)
                 vec3d_length = np.linalg.norm(vec3d)
                 if abs(vec3d_length) > epsilon:
                     # vec3d = vec3d / vec3d_length
                     dot_ret = np.dot(self.red_vecs[i], vec3d)
-                    cross_ret = np.cross(self.red_vecs[i], vec3d)[dot_ret > 0, 2]  # (n, 1) n为red_vec
-                    self.temp_red_result.append(cross_ret)
-            for i in range(self.green_points.__len__() - 1):  # 最后一个点不计算
+                    if dot_ret > 0:
+                        cross_ret = np.cross(self.red_vecs[i], vec3d)[2]  # (n, 1) n为red_vec
+                        self.temp_red_result.append(cross_ret)
+            for i in range(len(self.green_points) - 1):  # 最后一个点不计算
                 vec3d = (item.base_x - self.green_points[i][0], item.base_y - self.green_points[i][1], 0)
                 vec3d_length = np.linalg.norm(vec3d)
                 if abs(vec3d_length) > epsilon:
                     # vec3d = vec3d / vec3d_length
                     dot_ret = np.dot(self.green_vecs[i], vec3d)
-                    cross_ret = np.cross(self.green_vecs[i], vec3d)[dot_ret > 0, 2]
-                    self.temp_green_result.append(cross_ret)
+                    if dot_ret > 0:
+                        cross_ret = np.cross(self.green_vecs[i], vec3d)[2]
+                        self.temp_green_result.append(cross_ret)
             item.update_red(self._process_cross(self.temp_red_result))
             item.update_green(self._process_cross(self.temp_green_result))
             # 处理红绿信号
