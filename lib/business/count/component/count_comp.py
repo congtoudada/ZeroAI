@@ -126,7 +126,7 @@ class CountComponent(BasedMOTComponent):
                 if abs(vec3d_length) > epsilon:
                     # vec3d = vec3d / vec3d_length
                     dot_ret = np.dot(self.red_vecs[i], vec3d)
-                    cross_ret = np.cross(self.red_vecs[i], vec3d)[dot_ret > epsilon, 2]  # (n, 1) n为red_vec
+                    cross_ret = np.cross(self.red_vecs[i], vec3d)[dot_ret > 0, 2]  # (n, 1) n为red_vec
                     self.temp_red_result.append(cross_ret)
             for i in range(self.green_points.__len__() - 1):  # 最后一个点不计算
                 vec3d = (item.base_x - self.green_points[i][0], item.base_y - self.green_points[i][1], 0)
