@@ -34,6 +34,7 @@ class BasedStreamComponent(Component):
         self.update_fps = []
         self.video_writer: List[SaveVideoHelperComponent] = []  # 存储视频组件
         self.window_name = []  # 窗口名
+        self.output_dir = []
         # self.time_count = 0
         # self.time_diff_sum = 0
 
@@ -56,9 +57,9 @@ class BasedStreamComponent(Component):
                 # 设置输出文件夹
                 # folder = os.path.splitext(os.path.basename(self.shared_data[SharedKey.STREAM_URL]))[0]
                 filename = os.path.basename(self.stream_url[i]).split('.')[0]
-                output_dir = os.path.join(self.config.stream_output_dir, f"camera{self.stream_cam_id[i]}")
-                os.makedirs(output_dir, exist_ok=True)
-                output_path = os.path.join(self.config.stream_output_dir, f"camera{self.stream_cam_id[i]}", f"{filename}.mp4")
+                self.output_dir.append(os.path.join(self.config.stream_output_dir, f"camera{self.stream_cam_id[i]}"))
+                os.makedirs(self.output_dir[i], exist_ok=True)
+                output_path = os.path.join(self.output_dir[i], f"{filename}.mp4")
                 self.video_writer.append(
                     SaveVideoHelperComponent(output_path, self.config.stream_save_video_width,
                                              self.config.stream_save_video_height,
