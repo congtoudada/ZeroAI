@@ -16,6 +16,7 @@ class Component(ABC):
         self.config: BaseInfo = None
         self.pname = f"[ {os.getpid()}:component ]"
         self.esc_event = None
+        self.children = []
 
     def on_start(self):
         if self.shared_data is not None:
@@ -34,6 +35,26 @@ class Component(ABC):
 
     def on_analysis(self):
         pass
+
+    def add_component(self, component):
+        if isinstance(component, Component):
+            self.children.append(component)
+
+    def get_component(self, class_type):
+        for child in self.children:
+            if isinstance(child, class_type):
+                return child
+        logger.error(f"{self.pname} 找不到组件: {class_type}")
+        return None
+
+    def get_components(self, class_type):
+        ret = []
+        for child in self.children:
+            if isinstance(child, class_type):
+                ret.append(child)
+        if len(ret) == 0:
+            logger.error(f"{self.pname} 找不到组件: {class_type}")
+        return ret
 
     def start(self):
         """
