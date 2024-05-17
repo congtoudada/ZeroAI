@@ -5,12 +5,13 @@ import httpx
 
 
 class WebKit(object):
-    initialized = False
+    Initialized = False
+    Prefix_url = "http://localhost:9012/algorithm"
 
     @staticmethod
     def initialize():
-        if not WebKit.initialized:
-            WebKit.initialized = True
+        if not WebKit.Initialized:
+            WebKit.Initialized = True
             # 在新的线程中运行事件循环
             thread = threading.Thread(target=asyncio.get_event_loop().run_forever, daemon=True)
             thread.start()
@@ -25,24 +26,23 @@ class WebKit(object):
 
     @staticmethod
     def get(url):
-        if not WebKit.initialized:
-            print("WebKit not initialized")
-            return
+        if not WebKit.Initialized:
+            WebKit.initialize()
         asyncio.get_event_loop().create_task(WebKit._async_get(url))
 
     @staticmethod
     async def _async_post(url, data: dict):
         async with httpx.AsyncClient() as client:
             headers = {'Content-Type': 'application/json'}
-            response = await client.post(url, json=data, headers=headers)
-            print(response.status_code)
-            print(response.text)
+            await client.post(url, json=data, headers=headers)
+            # response = await client.post(url, json=data, headers=headers)
+            # print(response.status_code)
+            # print(response.text)
 
     @staticmethod
     def post(url, data: dict):
-        if not WebKit.initialized:
-            print("WebKit not initialized")
-            return
+        if not WebKit.Initialized:
+            WebKit.initialize()
         asyncio.get_event_loop().create_task(WebKit._async_post(url, data))
 
 
