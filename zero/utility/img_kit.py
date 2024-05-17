@@ -3,12 +3,12 @@ import numpy as np
 
 class ImgKit:
     @staticmethod
-    def crop_img(self, im, tlbr):
+    def crop_img(im, tlbr):
         x1, y1, x2, y2 = tlbr[0], tlbr[1], tlbr[2], tlbr[3]
         return np.ascontiguousarray(np.copy(im[int(y1): int(y2), int(x1): int(x2)]))
 
     @staticmethod
-    def crop_img_border(self, im, tlbr, border=0):
+    def crop_img_border(im, tlbr, border=0):
         x1, y1, w, h = tlbr[0], tlbr[1], tlbr[2] - tlbr[0], tlbr[3] - tlbr[1]
         x2 = x1 + w + border
         x1 = x1 - border
