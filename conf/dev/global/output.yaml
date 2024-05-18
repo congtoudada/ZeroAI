@@ -7,5 +7,9 @@ stream:
     fps: 24  # 输出视频帧率
   draw_vis:
     enable: False  # 是否可视化
+  export_img:
+    enable: True   # 是否导出抓拍图
+  web:
+    enable: True  # 是否发送web消息
 
 

@@ -77,7 +77,8 @@ class IntrudeComponent(BasedMOTComponent):
         if not intrude_item.has_warn and intrude_item.get_valid_count() >= self.config.intrude_valid_count:
             logger.info("入侵异常")
             shot_img = ImgKit.crop_img(self.frame, ltrb)
-            WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, 4, 1, shot_img)
+            WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, 4, 1,
+                                     shot_img, self.config.stream_export_img_enable, self.config.stream_web_enable)
             intrude_item.has_warn = True
 
     def preprocess(self):

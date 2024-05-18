@@ -169,7 +169,8 @@ class CardComponent(BasedMOTComponent):
             self.valid = True  # 检测到代刷卡行为
             self.valid_count = self.config.draw_warning_time
             # print(str(key)+"代刷卡行为")  # 控制台打印
-            WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, 3, 1, self.frame)
+            WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, 3, 1, self.frame,
+                                     self.config.stream_export_img_enable, self.config.stream_web_enable)
         else:
             self.gate_dict[key] = 2
             # print(str(key)+"正常通过")   #控制台打印

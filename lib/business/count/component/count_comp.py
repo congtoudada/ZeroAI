@@ -278,21 +278,24 @@ class CountComponent(BasedMOTComponent):
         :return:
         """
         # 导出图
+
         time_str = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())
         status_str = "In" if status == 1 else "Out"
         img_path = os.path.join(self.output_dir, f"{time_str}_{status_str}.jpg")
         img_shot = ImgKit.crop_img(self.frame, ltrb)
-        cv2.imwrite(img_path, img_shot)
-        logger.info(f"{self.pname}存图成功，路径: {img_path}")
-        # 通知后端
-        data = {
-            "recordTime": time_str,
-            "camId": self.stream_cam_id,
-            "status": status,
-            "shotImg": img_path
-        }
-        WebKit.post(f"{WebKit.Prefix_url}/count", data)
-        logger.info(f"{self.pname}发送后端请求，路径: {WebKit.Prefix_url}/count")
+        if self.config.stream_export_img_enable:
+            cv2.imwrite(img_path, img_shot)
+            logger.info(f"{self.pname}存图成功，路径: {img_path}")
+        if self.config.stream_web_enable:
+            # 通知后端
+            data = {
+                "recordTime": time_str,
+                "camId": self.stream_cam_id,
+                "status": status,
+                "shotImg": img_path
+            }
+            WebKit.post(f"{WebKit.Prefix_url}/count", data)
+            logger.info(f"{self.pname}发送后端请求，路径: {WebKit.Prefix_url}/count")
 
 
 
