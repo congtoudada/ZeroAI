@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 from typing import List
 
@@ -14,6 +15,7 @@ from zero.utility.timer_kit import TimerKit
 
 
 class BasedStreamComponent(Component):
+    IsLinux = sys.platform.startswith('linux')
     """
     基于视频流的算法组件
     """
@@ -111,7 +113,7 @@ class BasedStreamComponent(Component):
         return ret
 
     def on_draw_vis(self, frame, vis=False, window_name="window", is_copy=True):
-        if vis and frame is not None:
+        if vis and frame is not None and not BasedStreamComponent.IsLinux:
             cv2.imshow(window_name, frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
