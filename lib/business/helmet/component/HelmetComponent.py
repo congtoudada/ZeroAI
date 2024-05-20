@@ -1,7 +1,7 @@
 import os
 from typing import Dict
 
-from common.warn_kit import WarnKit
+from common.warn_kit import WarnKit, WarnType
 from helmet.component.HelmetItem import HelmetItem
 from helmet.info.HelmetInfo import HelmetInfo
 from zero.core.component.based.based_mot_comp import BasedMOTComponent
@@ -57,7 +57,7 @@ class HelmetComponent(BasedMOTComponent):
                 logger.info(f"安全帽佩戴异常: {helmet_item.cls}")
                 helmet_item.has_warn = True
                 shot_img = ImgKit.crop_img(self.frame, ltrb)
-                WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, 2, 1,
+                WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, WarnType.Helmet, 1,
                                          shot_img, self.config.stream_export_img_enable, self.config.stream_web_enable)
 
     def preprocess(self):

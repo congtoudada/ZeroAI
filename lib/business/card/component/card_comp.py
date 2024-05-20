@@ -2,7 +2,7 @@ import cv2
 from typing import Dict
 import numpy as np
 from card.info.card_info import CardInfo
-from common.warn_kit import WarnKit
+from common.warn_kit import WarnKit, WarnType
 from zero.core.component.based.based_mot_comp import BasedMOTComponent
 from zero.utility.config_kit import ConfigKit
 from loguru import logger
@@ -169,7 +169,7 @@ class CardComponent(BasedMOTComponent):
             self.valid = True  # 检测到代刷卡行为
             self.valid_count = self.config.draw_warning_time
             # print(str(key)+"代刷卡行为")  # 控制台打印
-            WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, 3, 1, self.frame,
+            WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, WarnType.Card, 1, self.frame,
                                      self.config.stream_export_img_enable, self.config.stream_web_enable)
         else:
             self.gate_dict[key] = 2
