@@ -9,11 +9,13 @@ stream:
   frame_history_capacity: 10
   # 手动丢帧数（越大性能越差，准确率高） eg.2: 每2帧里面丢1帧
   drop_interval: 2
-  # 取流重缩放宽
+  # 取流重缩放宽（弃用）1920/2
   width: 960
-  # 取流重缩放高
+  # 取流重缩放高（弃用）1080/2
   height: 540
-  # 取流通道数
+  # 取流通道数（弃用）
   channel: 3
+  # 画面缩放系数（为了兼容性，建议设2）
+  scale: 2
   # 算法update帧率, <=0 表示无限制
   update_fps: 60

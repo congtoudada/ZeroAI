@@ -76,7 +76,8 @@ class StreamComponent(Component):
                 # cv2.imshow("window", frame)
                 # key = cv2.waitKey(1) & 0xFF
                 self.success_frame = (self.success_frame + 1) % sys.maxsize
-                frame = frame[::2, ::2, :]  #cv2.resize(frame, (self.config.stream_width, self.config.stream_height))
+                # cv2.resize(frame, (self.config.stream_width, self.config.stream_height))
+                frame = frame[::self.config.stream_scale, ::self.config.stream_scale, :]
                 self.stream_frame_info[SharedKey.STREAM_FRAME_ID] = self.success_frame
                 # self.stream_frame_info[SharedKey.STREAM_FRAME_TIME] = time.time()
                 # self.stream_frame_info[SharedKey.STREAM_FRAME] = frame
