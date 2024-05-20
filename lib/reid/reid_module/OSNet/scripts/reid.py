@@ -31,10 +31,10 @@ class Reid:
         self.parser.add_argument('opts', default=None, nargs=argparse.REMAINDER, help='Modify config options using the command-line')
         self.parser.add_argument('-s','--sources',type=str,nargs='+',help='source datasets (delimited by space)')
         self.parser.add_argument('-t','--targets',type=str,nargs='+',help='target datasets (delimited by space)')
-        self.parser.add_argument('--config-file', type=str, default='conf/algorithm/reid/dut_test_1c.yaml', help='path to config file')
+        self.parser.add_argument('--config-file', type=str, default='conf/dev/algorithm/reid/dut_test_1c.yaml', help='path to config file')
         self.parser.add_argument('--transforms', type=str, nargs='+', default=['random_flip', 'random_erase'], help='data augmentation')
-        self.parser.add_argument('--root', type=str, default='C:\\Users\\13220\\Desktop\\linshi\\shuju\\dut_test', help='path to data root')
-        self.parser.add_argument('--model_weights', type=str, default='C:\\Users\\13220\\Desktop\\linshi\\checkpoint\\osnet_x1_0_market_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_labelsmooth_flip.pth', help='path to model weights')
+        self.parser.add_argument('--root', type=str, default='lib/reid/reid_module/root_datasets/dut_test', help='path to data root')
+        self.parser.add_argument('--model_weights', type=str, default='pretrained/reid/osnet_x1_0_market_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_labelsmooth_flip.pth', help='path to model weights')
         self.parser.add_argument('--test_evaluate', action='store_true', default=True, help='whether to perform evaluation')
         self.args = self.parser.parse_args()
         
@@ -286,5 +286,5 @@ class Reid:
     
 if __name__ == '__main__':
     reid_instance = Reid()
-    demo_data1 = r"C:\Users\zuyi\Downloads\10_c1s1_000290_00.jpg"
-    reid_instance.run(demo_data1)
+    #demo_data1 = r"C:\Users\zuyi\Downloads\10_c1s1_000290_00.jpg"
+    #reid_instance.run(demo_data1)

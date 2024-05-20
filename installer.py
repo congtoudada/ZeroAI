@@ -6,6 +6,9 @@ search_dir = './'  # 修改为你的工程目录
 
 # 递归搜索目录下的 setup.py 文件
 for root, dirs, files in os.walk(search_dir):
+    # 忽略 'reid' 文件夹
+    if 'reid' in dirs:
+        dirs.remove('reid')  # 从 dirs 列表中移除 'reid'，这样 os.walk 不会进入这个目录
     if 'setup.py' in files:
         # 构造完整的 setup.py 文件路径
         setup_py_path = os.path.join(root, 'setup.py')
