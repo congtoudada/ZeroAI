@@ -277,7 +277,6 @@ class CountComponent(BasedMOTComponent):
         :return:
         """
         # 导出图
-
         time_str = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())
         status_str = "In" if status == 1 else "Out"
         img_path = os.path.join(self.output_dir, f"{time_str}_{status_str}.jpg")

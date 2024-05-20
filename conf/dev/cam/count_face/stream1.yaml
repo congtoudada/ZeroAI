@@ -12,7 +12,7 @@ stream:
       conf: conf/dev/algorithm/detection/yolox/yolox_head_1-1.yaml
     - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py  # bytetrack
       conf: conf/dev/algorithm/mot/bytetrack/bytetrack_head_1-1-1.yaml
-    - path: lib/business/count/extension/count_face_comp.py  # count+face
-      conf: conf/dev/algorithm/business/count/count_face/count_head_face1.yaml
-#    - path: lib/business/count/component/count_comp.py  # count
-#      conf: conf/dev/algorithm/business/count/count_head1.yaml
+#    - path: lib/business/count/extension/count_face_comp.py  # count+face
+#      conf: conf/dev/algorithm/business/count/count_face/count_head_face1.yaml
+    - path: lib/business/count/component/count_comp.py  # count
+      conf: conf/dev/algorithm/business/count/count_head1.yaml

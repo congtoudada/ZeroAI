@@ -11,5 +11,9 @@ stream:
     enable: True   # 是否导出抓拍图
   web:
     enable: True  # 是否发送web消息
+  rtsp:
+    enable: True
+    url: rtsp://127.0.0.1:554/video
+
 
 
