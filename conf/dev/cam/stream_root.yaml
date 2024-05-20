@@ -10,9 +10,9 @@ stream:
   # 手动丢帧数（越大性能越差，准确率高） eg.2: 每2帧里面丢1帧
   drop_interval: 2
   # 取流重缩放宽
-  width: 640
+  width: 960
   # 取流重缩放高
-  height: 640
+  height: 540
   # 取流通道数
   channel: 3
   # 算法update帧率, <=0 表示无限制

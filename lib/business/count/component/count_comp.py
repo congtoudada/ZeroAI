@@ -94,19 +94,20 @@ class CountComponent(BasedMOTComponent):
         :return:
         """
         for obj in self.input_mot:
-            ltrb = obj[:4]
-            conf = obj[4]
             cls = int(obj[5])
-            obj_id = int(obj[6])
-            # 1.如果没有则添加
-            if not self.item_dict.__contains__(obj_id):
-                item: CountItem = self.pool.pop()
-                item.init(obj_id, self.config.count_valid_frames)  # 初始化对象
-                self.item_dict[obj_id] = item
-                self.on_create_obj(item)
-            # 2.更新状态
-            x, y = self._get_base(self.config.count_base, ltrb)
-            self.item_dict[obj_id].update(self.current_frame_id, x / self.stream_width, y / self.stream_height, ltrb)
+            if cls == 0:
+                ltrb = obj[:4]
+                conf = obj[4]
+                obj_id = int(obj[6])
+                # 1.如果没有则添加
+                if not self.item_dict.__contains__(obj_id):
+                    item: CountItem = self.pool.pop()
+                    item.init(obj_id, self.config.count_valid_frames)  # 初始化对象
+                    self.item_dict[obj_id] = item
+                    self.on_create_obj(item)
+                # 2.更新状态
+                x, y = self._get_base(self.config.count_base, ltrb)
+                self.item_dict[obj_id].update(self.current_frame_id, x / self.stream_width, y / self.stream_height, ltrb)
 
     def process_result(self):
         """
@@ -226,13 +227,15 @@ class CountComponent(BasedMOTComponent):
                         thickness=text_thickness)
         # 对象包围盒
         for obj in self.input_mot:
-            ltrb = obj[:4]
-            obj_id = int(obj[6])
-            cv2.rectangle(im, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
-                          color=(0, 0, 255), thickness=1)
-            cv2.putText(im, f"{obj_id}",
-                        (int(ltrb[0]), int(ltrb[1])),
-                        cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
+            cls = obj[5]
+            if cls == 0:
+                ltrb = obj[:4]
+                obj_id = int(obj[6])
+                cv2.rectangle(im, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
+                              color=(0, 0, 255), thickness=1)
+                cv2.putText(im, f"{obj_id}",
+                            (int(ltrb[0]), int(ltrb[1])),
+                            cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
 
         # 可视化并返回
         return super().on_draw_vis(im, vis, window_name)

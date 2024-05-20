@@ -42,8 +42,9 @@ class BasedDetComponent(BasedStreamComponent):
         det_info = self.shared_data[self.config.DETECTION_INFO]
         if det_info is not None and self.current_frame_id != int(det_info[SharedKey.DETECTION_ID]):
             self.current_frame_id = int(det_info[SharedKey.DETECTION_ID])
-            self.frame = np.reshape(np.ascontiguousarray(np.copy(det_info[SharedKey.DETECTION_FRAME])),
-                                    (self.stream_height, self.stream_width, self.stream_channel))
+            # self.frame = np.reshape(np.ascontiguousarray(np.copy(det_info[SharedKey.DETECTION_FRAME])),
+            #                         (self.stream_height, self.stream_width, self.stream_channel))
+            self.frame = det_info[SharedKey.DETECTION_FRAME]
             self.input_det = det_info[SharedKey.DETECTION_OUTPUT]
             return True
         else:

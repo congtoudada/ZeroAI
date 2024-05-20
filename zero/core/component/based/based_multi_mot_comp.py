@@ -39,8 +39,9 @@ class BasedMultiMOTComponent(BasedMultiDetComponent):
         mot_info = self.shared_data[self.config.MOT_INFO[self.ports_len - 1]]  # 取最后一个模型的信息用于判断是否更新id和frame
         if mot_info is not None and self.current_frame_id != int(mot_info[SharedKey.MOT_ID]):
             self.current_frame_id = int(mot_info[SharedKey.MOT_ID])
-            self.frame = np.reshape(np.ascontiguousarray(np.copy(mot_info[SharedKey.MOT_FRAME])),
-                                    (self.stream_height, self.stream_width, self.stream_channel))
+            # self.frame = np.reshape(np.ascontiguousarray(np.copy(mot_info[SharedKey.MOT_FRAME])),
+            #                         (self.stream_height, self.stream_width, self.stream_channel))
+            self.frame = mot_info[SharedKey.MOT_FRAME]
             for i in range(self.ports_len):
                 mot_output = self.shared_data[self.config.MOT_INFO[i]]  # 取出每一个目标检测算法的检测结果
                 if mot_output is not None:

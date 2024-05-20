@@ -95,16 +95,35 @@ class PhoneComponent(BasedMultiMOTComponent):
         return res_bbox, res_idx
 
     def on_draw_vis(self, frame, vis=False, window_name="", is_copy=True):
+        """
+        # output shape: [n, 7]
+        # n: n个对象
+        # [0,1,2,3]: ltrb bboxes (基于视频流分辨率)
+        #   [0]: x1
+        #   [1]: y1
+        #   [2]: x2
+        #   [3]: y2
+        # [4]: 置信度
+        # [5]: 类别 (下标从0开始)
+        # [6]: id
+        :param frame:
+        :param vis:
+        :param window_name:
+        :param is_copy:
+        :return:
+        """
         for i in range(len(self.input_mot)):  # 遍历内一个检测模型的输出
             if self.input_mot[i] is not None:
                 for obj in self.input_mot[i]:  # 遍历每一个对象
-                    ltrb = obj[:4]
-                    obj_id = int(obj[6])
-                    cv2.rectangle(frame, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
-                                  color=(0, 0, 255), thickness=1)
-                    cv2.putText(frame, f"{obj_id}",
-                                (int(ltrb[0]), int(ltrb[1])),
-                                cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
+                    cls = obj[5]
+                    if cls == 0:
+                        ltrb = obj[:4]
+                        obj_id = int(obj[6])
+                        cv2.rectangle(frame, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
+                                      color=(0, 0, 255), thickness=1)
+                        cv2.putText(frame, f"{obj_id}",
+                                    (int(ltrb[0]), int(ltrb[1])),
+                                    cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
         # 可视化并返回
         return super().on_draw_vis(frame, vis, window_name)
 
@@ -116,7 +135,7 @@ class PhoneComponent(BasedMultiMOTComponent):
         if last is None or (now - last) >= delta:
             for id, bbox in bboxes.items():
                 self.on_save_img(bbox, id, self.config.timing_path)
-            print(f"timely save {now}")
+            # print(f"timely save {now}")
             self.timing_record = now
 
         # 报警

@@ -11,10 +11,10 @@ from zero.utility.config_kit import ConfigKit
 from zero.utility.yaml_kit import YamlKit
 
 # 用户设置变量
-cap = cv2.VideoCapture("res/videos/renlian/renlian1.mp4")  # 打开本地视频
+cap = cv2.VideoCapture("output/business/card/camera4/av_stream_card1.mp4")  # 打开本地视频
 expect_preview = (1280, 720)  # 期望分辨率
 frame_index = 50  # 替换为你想要读取的帧索引
-input_file = "script/output/count/drawn_points.yaml"  # 与output不一致，每次可以在结果集基础上预览
+input_file = "conf/dev/algorithm/business/card/zone/card_points.yaml"  # 与output不一致，每次可以在结果集基础上预览
 output_file = "script/output/count/drawn_points.yaml"  # 输出路径
 auto_save = True
 mode_str = ['red', 'green']
@@ -177,7 +177,7 @@ pre_process(frame, input_file)
 cv2.namedWindow("Frame")
 cv2.setMouseCallback("Frame", draw_line_with_fixed_arrow)
 
-# 在窗口中显示图像
+# 在窗口中显示图
 cv2.imshow("Frame", frame)
 
 signal.signal(signal.SIGINT, handle_termination)

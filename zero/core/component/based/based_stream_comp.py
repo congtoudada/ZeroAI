@@ -16,7 +16,7 @@ from zero.utility.timer_kit import TimerKit
 
 
 class BasedStreamComponent(Component):
-    IsLinux = sys.platform.startswith('linux')
+    # IsLinux = sys.platform.startswith('linux')
     """
     基于视频流的算法组件
     """
@@ -83,9 +83,10 @@ class BasedStreamComponent(Component):
                     self.current_frame_id[i] = int(frame_info[SharedKey.STREAM_FRAME_ID])
                     # self.frame = np.reshape(np.ascontiguousarray(np.copy(frame_info[SharedKey.STREAM_FRAME])),
                     #                         (self.stream_height[i], self.stream_width[i], self.stream_channel[i]))
-                    self.frame = np.reshape(frame_info[SharedKey.STREAM_FRAME],
-                                            (self.stream_height[i], self.stream_width[i], self.stream_channel[i]))
-
+                    self.frame = frame_info[SharedKey.STREAM_FRAME]
+                    # self.frame = (
+                    #     np.reshape(frame_info[SharedKey.STREAM_FRAME],
+                    #                         (self.stream_height[i], self.stream_width[i], self.stream_channel[i])))
                     # self.frame = frame_info[SharedKey.STREAM_FRAME]
                     # self.frame = np.copy(frame_info[SharedKey.STREAM_FRAME])
                     # self.frame = np.ascontiguousarray(np.copy(frame_info[SharedKey.STREAM_FRAME]))
@@ -118,10 +119,11 @@ class BasedStreamComponent(Component):
         return ret
 
     def on_draw_vis(self, frame, vis=False, window_name="window", is_copy=True):
-        if vis and frame is not None and not BasedStreamComponent.IsLinux:
+        # if vis and frame is not None and not BasedStreamComponent.IsLinux:
+        if vis and frame is not None:
             cv2.imshow(window_name, frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
         return frame
 
     def start(self):

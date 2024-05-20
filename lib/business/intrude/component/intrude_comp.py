@@ -61,14 +61,15 @@ class IntrudeComponent(BasedMOTComponent):
                 conf = obj[4]
                 cls = int(obj[5])
                 obj_id = int(obj[6])
-                if not self.data_dict.__contains__(obj_id):  # 没有被记录过
-                    item = self.pool.pop()
-                    item.init(obj_id, self.current_frame_id)
-                    self.data_dict[obj_id] = item
-                else:  # 已经记录过
-                    in_warn = self.is_in_warn(ltrb)  # 判断是否处于警戒区
-                    self.data_dict[obj_id].update(self.current_frame_id, in_warn)
-                self.postprocess_item(self.data_dict[obj_id], ltrb)
+                if cls == 0:  # 人类
+                    if not self.data_dict.__contains__(obj_id):  # 没有被记录过
+                        item = self.pool.pop()
+                        item.init(obj_id, self.current_frame_id)
+                        self.data_dict[obj_id] = item
+                    else:  # 已经记录过
+                        in_warn = self.is_in_warn(ltrb)  # 判断是否处于警戒区
+                        self.data_dict[obj_id].update(self.current_frame_id, in_warn)
+                    self.postprocess_item(self.data_dict[obj_id], ltrb)
             self.timer.toc()
             return True
         return False
@@ -147,16 +148,18 @@ class IntrudeComponent(BasedMOTComponent):
 
         # 对象基准点、包围盒
         for obj in self.input_mot:
-            ltrb = obj[:4]
-            obj_id = int(obj[6])
-            screen_x = int((ltrb[0] + ltrb[2]) * 0.5)
-            screen_y = int((ltrb[1] + ltrb[3]) * 0.5)
-            cv2.circle(im, (screen_x, screen_y), 4, (118, 154, 242), line_thickness)
-            cv2.rectangle(im, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
-                          color=(0, 0, 255), thickness=1)
-            cv2.putText(im, f"{obj_id}",
-                        (int(ltrb[0]), int(ltrb[1])),
-                        cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
+            cls = obj[5]
+            if cls == 0:
+                ltrb = obj[:4]
+                obj_id = int(obj[6])
+                screen_x = int((ltrb[0] + ltrb[2]) * 0.5)
+                screen_y = int((ltrb[1] + ltrb[3]) * 0.5)
+                cv2.circle(im, (screen_x, screen_y), 4, (118, 154, 242), line_thickness)
+                cv2.rectangle(im, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
+                              color=(0, 0, 255), thickness=1)
+                cv2.putText(im, f"{obj_id}",
+                            (int(ltrb[0]), int(ltrb[1])),
+                            cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
         # 可视化并返回
         return super().on_draw_vis(im, vis, window_name)
 

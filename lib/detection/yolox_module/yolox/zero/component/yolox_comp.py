@@ -86,6 +86,8 @@ class YoloxComponent(BaseDetComponent):
         :param inference_outputs:
         :return:
         """
+        if inference_outputs is None:
+            return None
         outputs_cpu = inference_outputs.cpu().numpy()
         bboxes = outputs_cpu[:, :4] / self.scale[self.cur_stream_idx]
         scores = outputs_cpu[:, 4] * outputs_cpu[:, 5]

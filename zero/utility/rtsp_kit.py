@@ -23,10 +23,12 @@ class RtspKit:
             '-preset', 'ultrafast',
             '-f', 'rtsp',  # 强制输入或输出文件格式
             rtsp_url]
+        print("初始化rtsp推流器: " + rtsp_url)
         self.rtsp_proxy = sp.Popen(self.command, stdin=sp.PIPE)
 
     def push(self, frame):
         if frame is not None:
+            print("rtsp push!")
             self.rtsp_proxy.stdin.write(frame.tostring())
         else:
             print("push rtsp is failed!")

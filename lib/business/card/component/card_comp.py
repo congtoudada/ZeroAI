@@ -105,22 +105,23 @@ class CardComponent(BasedMOTComponent):
         """
 
         for obj in self.input_mot:
-            ltrb = obj[:4]  # 提取当前目标的边界框坐标，即左上角和右下角的坐标
-            conf = obj[4]  # 提取当前目标的置信度
             cls = int(obj[5])  # 提取当前目标的类别，转换为整数类型
-            obj_id = int(obj[6])  # 提取当前目标的唯一标识符，转换为整数类型
-            # 1.如果没有则添加
-            if not self.item_dict.__contains__(obj_id):  # 检查当前目标是否在 item_dict 中
-                self.gate_dict[obj_id] = 0 # 加入item_dict时为初始状态0
-                item: CardItem = self.pool.pop()  # 如果当前目标不在 item_dict 中，则从对象池中取出一个对象，这里假设为 CountItem 类型
-                item.init(obj_id,
-                          self.config.item_valid_frames)  # 初始化对象 ，传入目标的唯一标识符和有效帧数,card_valid_frames对象稳定出现多少帧，才开始计算
-                self.item_dict[obj_id] = item  # 将初始化后的对象添加到 item_dict 字典中，以目标的唯一标识符为键
-                self.on_create_obj(item)  # 调用 on_create_obj 方法，处理新创建的对象
-            # 2.更新状态
-            x, y = self._get_base(self.config.item_base, ltrb)  # 调用 _get_base 方法获取目标的基准点坐标
-            # 调用对象的 update 方法，更新目标的状态信息，包括当前帧序号、归一化后的坐标和边界框坐标
-            self.item_dict[obj_id].update(self.current_frame_id, x / self.stream_width, y / self.stream_height, ltrb)
+            if cls == 0:  # 人
+                ltrb = obj[:4]  # 提取当前目标的边界框坐标，即左上角和右下角的坐标
+                conf = obj[4]  # 提取当前目标的置信度
+                obj_id = int(obj[6])  # 提取当前目标的唯一标识符，转换为整数类型
+                # 1.如果没有则添加
+                if not self.item_dict.__contains__(obj_id):  # 检查当前目标是否在 item_dict 中
+                    self.gate_dict[obj_id] = 0 # 加入item_dict时为初始状态0
+                    item: CardItem = self.pool.pop()  # 如果当前目标不在 item_dict 中，则从对象池中取出一个对象，这里假设为 CountItem 类型
+                    item.init(obj_id,
+                              self.config.item_valid_frames)  # 初始化对象 ，传入目标的唯一标识符和有效帧数,card_valid_frames对象稳定出现多少帧，才开始计算
+                    self.item_dict[obj_id] = item  # 将初始化后的对象添加到 item_dict 字典中，以目标的唯一标识符为键
+                    self.on_create_obj(item)  # 调用 on_create_obj 方法，处理新创建的对象
+                # 2.更新状态
+                x, y = self._get_base(self.config.item_base, ltrb)  # 调用 _get_base 方法获取目标的基准点坐标
+                # 调用对象的 update 方法，更新目标的状态信息，包括当前帧序号、归一化后的坐标和边界框坐标
+                self.item_dict[obj_id].update(self.current_frame_id, x / self.stream_width, y / self.stream_height, ltrb)
 
     def process_result(self):
         """
@@ -168,7 +169,7 @@ class CardComponent(BasedMOTComponent):
             self.gate_dict[key] = 1
             self.valid = True  # 检测到代刷卡行为
             self.valid_count = self.config.draw_warning_time
-            # print(str(key)+"代刷卡行为")  # 控制台打印
+            logger.info(f"{self.pname} {key} 代刷卡行为")  # 控制台打印
             WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, WarnType.Card, 1, self.frame,
                                      self.config.stream_export_img_enable, self.config.stream_web_enable)
         else:
@@ -235,18 +236,20 @@ class CardComponent(BasedMOTComponent):
                         thickness=text_thickness)
         # 对象包围盒
         for obj in self.input_mot:
-            ltrb = obj[:4]
-            obj_id = int(obj[6])
-            text = ""
-            if self.gate_dict[obj_id] == 2:
-                text = "normal"
-            elif self.gate_dict[obj_id] == 1:
-                text = "error"
-            cv2.rectangle(im, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
-                          color=(0, 0, 255), thickness=1)
-            cv2.putText(im, f"{obj_id}"+text,
-                        (int(ltrb[0]), int(ltrb[1])),
-                        cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
+            cls = obj[5]
+            if cls == 0:
+                ltrb = obj[:4]
+                obj_id = int(obj[6])
+                text = ""
+                if self.gate_dict[obj_id] == 2:
+                    text = "normal"
+                elif self.gate_dict[obj_id] == 1:
+                    text = "error"
+                cv2.rectangle(im, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
+                              color=(0, 0, 255), thickness=1)
+                cv2.putText(im, f"{obj_id}"+text,
+                            (int(ltrb[0]), int(ltrb[1])),
+                            cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
 
         self.draw_warning(im)
         # 可视化并返回

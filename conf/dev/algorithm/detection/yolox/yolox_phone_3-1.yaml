@@ -10,4 +10,4 @@ yolox:
     path: null  # 取流路径（为None则通过内部框架取流）
     exp_file: conf/dev/algorithm/detection/yolox/exps/yolox_s_phone.py  # 通过.py选择模型
     ckpt: pretrained/detection/yolox/phone/best_ckpt.pth # 推理用模型权重文件
-    conf: 0.4 # test conf
+    conf: 0.25 # test conf

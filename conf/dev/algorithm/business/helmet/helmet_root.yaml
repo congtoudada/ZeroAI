@@ -6,7 +6,7 @@ stream:
   save_video:
     enable: False  # 是否保存视频
   draw_vis:
-    enable: True  # 是否可视化
+    enable: False  # 是否可视化
 helmet:
   valid_count: 10
   lost_frames: 60
