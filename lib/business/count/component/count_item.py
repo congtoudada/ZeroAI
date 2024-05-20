@@ -12,6 +12,8 @@ class CountItem:
         self.base_y = 0  # base_y 百分比
         self.valid_count = 5  # 有效更新阈值（到达该阈值的Item才有效，避免抖动开销）
         self._update_count = 0  # 累计更新次数
+        self.per_id = 1  # 默认为陌生人
+        self.score = 0  # 置信度分数
         self.enable = False  # 是否为有效点
 
     def init(self, obj_id, valid_count):
@@ -26,6 +28,8 @@ class CountItem:
         self.base_y = 0  # base_y 百分比
         self.valid_count = valid_count
         self._update_count = 0  # 累计更新次数
+        self.per_id = 1  # 默认为陌生人
+        self.score = 0  # 置信度分数
         self.enable = False
 
     def update(self, last_update_id, base_x, base_y, ltrb):

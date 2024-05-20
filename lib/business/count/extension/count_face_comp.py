@@ -75,7 +75,9 @@ class CountFaceComponent(CountComponent):
         return super().on_draw_vis(im, vis, window_name, False)  # 父类没有必要继续copy
 
     def face_callback(self, obj_id, per_id, score):
-        pass
+        self.item_dict[obj_id].per_id = per_id
+        self.item_dict[obj_id].score = score
+
 
     def _crop_img(self, im, ltrb):
         x1, y1, x2, y2 = ltrb[0], ltrb[1], ltrb[2], ltrb[3]
@@ -98,7 +100,7 @@ class CountFaceComponent(CountComponent):
         self.helper.destroy()
         super().on_destroy()
 
-    def send_face_result(self, status: int, ltrb, per_id):
+    def send_result(self, status: int, ltrb, per_id):
         """
         结果通知
         :param per_id:

@@ -1,5 +1,6 @@
 INCLUDE:
     - conf/dev/global/log.yaml
+    - conf/dev/global/output.yaml
 stream:
   output_dir: output/business/intrude  # 输出目录
   save_video:

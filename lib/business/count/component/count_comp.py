@@ -21,8 +21,7 @@ class CountComponent(BasedMOTComponent):
     def __init__(self, shared_data, config_path: str):
         super().__init__(shared_data)
         self.config: CountInfo = CountInfo(ConfigKit.load(config_path))
-        self.pname = f"[ {os.getpid()}:count for {self.config.count_input_port}]"
-        self.input_port = self.config.count_input_port
+        self.pname = f"[ {os.getpid()}:count for {self.config.input_port[0]}]"
         # 自身定义
         self.in_count = 0  # 进入人数
         self.out_count = 0  # 离开人数
@@ -179,10 +178,10 @@ class CountComponent(BasedMOTComponent):
                 ret = self._get_dir(item.red_seq[0] == 0, self.config.count_reverse)
                 if ret:
                     self.in_count += 1
-                    self.send_result(1, item.ltrb)
+                    self.send_result(1, item.ltrb, item.per_id)
                 else:
                     self.out_count += 1
-                    self.send_result(2, item.ltrb)
+                    self.send_result(2, item.ltrb, item.per_id)
                 # 重置计数器
                 item.red_seq.pop(0)
                 item.green_seq.pop(0)
@@ -270,7 +269,7 @@ class CountComponent(BasedMOTComponent):
         logger.info(f"{self.pname} video fps: {1. / max(1e-5, self.update_timer.average_time):.2f}"
                     f" count calculate fps: {1. / max(1e-5, self.timer.average_time):.2f}")
 
-    def send_result(self, status: int, ltrb):
+    def send_result(self, status: int, ltrb, per_id):
         """
         结果通知
         :param status: 1进2出
