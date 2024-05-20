@@ -36,10 +36,14 @@ class WarnKit:
             data = {
                 "recordTime": time_str,
                 "camId": camId,
-                "warnType": warnType,
+                "warnType":  warnType.value[0],
                 "personId": per_id,
                 "shotImg": img_path
             }
             WebKit.post(f"{WebKit.Prefix_url}/warn", data)
             logger.info(f"{pname}发送后端请求，路径: {WebKit.Prefix_url}/warn")
 
+
+if __name__ == "__main__":
+    warnType = WarnType.Phone
+    print(warnType.value[0])

@@ -1,4 +1,6 @@
 import os
+import time
+
 import cv2
 from loguru import logger
 from math import sqrt
@@ -19,7 +21,6 @@ class PhoneComponent(BasedMultiMOTComponent):
         self.det_record = {}  # key: person_id  value: last_time
         self.timing_record = None  # 记录上一次定时保存的时间
         self.state = []  # 存储已经报警的id，避免重复报警
-
 
     def on_update(self) -> bool:
         """
@@ -46,12 +47,12 @@ class PhoneComponent(BasedMultiMOTComponent):
                         # logger.info(f"来自{self.config.input_port[i]}端口，检测类别: {self.input_mot[i][j][5]} obj_id: {self.input_mot[i][j][6]}")
                         # print(self.input_mot[i][j][5])
                         if self.config.input_port[i] == "camera3-bytetrack_person1":
-                        # if self.input_mot[i][j][5] == 0.:
+                            # if self.input_mot[i][j][5] == 0.:
                             if self.input_mot[i][j][5] == 0.:
                                 person_bboxes.append(self.input_mot[i][j][:4])
                                 person_id.append(self.input_mot[i][j][6])
                         elif self.config.input_port[i] == "camera3-bytetrack_phone1":
-                        # elif self.input_mot[i][j][5] == 1.:
+                            # elif self.input_mot[i][j][5] == 1.:
                             phone_bboxes.append(self.input_mot[i][j][:4])
                     if phone_bboxes:  # 检测到手机
                         output_bboxes, output_idx = self.on_calculate(person_bboxes, phone_bboxes)
@@ -60,7 +61,6 @@ class PhoneComponent(BasedMultiMOTComponent):
                         # logger.info(f"检测到玩手机的人 {object_bboxes}")
                         # print(f"检测到玩手机的人 {object_bboxes}")
                         self.on_execute(object_bboxes)
-
 
         return False
 
@@ -74,17 +74,18 @@ class PhoneComponent(BasedMultiMOTComponent):
         # 中心点计算
         person_centres = []
         for person_bbox in person_bboxes:
-            person_centres.append([(person_bbox[0]+person_bbox[2])/2, (person_bbox[1]+person_bbox[3])/2])
+            person_centres.append([(person_bbox[0] + person_bbox[2]) / 2, (person_bbox[1] + person_bbox[3]) / 2])
         for phone_bbox in phone_bboxes:
-            phone_centre = [(phone_bbox[0]+phone_bbox[2])/2, (phone_bbox[1]+phone_bbox[3])/2]
+            phone_centre = [(phone_bbox[0] + phone_bbox[2]) / 2, (phone_bbox[1] + phone_bbox[3]) / 2]
             min_index = -1  # 距离手机最近的人的下标
             min_dist = -1  # 最小距离
             for index, person_centre in enumerate(person_centres):
                 if min_dist == -1:
                     min_index = index
-                    min_dist = sqrt((phone_centre[0]-person_centre[0])**2 + (phone_centre[1]-person_centre[1])**2)
+                    min_dist = sqrt(
+                        (phone_centre[0] - person_centre[0]) ** 2 + (phone_centre[1] - person_centre[1]) ** 2)
                 else:
-                    dist = sqrt((phone_centre[0]-person_centre[0])**2 + (phone_centre[1]-person_centre[1])**2)
+                    dist = sqrt((phone_centre[0] - person_centre[0]) ** 2 + (phone_centre[1] - person_centre[1]) ** 2)
                     if dist < min_dist:
                         min_index = index
                         min_dist = dist
@@ -149,11 +150,14 @@ class PhoneComponent(BasedMultiMOTComponent):
 
     def on_save_img(self, bbox, id, path):
         img = self.frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
-        img_name = "0000_" + "c3_" + str(self.stream_cam_id) + "s1_" + "{:06d}".format(self.current_frame_id) + "{:02d}".format(int(id)) + "_"
-        for i in range(4):
-            img_name += str(int(bbox[i])) + "_"
-        img_name = img_name[:-1]
-        path = path+img_name+".jpg"
+        # img_name = "0000_c" + str(self.stream_cam_id) + "s1_" + "{:06d}".format(self.current_frame_id) + "{:02d}".format(int(id)) + "_"
+        time_str = time.strftime('%Y%m%d', time.localtime())
+        path = path + (f"0000_c{self.stream_cam_id}s1_{time_str}{int(self.current_frame_id):08d}_{int(id):02d}_"
+                       f"{int(bbox[0])}_{int(bbox[1])}_{int(bbox[2])}_{int(bbox[3])}.jpg")
+        # for i in range(4):
+        #     img_name += str(int(bbox[i])) + "_"
+        # img_name = img_name[:-1]
+        # path = path+img_name+".jpg"
         cv2.imwrite(path, img)
         return path, img
 
@@ -162,3 +166,10 @@ def create_process(shared_data, config_path: str):
     phoneComp: PhoneComponent = PhoneComponent(shared_data, config_path)  # 创建组件
     phoneComp.start()  # 初始化
     phoneComp.update()  # 算法逻辑循环
+
+
+if __name__ == "__main__":
+    time_str = time.strftime('%Y%m%d', time.localtime())
+    print(time_str)
+    id_str = f"{2:02d}"
+    print(id_str)

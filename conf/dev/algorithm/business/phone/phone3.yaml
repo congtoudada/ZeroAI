@@ -1,8 +1,8 @@
 INCLUDE:
   - conf/dev/algorithm/business/phone/phone_root.yaml
 
-warning_path: output/business/phone/timing/
-timing_path: output/business/phone/warning/
+warning_path: output/business/phone/warning/
+timing_path: output/business/phone/timing/
 
 input_port:
   - camera3-bytetrack_person1
