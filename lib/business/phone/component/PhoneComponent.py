@@ -6,7 +6,7 @@ from loguru import logger
 from math import sqrt
 from datetime import datetime, timedelta
 
-from common.warn_kit import WarnKit, WarnType
+from common.warn_kit import WarnKit
 from phone.info.PhoneInfo import PhoneInfo
 from zero.core.component.based.based_multi_mot_comp import BasedMultiMOTComponent
 from zero.utility.config_kit import ConfigKit
@@ -161,7 +161,7 @@ class PhoneComponent(BasedMultiMOTComponent):
                         #     print("REQUEST failed")
                         logger.info(f"{self.pname} warning! id = {id}")
                         path, img = self.on_save_img(bboxes[id], id, self.config.warning_path)
-                        WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, WarnType.Phone, 1,
+                        WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, 1, 1,
                                                  img, self.config.stream_export_img_enable,
                                                  self.config.stream_web_enable)
                         self.state.append(id)
