@@ -99,8 +99,9 @@ class LauncherComponent(Component):
 
 
 if __name__ == '__main__':
-    launcher = LauncherComponent("conf/application-dev.yaml")
-    launcher.start()
-    launcher.update()
+    print(sys.platform.startswith('linux'))  # linux默认fork，但fork不支持cuda)
+    # launcher = LauncherComponent("conf/application-dev.yaml")
+    # launcher.start()
+    # launcher.update()
 
 
