@@ -7,6 +7,10 @@ stream:
     fps: 24  # 输出视频帧率
   draw_vis:
     enable: False  # 是否可视化（linux默认不显示）
+  export_img:
+    enable: True  # 导出图片
+  web:
+    enable: True  # web请求
   rtsp:
     enable: False
     url: rtsp://127.0.0.1:554/video

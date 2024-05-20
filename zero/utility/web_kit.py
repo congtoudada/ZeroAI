@@ -7,7 +7,7 @@ from loguru import logger
 
 class WebKit(object):
     Initialized = False
-    Prefix_url = "http://172.29.25.49:8080/algorithm"
+    Prefix_url = "http://210.30.97.235:8080/algorithm"
     # Prefix_url = "http://localhost:9012/algorithm"
     get_queue = []
     post_queue = []
