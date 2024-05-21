@@ -33,7 +33,8 @@ class BasedMOTComponent(BasedDetComponent):
             self.current_frame_id = int(mot_info[SharedKey.MOT_ID])
             # self.frame = np.reshape(np.ascontiguousarray(np.copy(mot_info[SharedKey.MOT_FRAME])),
             #                         (self.stream_height, self.stream_width, self.stream_channel))
-            self.frame = mot_info[SharedKey.MOT_FRAME]
+            self.frame = np.ascontiguousarray(np.copy(mot_info[SharedKey.MOT_FRAME]))
+            # self.frame = mot_info[SharedKey.MOT_FRAME]
             self.input_mot = mot_info[SharedKey.MOT_OUTPUT]
             return True
         else:

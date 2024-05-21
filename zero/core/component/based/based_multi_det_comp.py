@@ -48,7 +48,7 @@ class BasedMultiDetComponent(BasedStreamComponent):
             self.current_frame_id = int(det_info[SharedKey.DETECTION_ID])  # 更新帧id
             # self.frame = np.reshape(np.ascontiguousarray(np.copy(det_info[SharedKey.DETECTION_FRAME])),
             #                         (self.stream_height, self.stream_width, self.stream_channel))  # 更新帧
-            self.frame = det_info[SharedKey.DETECTION_FRAME]
+            self.frame = np.ascontiguousarray(np.copy(det_info[SharedKey.DETECTION_FRAME]))
             for i in range(self.ports_len):
                 det_output = self.shared_data[self.config.DETECTION_INFO[i]]  # 取出每一个目标检测算法的检测结果
                 if det_output is not None:

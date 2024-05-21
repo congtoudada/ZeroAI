@@ -60,7 +60,6 @@ class CardComponent(BasedMOTComponent):
             self.process_update()  # 调用 process_update 方法，处理多目标追踪结果的更新
             self.process_result()  # 调用 process_result 方法，处理结果
             self.timer.toc()  # 结束计时器
-
         return True
 
     def preprocess(self):

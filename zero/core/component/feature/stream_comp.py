@@ -60,8 +60,12 @@ class StreamComponent(Component):
         self.algo_group_comp.start()
         # 等待所有算法初始化完成
         while self.shared_data[SharedKey.STREAM_WAIT_COUNTER] < self.shared_data[SharedKey.STREAM_WAIT_COUNTER_MAX]:
-            self.cap.grab()
-        logger.info(f"{self.pname} 所有算法成功初始化！开始取流 URL: {self.config.stream_url} fps: {self.frame_fps}")
+            if self.config.stream_delay:
+                time.sleep(0.2)
+            else:
+                self.cap.grab()
+        logger.info(f"{self.pname} 所有算法成功初始化！开始取流 URL: {self.config.stream_url} "
+                    f"width:{int(self.config.stream_width)} height:{int(self.config.stream_height)} fps: {self.frame_fps}")
 
     def on_update(self) -> bool:
         """
@@ -76,8 +80,8 @@ class StreamComponent(Component):
                 # cv2.imshow("window", frame)
                 # key = cv2.waitKey(1) & 0xFF
                 self.success_frame = (self.success_frame + 1) % sys.maxsize
-                # cv2.resize(frame, (self.config.stream_width, self.config.stream_height))
-                frame = frame[::self.config.stream_scale, ::self.config.stream_scale, :]
+                frame = cv2.resize(frame, (self.config.stream_width, self.config.stream_height))  # 开发用
+                # frame = frame[::self.config.stream_scale, ::self.config.stream_scale, :]   # 部署用
                 self.stream_frame_info[SharedKey.STREAM_FRAME_ID] = self.success_frame
                 # self.stream_frame_info[SharedKey.STREAM_FRAME_TIME] = time.time()
                 # self.stream_frame_info[SharedKey.STREAM_FRAME] = frame
@@ -104,11 +108,12 @@ class StreamComponent(Component):
 
     def _can_read(self) -> bool:
         self.drop_flag += 1
-        self.cap.grab()
         if self.drop_flag >= self.config.stream_drop_interval:
             self.drop_flag = 0
             return True
-        return False
+        else:
+            self.cap.grab()
+            return False
 
 
 def create_process(shared_data, config_path: str):

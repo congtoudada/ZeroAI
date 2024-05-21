@@ -83,7 +83,7 @@ class BasedStreamComponent(Component):
                     self.current_frame_id[i] = int(frame_info[SharedKey.STREAM_FRAME_ID])
                     # self.frame = np.reshape(np.ascontiguousarray(np.copy(frame_info[SharedKey.STREAM_FRAME])),
                     #                         (self.stream_height[i], self.stream_width[i], self.stream_channel[i]))
-                    self.frame = frame_info[SharedKey.STREAM_FRAME]
+                    self.frame = np.ascontiguousarray(np.copy(frame_info[SharedKey.STREAM_FRAME]))
                     # self.frame = (
                     #     np.reshape(frame_info[SharedKey.STREAM_FRAME],
                     #                         (self.stream_height[i], self.stream_width[i], self.stream_channel[i])))
