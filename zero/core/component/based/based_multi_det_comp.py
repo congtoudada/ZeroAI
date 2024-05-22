@@ -28,6 +28,9 @@ class BasedMultiDetComponent(BasedStreamComponent):
         self.stream_cam_id = self.stream_cam_id[0]
         self.current_frame_id = self.current_frame_id[0]
         self.output_dir = self.output_dir[0]
+        # 初始化端口内容，避免Key不存在
+        for i in range(self.ports_len):
+            self.shared_data[self.config.DETECTION_INFO[i]] = None
 
 
     def on_resolve_stream(self) -> bool:

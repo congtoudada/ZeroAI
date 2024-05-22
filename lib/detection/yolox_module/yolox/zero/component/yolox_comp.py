@@ -58,6 +58,7 @@ class YoloxComponent(BaseDetComponent):
             if self.inference_outputs is not None:
                 self.resolve_output(self.inference_outputs)  # 解析推理结果
             self.timer.toc()  # 计算推理开始到输出结果的耗时
+        return True
 
     def on_analysis(self):
         logger.info(f"{self.pname} video fps: {1. / max(1e-5, self.update_timer.average_time):.2f}"

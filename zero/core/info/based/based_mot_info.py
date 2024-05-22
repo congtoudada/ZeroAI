@@ -1,8 +1,8 @@
-from zero.core.info.based.based_stream_info import BasedStreamInfo
+from zero.core.info.based.based_det_info import BasedDetInfo
 from zero.core.key.shared_key import SharedKey
 
 
-class BasedMOTInfo(BasedStreamInfo):
+class BasedMOTInfo(BasedDetInfo):
     def __init__(self, data: dict = None):
         self.input_port = []  # 输入端口
         super().__init__(data)

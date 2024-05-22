@@ -1,4 +1,5 @@
 INCLUDE:
+  - conf/dev/algorithm/business/common.yaml
   - conf/dev/algorithm/business/phone/phone_root.yaml
 
 warning_path: output/business/phone/warning/

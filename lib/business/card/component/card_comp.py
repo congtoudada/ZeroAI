@@ -235,7 +235,7 @@ class CardComponent(BasedMOTComponent):
                         thickness=text_thickness)
         # 对象包围盒
         for obj in self.input_mot:
-            cls = obj[5]
+            cls = int(obj[5])
             if cls == 0:
                 ltrb = obj[:4]
                 obj_id = int(obj[6])

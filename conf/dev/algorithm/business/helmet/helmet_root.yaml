@@ -1,12 +1,9 @@
 INCLUDE:
+    - conf/dev/algorithm/business/common.yaml
     - conf/dev/global/log.yaml
     - conf/dev/global/output.yaml
 stream:
   output_dir: output/business/helmet  # 输出目录
-  save_video:
-    enable: True  # 是否保存视频
-  draw_vis:
-    enable: True  # 是否可视化
 helmet:
   valid_count: 10
   lost_frames: 60

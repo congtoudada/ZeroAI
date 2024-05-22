@@ -1,0 +1,8 @@
+# 业务公共配置
+log:
+  enable: True
+stream:
+  save_video:
+    enable: True  # 是否保存视频
+  draw_vis:
+    enable: True  # 是否可视化

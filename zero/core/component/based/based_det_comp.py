@@ -25,6 +25,8 @@ class BasedDetComponent(BasedStreamComponent):
         self.stream_cam_id = self.stream_cam_id[0]
         self.current_frame_id = self.current_frame_id[0]
         self.output_dir = self.output_dir[0]
+        # 填充共享内存
+        self.shared_data[self.config.DETECTION_INFO] = None
 
     def on_resolve_stream(self) -> bool:
         """
@@ -47,6 +49,7 @@ class BasedDetComponent(BasedStreamComponent):
             self.frame = np.ascontiguousarray(np.copy(det_info[SharedKey.DETECTION_FRAME]))
             # self.frame = det_info[SharedKey.DETECTION_FRAME]
             self.input_det = det_info[SharedKey.DETECTION_OUTPUT]
+            self.analysis(self.current_frame_id)  # 打印性能分析报告
             return True
         else:
             return False

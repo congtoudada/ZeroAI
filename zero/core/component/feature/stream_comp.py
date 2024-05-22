@@ -42,8 +42,10 @@ class StreamComponent(Component):
             SharedKey.STREAM_FRAME: None
         }
         self.shared_data[self.config.STREAM_FRAME_INFO] = self.stream_frame_info
-        self.shared_data[self.config.STREAM_ORIGINAL_WIDTH] = int(self.config.stream_width)
-        self.shared_data[self.config.STREAM_ORIGINAL_HEIGHT] = int(self.config.stream_height)
+        width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH) / self.config.stream_scale)
+        height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / self.config.stream_scale)
+        self.shared_data[self.config.STREAM_ORIGINAL_WIDTH] = width
+        self.shared_data[self.config.STREAM_ORIGINAL_HEIGHT] = height
         self.shared_data[self.config.STREAM_ORIGINAL_CHANNEL] = int(self.config.stream_channel)
         self.shared_data[self.config.STREAM_ORIGINAL_FPS] = self.frame_fps
         self.shared_data[self.config.STREAM_URL] = self.config.stream_url
@@ -80,14 +82,10 @@ class StreamComponent(Component):
                 # cv2.imshow("window", frame)
                 # key = cv2.waitKey(1) & 0xFF
                 self.success_frame = (self.success_frame + 1) % sys.maxsize
-                frame = cv2.resize(frame, (self.config.stream_width, self.config.stream_height))  # 开发用
-                # frame = frame[::self.config.stream_scale, ::self.config.stream_scale, :]   # 部署用
+                # frame = cv2.resize(frame, (self.config.stream_width, self.config.stream_height))  # 开发用
+                frame = frame[::self.config.stream_scale, ::self.config.stream_scale, :]   # 部署用
                 self.stream_frame_info[SharedKey.STREAM_FRAME_ID] = self.success_frame
-                # self.stream_frame_info[SharedKey.STREAM_FRAME_TIME] = time.time()
-                # self.stream_frame_info[SharedKey.STREAM_FRAME] = frame
-                # self.stream_frame_info[SharedKey.STREAM_FRAME] = frame.flatten()
                 self.stream_frame_info[SharedKey.STREAM_FRAME] = frame
-                # self.stream_frame_info[SharedKey.STREAM_FRAME] = cv2.imencode(".jpg", frame)[1].tobytes()
                 # 填充输出
                 self.shared_data[self.config.STREAM_FRAME_INFO] = self.stream_frame_info
                 if self.config.stream_delay:
@@ -96,11 +94,10 @@ class StreamComponent(Component):
             else:
                 # logger.error(f"{self.pname} 取流结束或异常！")
                 time.sleep(1)
-
-        # except Exception as e:
-        #     logger.error(f"{self.pname} {traceback.format_exc()}")
-        #     time.sleep(1)  # 等待1s
-        #     self.cap = cv2.VideoCapture(self.config.stream_url)  # 尝试重新取流
+            # except Exception as e:
+            #     logger.error(f"{self.pname} {traceback.format_exc()}")
+            #     time.sleep(1)  # 等待1s
+            #     self.cap = cv2.VideoCapture(self.config.stream_url)  # 尝试重新取流
         return False
 
     def on_analysis(self):
@@ -108,11 +105,11 @@ class StreamComponent(Component):
 
     def _can_read(self) -> bool:
         self.drop_flag += 1
+        self.cap.grab()
         if self.drop_flag >= self.config.stream_drop_interval:
             self.drop_flag = 0
             return True
         else:
-            self.cap.grab()
             return False
 
 

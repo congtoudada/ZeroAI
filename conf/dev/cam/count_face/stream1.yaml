@@ -8,18 +8,14 @@ stream:
 #  url: res/videos/renlian/renlian1.mp4  # 取流地址（输入）
   url: rtsp://admin:hik12345@210.30.97.4:554/h264/ch1/main/av_stream_count1  # 取流地址（输入）
   output_port: camera1  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
-  # 取流重缩放宽（弃用）1920/1
-  width: 1920
-  # 取流重缩放高（弃用）1080/1
-  height: 1080
-  # 画面缩放系数（为了兼容性，建议设2）
+  # 画面缩放系数
   scale: 1
   algorithm: # 算法配置
     - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # yolox
       conf: conf/dev/algorithm/detection/yolox/yolox_head_1-1.yaml
     - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py  # bytetrack
       conf: conf/dev/algorithm/mot/bytetrack/bytetrack_head_1-1-1.yaml
+    - path: lib/business/count/component/count_comp.py  # count
+      conf: conf/dev/algorithm/business/count/count_head1.yaml
     - path: lib/business/count/extension/count_face_comp.py  # count+face
       conf: conf/dev/algorithm/business/count/count_face/count_head_face1.yaml
-#    - path: lib/business/count/component/count_comp.py  # count
-#      conf: conf/dev/algorithm/business/count/count_head1.yaml

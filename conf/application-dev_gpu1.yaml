@@ -1,11 +1,12 @@
-INCLUDE:
+INCLUDE:  # INCLUDE越先被包含，优先级越高
   - conf/dev/global/log.yaml
 cam_list:
+#  - conf/dev/cam/count_face/stream1_keliu.yaml  # 客流计数
 #  - conf/dev/cam/count_face/stream1.yaml  # 计数+人脸（依赖face服务）
 #  - conf/dev/cam/helmet/stream2.yaml  # 安全帽 warnType: 2
-  - conf/dev/cam/phone/stream3.yaml  # 手机 warnType: 1
-  - conf/dev/cam/card/stream4.yaml  # 代刷卡 warnType: 3
-#  - conf/dev/cam/intrude/stream5.yaml  # 入侵检测 warnType: 4
+#  - conf/dev/cam/phone/stream3.yaml  # 手机 warnType: 1
+#  - conf/dev/cam/card/stream4.yaml  # 代刷卡 warnType: 3
+  - conf/dev/cam/intrude/stream5.yaml  # 入侵检测 warnType: 4
 service: [] # 全局服务
 #  - path: lib/face/insight_module/insight/zero/component/insight_comp.py
 #    conf: conf/dev/algorithm/face/insight/insight.yaml

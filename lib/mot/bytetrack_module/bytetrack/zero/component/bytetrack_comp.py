@@ -46,7 +46,7 @@ class BytetrackComponent(BaseMOTComponent):
 
     def on_analysis(self):
         logger.info(f"{self.pname} video fps: {1. / max(1e-5, self.update_timer.average_time):.2f}"
-                    f" inference fps: {1. / max(1e-5, self.timer.average_time):.2f}")
+                    f"bytetrack inference fps: {1. / max(1e-5, self.timer.average_time):.2f}")
 
     def on_resolve_output(self, online_targets: List[STrack]):
         """
@@ -107,16 +107,16 @@ class BytetrackComponent(BaseMOTComponent):
                 intbox = tuple(map(int, (x1, y1, x1 + w, y1 + h)))
                 obj_id = int(self.online_ids[i])
                 cls = int(self.online_classes[i])
-                if self.online_scores is not None and cls < len(self.config.detection_labels):
-                    id_text = '{}:{:.2f}({})'.format(int(obj_id), self.online_scores[i],
-                                                     self.config.detection_labels[int(self.online_classes[i])])
-                else:
-                    id_text = '{}'.format(int(obj_id))
-
-                color = self.get_color(abs(obj_id))
-                cv2.rectangle(im, intbox[0:2], intbox[2:4], color=color, thickness=line_thickness)
-                cv2.putText(im, id_text, (intbox[0], intbox[1]), cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255),
-                            thickness=text_thickness)
+                if cls < len(self.config.detection_labels):
+                    if self.online_scores is not None:
+                        id_text = '{}:{:.2f}({})'.format(int(obj_id), self.online_scores[i],
+                                                         self.config.detection_labels[int(self.online_classes[i])])
+                    # else:
+                    #     id_text = '{}'.format(int(obj_id))
+                    color = self.get_color(abs(obj_id))
+                    cv2.rectangle(im, intbox[0:2], intbox[2:4], color=color, thickness=line_thickness)
+                    cv2.putText(im, id_text, (intbox[0], intbox[1]), cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255),
+                                thickness=text_thickness)
         return super().on_draw_vis(im, vis, window_name)
 
 

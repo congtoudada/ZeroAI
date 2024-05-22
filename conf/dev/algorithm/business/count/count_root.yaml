@@ -1,12 +1,9 @@
 INCLUDE:
+  - conf/dev/algorithm/business/common.yaml
   - conf/dev/global/log.yaml
   - conf/dev/global/output.yaml
 stream:
   output_dir: output/business/count_face  # 输出目录
-  save_video:
-    enable: True  # 是否保存视频
-  draw_vis:
-    enable: True  # 是否可视化
 count:
   base: 0  # 检测基准 0:包围盒中心点 1:包围盒左上角
   reverse: False  # 默认从上到下为进入，从下到上为离开

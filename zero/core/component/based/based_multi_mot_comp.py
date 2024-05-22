@@ -21,6 +21,9 @@ class BasedMultiMOTComponent(BasedMultiDetComponent):
         super().on_start()
         self.ports_len = len(self.config.input_port)
         self.input_mot = [None] * self.ports_len
+        # 初始化端口内容，避免Key不存在
+        for i in range(self.ports_len):
+            mot_info = self.shared_data[self.config.MOT_INFO[i]] = None
 
     def on_resolve_stream(self) -> bool:
         """

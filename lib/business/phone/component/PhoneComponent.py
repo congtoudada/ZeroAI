@@ -44,15 +44,16 @@ class PhoneComponent(BasedMultiMOTComponent):
             for i in range(len(self.input_mot)):  # 遍历内一个检测模型的输出
                 if self.input_mot[i] is not None:
                     for j in range(len(self.input_mot[i])):  # 遍历每一个对象
+                        cls = int(self.input_mot[i][j][5])
+                        if cls != 0:
+                            continue  # 人和手机都是0
                         # logger.info(f"来自{self.config.input_port[i]}端口，检测类别: {self.input_mot[i][j][5]} obj_id: {self.input_mot[i][j][6]}")
                         # print(self.input_mot[i][j][5])
                         if self.config.input_port[i] == "camera3-bytetrack_person1":
-                            # if self.input_mot[i][j][5] == 0.:
-                            if self.input_mot[i][j][5] == 0.:
+                            if int(self.input_mot[i][j][5]) == 0:
                                 person_bboxes.append(self.input_mot[i][j][:4])
                                 person_id.append(self.input_mot[i][j][6])
                         elif self.config.input_port[i] == "camera3-bytetrack_phone1":
-                            # elif self.input_mot[i][j][5] == 1.:
                             phone_bboxes.append(self.input_mot[i][j][:4])
                     if phone_bboxes:  # 检测到手机
                         output_bboxes, output_idx = self.on_calculate(person_bboxes, phone_bboxes)
@@ -115,13 +116,14 @@ class PhoneComponent(BasedMultiMOTComponent):
         for i in range(len(self.input_mot)):  # 遍历内一个检测模型的输出
             if self.input_mot[i] is not None:
                 for obj in self.input_mot[i]:  # 遍历每一个对象
-                    cls = obj[5]
+                    cls = int(obj[5])
                     if cls == 0:
                         ltrb = obj[:4]
                         obj_id = int(obj[6])
                         cv2.rectangle(frame, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
                                       color=(0, 0, 255), thickness=1)
-                        cv2.putText(frame, f"{obj_id}",
+                        label = "person" if i == 0 else "phone"
+                        cv2.putText(frame, f"{obj_id}({label})",
                                     (int(ltrb[0]), int(ltrb[1])),
                                     cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
         # 可视化并返回
