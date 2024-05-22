@@ -1,3 +1,5 @@
 INCLUDE:
   - conf/dev/algorithm/business/count/count_head1.yaml
-  - conf/dev/algorithm/business/count/count_face/face_helper.yaml
+
+count:
+  face_helper: conf/dev/algorithm/business/count/count_face/face_helper.yaml  # 人脸识别配置文件（可选）

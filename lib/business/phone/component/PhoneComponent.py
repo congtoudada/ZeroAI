@@ -62,7 +62,6 @@ class PhoneComponent(BasedMultiMOTComponent):
                         # logger.info(f"检测到玩手机的人 {object_bboxes}")
                         # print(f"检测到玩手机的人 {object_bboxes}")
                         self.on_execute(object_bboxes)
-
         return False
 
     def on_analysis(self):
@@ -113,19 +112,20 @@ class PhoneComponent(BasedMultiMOTComponent):
         :param is_copy:
         :return:
         """
-        for i in range(len(self.input_mot)):  # 遍历内一个检测模型的输出
-            if self.input_mot[i] is not None:
-                for obj in self.input_mot[i]:  # 遍历每一个对象
-                    cls = int(obj[5])
-                    if cls == 0:
-                        ltrb = obj[:4]
-                        obj_id = int(obj[6])
-                        cv2.rectangle(frame, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
-                                      color=(0, 0, 255), thickness=1)
-                        label = "person" if i == 0 else "phone"
-                        cv2.putText(frame, f"{obj_id}({label})",
-                                    (int(ltrb[0]), int(ltrb[1])),
-                                    cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
+        if self.input_mot is not None:
+            for i in range(len(self.input_mot)):  # 遍历内一个检测模型的输出
+                if self.input_mot[i] is not None:
+                    for obj in self.input_mot[i]:  # 遍历每一个对象
+                        cls = int(obj[5])
+                        if cls == 0:
+                            ltrb = obj[:4]
+                            obj_id = int(obj[6])
+                            cv2.rectangle(frame, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
+                                          color=(0, 0, 255), thickness=1)
+                            label = "person" if i == 0 else "phone"
+                            cv2.putText(frame, f"{obj_id}({label})",
+                                        (int(ltrb[0]), int(ltrb[1])),
+                                        cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
         # 可视化并返回
         return super().on_draw_vis(frame, vis, window_name)
 
@@ -136,7 +136,8 @@ class PhoneComponent(BasedMultiMOTComponent):
         last = self.timing_record
         if last is None or (now - last) >= delta:
             for id, bbox in bboxes.items():
-                self.on_save_img(bbox, id, self.config.timing_path)
+                if self.config.timing_enable:
+                    self.on_save_img(bbox, id, self.config.timing_path)
             # print(f"timely save {now}")
             self.timing_record = now
 

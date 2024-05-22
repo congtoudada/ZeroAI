@@ -21,7 +21,10 @@ class BaseMOTComponent(BasedDetComponent):
         self.output_mot_info.clear()
         self.output_mot_info[SharedKey.MOT_ID] = self.current_frame_id
         self.output_mot_info[SharedKey.MOT_FRAME] = self.frame
-        self.output_mot_info[SharedKey.MOT_OUTPUT] = self.on_resolve_output(inference_outputs)
+        if inference_outputs is not None:
+            self.output_mot_info[SharedKey.MOT_OUTPUT] = self.on_resolve_output(inference_outputs)
+        else:
+            self.output_mot_info[SharedKey.MOT_OUTPUT] = None
         self.shared_data[self.config.MOT_INFO] = self.output_mot_info  # 填充输出
 
     def get_color(self, idx):

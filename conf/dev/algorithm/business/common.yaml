@@ -1,8 +1,9 @@
 # 业务公共配置
 log:
   enable: True
+  analysis: False # 是否开启性能分析（额外生成性能日志信息）
 stream:
   save_video:
     enable: True  # 是否保存视频
   draw_vis:
-    enable: True  # 是否可视化
+    enable: False  # 是否可视化

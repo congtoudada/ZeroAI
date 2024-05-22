@@ -102,7 +102,8 @@ class CardComponent(BasedMOTComponent):
         # [6]: id
         :return:
         """
-
+        if self.input_mot is None:
+            return
         for obj in self.input_mot:
             cls = int(obj[5])  # 提取当前目标的类别，转换为整数类型
             if cls == 0:  # 人
@@ -111,7 +112,7 @@ class CardComponent(BasedMOTComponent):
                 obj_id = int(obj[6])  # 提取当前目标的唯一标识符，转换为整数类型
                 # 1.如果没有则添加
                 if not self.item_dict.__contains__(obj_id):  # 检查当前目标是否在 item_dict 中
-                    self.gate_dict[obj_id] = 0 # 加入item_dict时为初始状态0
+                    self.gate_dict[obj_id] = 0  # 加入item_dict时为初始状态0
                     item: CardItem = self.pool.pop()  # 如果当前目标不在 item_dict 中，则从对象池中取出一个对象，这里假设为 CountItem 类型
                     item.init(obj_id,
                               self.config.item_valid_frames)  # 初始化对象 ，传入目标的唯一标识符和有效帧数,card_valid_frames对象稳定出现多少帧，才开始计算
@@ -203,12 +204,13 @@ class CardComponent(BasedMOTComponent):
         text_thickness = 1
         line_thickness = 2
         # 标题线
+        num = 0 if self.input_mot is None else self.input_mot.shape[0]
         # 在图像上添加文本信息，包括帧序号、视频帧率、推理帧率、目标数量以及进入和离开人数等信息
         cv2.putText(im, 'frame:%d video_fps:%.2f inference_fps:%.2f num:%d' %
                     (self.current_frame_id,
                      1. / max(1e-5, self.update_timer.average_time),
                      1. / max(1e-5, self.timer.average_time),
-                     self.input_mot.shape[0]), (0, int(15 * text_scale)),
+                     num), (0, int(15 * text_scale)),
                     cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
         # 红线
         for i, red_point in enumerate(self.red_points):
@@ -234,21 +236,22 @@ class CardComponent(BasedMOTComponent):
             cv2.putText(im, str(item.green_cur), (screen_x + 10, screen_y), cv2.FONT_HERSHEY_PLAIN, text_scale, (255, 0, 0),
                         thickness=text_thickness)
         # 对象包围盒
-        for obj in self.input_mot:
-            cls = int(obj[5])
-            if cls == 0:
-                ltrb = obj[:4]
-                obj_id = int(obj[6])
-                text = ""
-                if self.gate_dict[obj_id] == 2:
-                    text = "normal"
-                elif self.gate_dict[obj_id] == 1:
-                    text = "error"
-                cv2.rectangle(im, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
-                              color=(0, 0, 255), thickness=1)
-                cv2.putText(im, f"{obj_id}"+text,
-                            (int(ltrb[0]), int(ltrb[1])),
-                            cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
+        if self.input_mot is not None:
+            for obj in self.input_mot:
+                cls = int(obj[5])
+                if cls == 0:
+                    ltrb = obj[:4]
+                    obj_id = int(obj[6])
+                    text = ""
+                    if self.gate_dict[obj_id] == 2:
+                        text = "normal"
+                    elif self.gate_dict[obj_id] == 1:
+                        text = "error"
+                    cv2.rectangle(im, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
+                                  color=(0, 0, 255), thickness=1)
+                    cv2.putText(im, f"{obj_id}"+text,
+                                (int(ltrb[0]), int(ltrb[1])),
+                                cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
 
         self.draw_warning(im)
         # 可视化并返回

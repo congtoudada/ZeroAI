@@ -12,4 +12,3 @@ service: [] # 全局服务
 #    conf: conf/dev/algorithm/face/insight/insight.yaml
 app:
   running_file: bin/dev/runtime.pkl
-

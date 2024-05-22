@@ -14,4 +14,5 @@ class CountInfo(BasedMOTInfo):
         self.count_req_len = 2  # 结果序列长度为多少计数 (>=2)
         self.count_red = []  # 点集1
         self.count_green = []  # 点集2
+        self.count_face_helper = ""  # 人脸识别配置文件（可选）
         super().__init__(data)  # 前面是声明，一定要最后调用这段赋值

@@ -2,7 +2,7 @@ INCLUDE:
   - conf/dev/global/log.yaml
   - conf/dev/global/output.yaml
 log:
-  enable: True
+  enable: False
 stream:
   output_dir: output/detection  # 输出目录
   save_video:

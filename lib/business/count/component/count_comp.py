@@ -93,6 +93,8 @@ class CountComponent(BasedMOTComponent):
         # [6]: id
         :return:
         """
+        if self.input_mot is None:
+            return
         for obj in self.input_mot:
             cls = int(obj[5])
             if cls == 0:
@@ -186,6 +188,7 @@ class CountComponent(BasedMOTComponent):
                 # 重置计数器
                 item.red_seq.pop(0)
                 item.green_seq.pop(0)
+                item.retry = 0  # 重置人脸识别重试次数
 
     def on_draw_vis(self, frame, vis=False, window_name="", is_copy=True):
         if is_copy:
@@ -196,11 +199,12 @@ class CountComponent(BasedMOTComponent):
         text_thickness = 1
         line_thickness = 2
         # 标题线
+        num = 0 if self.input_mot is None else self.input_mot.shape[0]
         cv2.putText(im, 'frame:%d video_fps:%.2f inference_fps:%.2f num:%d in:%d out:%d' %
                     (self.current_frame_id,
                      1. / max(1e-5, self.update_timer.average_time),
                      1. / max(1e-5, self.timer.average_time),
-                     self.input_mot.shape[0], self.in_count, self.out_count), (0, int(15 * text_scale)),
+                     num, self.in_count, self.out_count), (0, int(15 * text_scale)),
                     cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
         # 红线
         for i, red_point in enumerate(self.red_points):
@@ -226,16 +230,17 @@ class CountComponent(BasedMOTComponent):
             cv2.putText(im, str(item.green_cur), (screen_x + 10, screen_y), cv2.FONT_HERSHEY_PLAIN, text_scale, (255, 0, 0),
                         thickness=text_thickness)
         # 对象包围盒
-        for obj in self.input_mot:
-            cls = obj[5]
-            if cls == 0:
-                ltrb = obj[:4]
-                obj_id = int(obj[6])
-                cv2.rectangle(im, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
-                              color=(0, 0, 255), thickness=1)
-                cv2.putText(im, f"{obj_id}",
-                            (int(ltrb[0]), int(ltrb[1])),
-                            cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
+        if self.input_mot is not None:
+            for obj in self.input_mot:
+                cls = obj[5]
+                if cls == 0:
+                    ltrb = obj[:4]
+                    obj_id = int(obj[6])
+                    cv2.rectangle(im, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
+                                  color=(0, 0, 255), thickness=1)
+                    cv2.putText(im, f"{obj_id}",
+                                (int(ltrb[0]), int(ltrb[1])),
+                                cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
 
         # 可视化并返回
         return super().on_draw_vis(im, vis, window_name)

@@ -3,6 +3,7 @@ INCLUDE:
   - conf/dev/algorithm/business/phone/phone_root.yaml
 
 warning_path: output/business/phone/warning/
+timing_enable: False
 timing_path: output/business/phone/timing/
 
 input_port:

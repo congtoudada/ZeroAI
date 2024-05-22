@@ -14,6 +14,7 @@ class CountItem:
         self._update_count = 0  # 累计更新次数
         self.per_id = 1  # 默认为陌生人
         self.score = 0  # 置信度分数
+        self.retry = 0  # 识别重试次数
         self.enable = False  # 是否为有效点
 
     def init(self, obj_id, valid_count):
@@ -30,6 +31,7 @@ class CountItem:
         self._update_count = 0  # 累计更新次数
         self.per_id = 1  # 默认为陌生人
         self.score = 0  # 置信度分数
+        self.retry = 0  # 识别重试次数
         self.enable = False
 
     def update(self, last_update_id, base_x, base_y, ltrb):

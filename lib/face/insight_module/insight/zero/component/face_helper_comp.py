@@ -4,17 +4,14 @@ from loguru import logger
 
 from zero.core.component.helper.base_helper_comp import BaseHelperComponent
 from insight.zero.component.face_process_helper_comp import FaceProcessHelperComponent
-from zero.core.info.feature.face_helper_info import FaceHelperInfo
+from insight.zero.info.face_helper_info import FaceHelperInfo
 from zero.utility.config_kit import ConfigKit
 
 
 class FaceHelperComponent(BaseHelperComponent):
-    def __init__(self, shared_data, config, cam_id, callback):
+    def __init__(self, shared_data, path, cam_id, callback):
         super().__init__(shared_data)
-        if isinstance(config, str):
-            self.config: FaceHelperInfo = FaceHelperInfo(ConfigKit.load(config))
-        else:
-            self.config: FaceHelperInfo = config
+        self.config: FaceHelperInfo = FaceHelperInfo(ConfigKit.load(path))
         self.pname = f"[ {os.getpid()}:face_helper ]"
         self.handler = FaceProcessHelperComponent(shared_data, self.config, cam_id, self.face_callback)
         # key: obj_id
@@ -31,7 +28,9 @@ class FaceHelperComponent(BaseHelperComponent):
             self.handler.update()  # Helper是特殊update
         return False
 
-    def can_send(self, obj_id, diff, per_y) -> bool:
+    def can_send(self, obj_id, diff, per_y, retry) -> bool:
+        if retry > self.config.face_max_retry:
+            return False
         if self.face_dict.__contains__(obj_id) and self.face_dict[obj_id]['per_id'] != 1:  # 不是陌生人，不发送
             return False
         if not self.handler.can_send(obj_id):  # 处于响应阶段，不发送

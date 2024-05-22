@@ -90,7 +90,7 @@ class FaceRecognizer(object):
             else:
                 return 1, 0
         except Exception:
-            traceback.print_exc()
+            # traceback.print_exc()
             return 1, 0
 
     # 源码

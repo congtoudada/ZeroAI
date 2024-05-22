@@ -17,7 +17,7 @@ class CountFaceComponent(CountComponent):
         super().__init__(shared_data, config_path)
         self.pname = f"[ {os.getpid()}:face helper ]"
         self.helper = FaceHelperComponent(shared_data,
-                                          self.config,
+                                          self.config.count_face_helper,
                                           self.stream_cam_id,
                                           self.face_callback)
 
@@ -39,7 +39,7 @@ class CountFaceComponent(CountComponent):
 
     def cen_send(self, obj_id, item):
         diff = self.current_frame_id - item.__getattribute__("last_face_req")
-        if self.helper.can_send(obj_id, diff, item.base_y):
+        if self.helper.can_send(obj_id, diff, item.base_y, item.retry):
             # w = item.ltrb[2] - item.ltrb[0]
             # h = item.ltrb[3] - item.ltrb[1]
             # if w * h < 15 * 15:  # 包围盒太小，不发送
@@ -75,9 +75,11 @@ class CountFaceComponent(CountComponent):
         return super().on_draw_vis(im, vis, window_name, False)  # 父类没有必要继续copy
 
     def face_callback(self, obj_id, per_id, score):
-        self.item_dict[obj_id].per_id = per_id
-        self.item_dict[obj_id].score = score
-
+        if self.item_dict.__contains__(obj_id):
+            if per_id == 1:
+                self.item_dict[obj_id].retry += 1
+            self.item_dict[obj_id].per_id = per_id
+            self.item_dict[obj_id].score = score
 
     def _crop_img(self, im, ltrb):
         x1, y1, x2, y2 = ltrb[0], ltrb[1], ltrb[2], ltrb[3]
