@@ -172,14 +172,8 @@ class PhoneComponent(BasedMultiMOTComponent):
 
     def on_save_img(self, bbox, id, path):
         img = self.frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
-        # img_name = "0000_c" + str(self.stream_cam_id) + "s1_" + "{:06d}".format(self.current_frame_id) + "{:02d}".format(int(id)) + "_"
-        time_str = time.strftime('%Y%m%d', time.localtime())
-        path = path + (f"0000_c{self.stream_cam_id}s1_{time_str}{int(self.current_frame_id):08d}_{int(id):02d}_"
-                       f"{int(bbox[0])}_{int(bbox[1])}_{int(bbox[2])}_{int(bbox[3])}.jpg")
-        # for i in range(4):
-        #     img_name += str(int(bbox[i])) + "_"
-        # img_name = img_name[:-1]
-        # path = path+img_name+".jpg"
+        time_str = time.strftime('%Y%m%d%H%M%S', time.localtime())
+        path = path + f"0_{self.stream_cam_id}_{time_str}.jpg"
         cv2.imwrite(path, img)
         return path, img
 
