@@ -1,6 +1,8 @@
+
+# PhoneComponent
+
 import os
 import time
-
 import cv2
 from loguru import logger
 from math import sqrt
@@ -11,6 +13,9 @@ from phone.info.PhoneInfo import PhoneInfo
 from zero.core.component.based.based_multi_mot_comp import BasedMultiMOTComponent
 from zero.utility.config_kit import ConfigKit
 
+
+import glob
+import requests
 
 class PhoneComponent(BasedMultiMOTComponent):
     def __init__(self, shared_data, config_path: str):
@@ -170,12 +175,45 @@ class PhoneComponent(BasedMultiMOTComponent):
                         self.state.append(id)
                         self.counter[id] = 0
 
+                        # 检查目录中的图片数量
+                        if self.count_images_in_directory(self.config.warning_path) > 5:
+                            # 构建请求数据
+                            data = {
+                                "query_directory_or_id": "output/business/phone/warning",
+                                "gallery_directory": "res/images/reid_tmp_data/id_gt"
+                            }
+                            # 发送POST请求
+                            response = requests.post("http://localhost:5000/process", json=data, headers={"Content-Type": "application/json"})
+                            if response.status_code == 200:
+                                print("POST successfully")
+                                # 清空目录
+                                self.clear_directory(self.config.warning_path)
+                            else:
+                                print("POST failed, status code:", response.status_code)
+
     def on_save_img(self, bbox, id, path):
+        # 检查路径是否存在
+        if not os.path.exists(path):
+            # 如果路径不存在，创建路径
+            os.makedirs(path)
+
+        # 接下来是你的图像处理逻辑
         img = self.frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
         time_str = time.strftime('%Y%m%d%H%M%S', time.localtime())
-        path = path + f"0_{self.stream_cam_id}_{time_str}.jpg"
-        cv2.imwrite(path, img)
-        return path, img
+        # 确保文件名是路径的一部分
+        file_path = os.path.join(path, f"0_{self.stream_cam_id}_{time_str}.jpg")
+        cv2.imwrite(file_path, img)
+        return file_path, img
+
+    def count_images_in_directory(self, directory):
+        # 返回目录中的jpg图片数量
+        return len(glob.glob(os.path.join(directory, '*.jpg')))
+
+    def clear_directory(self, directory):
+        # 删除目录中的所有文件
+        files = glob.glob(os.path.join(directory, '*'))
+        for f in files:
+            os.remove(f)
 
 
 def create_process(shared_data, config_path: str):
@@ -184,8 +222,13 @@ def create_process(shared_data, config_path: str):
     phoneComp.update()  # 算法逻辑循环
 
 
+
+
+
 if __name__ == "__main__":
     time_str = time.strftime('%Y%m%d', time.localtime())
     print(time_str)
     id_str = f"{2:02d}"
     print(id_str)
+
+
