@@ -34,6 +34,7 @@ class AlgorithmGroupComponent(BaseHelperComponent):
                 sys.path.append(os.path.dirname(module_file))
                 module = importlib.import_module(os.path.basename(module_file).split(".")[0])
                 if module.__dict__.__contains__("create_process"):
+                    logger.info(f"{self.pname} 读取配置: {comp['conf']}")
                     Process(target=module.create_process,
                             args=(self.shared_data, comp['conf']),
                             daemon=False).start()
