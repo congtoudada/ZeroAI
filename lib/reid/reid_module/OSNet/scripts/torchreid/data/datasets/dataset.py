@@ -60,6 +60,7 @@ class Dataset(object):
             query = [(*items, 0) for items in query]
         if len(gallery[0]) == 3:
             gallery = [(*items, 0) for items in gallery]
+        
 
         self.train = train
         self.query = query

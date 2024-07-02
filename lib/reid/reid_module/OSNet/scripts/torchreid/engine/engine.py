@@ -15,6 +15,8 @@ from torchreid.utils import (
 )
 from torchreid.losses import DeepSupervision
 
+#pzy
+import json
 
 class Engine(object):
     r"""A generic base Engine class for both image- and video-reid.
@@ -296,7 +298,7 @@ class Engine(object):
         dist_metric='euclidean',
         normalize_feature=False,
         visrank=False,
-        visrank_topk=10,
+        visrank_topk=4,
         save_dir='',
         use_metric_cuhk03=False,
         ranks=[1, 5, 10, 20],
@@ -317,23 +319,16 @@ class Engine(object):
         """
         self.set_model_mode('eval')
         targets = list(self.test_loader.keys())
-
-        #pzy
-        def get_gallery_image_names(topn_matches, gallery_dataset):
-            gallery_image_names = []
-            for query_indices in topn_matches:
-                query_image_names = [gallery_dataset[idx][0] for idx in query_indices]  # Assuming gallery_dataset contains paths or identifiers
-                gallery_image_names.append(query_image_names)
-            return gallery_image_names
         
         for name in targets:
             domain = 'source' if name in self.datamanager.sources else 'target'
             print('##### Evaluating {} ({}) #####'.format(name, domain))
             query_loader = self.test_loader[name]['query']
             gallery_loader = self.test_loader[name]['gallery']
-            #rank1, mAP = self._evaluate( 
-            #pzy
-            topn_matches, rank1, mAP = self._evaluate( 
+            #原始：rank1, mAP = self._evaluate( 
+            #pzy 注意更改  1:
+            #topn_matches, rank1, mAP = self._evaluate( 
+            topn_matches = self._evaluate(                                          
                 dataset_name=name,
                 query_loader=query_loader,
                 gallery_loader=gallery_loader,
@@ -347,50 +342,51 @@ class Engine(object):
                 rerank=rerank
             )
             
-            #print(gallery_loader) #<torch.utils.data.dataloader.DataLoader object at 0x7fe19423e6a0>
-            #print(dir(gallery_loader.dataset)) 
-            '''['__add__', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', 
-            '__getitem__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__len__', '__lt__', '__module__', '__ne__', '__new__', 
-            '__radd__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', 
-            '_junk_pids', '_train_only', '_transform_image', 'check_before_run', 'combine_all', 'combineall', 'data', 'data_dir', 'dataset_dir', 
-            'dataset_url', 'download_dataset', 'extra_gallery_dir', 'gallery', 'gallery_dir', 'get_num_cams', 'get_num_datasets', 'get_num_pids', 
-            'k_tfm', 'market1501_500k', 'mode', 'num_datasets', 'num_train_cams', 'num_train_pids', 'process_dir', 'query', 'query_dir', 'root', 
-            'show_summary', 'train', 'train_dir', 'transform', 'verbose'''
-            #print(gallery_loader.dataset.gallery)  #e.g.('/user66/zuyi/OSNet/datasets/dut_test/market1501/bounding_box_test/1156_c6s3_024367_01.jpg', 1156, 5, 0), 
-            #print(len(gallery_loader.dataset.gallery)) #566
-            
             #🟥🟥🟥获得最关键的[n,topn] 其中n为所有query的数量，topn为想获得前多少的结果，列表内容为gallery_image_names🟥🟥🟥
             gallery_paths = gallery_loader.dataset.gallery  
-            n_topn_gallery_image_names = get_gallery_image_names(topn_matches, gallery_paths)
+            q_topn_gallery_image_names = self.get_gallery_image_names(topn_matches, gallery_paths)
             
-            #print(dir(query_loader.dataset))
-            '''['__add__', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', 
-            '__getitem__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__len__', '__lt__', '__module__', '__ne__', '__new__',
-            '__radd__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', 
-            '_junk_pids', '_train_only', '_transform_image', 'check_before_run', 'combine_all', 'combineall', 'data', 'data_dir', 'dataset_dir',
-            'dataset_url', 'download_dataset', 'extra_gallery_dir', 'gallery', 'gallery_dir', 'get_num_cams', 'get_num_datasets', 'get_num_pids',
-            'k_tfm', 'market1501_500k', 'mode', 'num_datasets', 'num_train_cams', 'num_train_pids', 'process_dir', 'query', 'query_dir', 'root', 
-            'show_summary', 'train', 'train_dir', 'transform', 'verbose']'''
+
             query_paths = query_loader.dataset.query
             #把query加进去成为首列
-            n_topn_gallery_image_names = [[query_path] + gallery_images for query_path, gallery_images in zip(query_paths, n_topn_gallery_image_names)]
+            q_topn_gallery_image_names = [[query_path[0]] + gallery_images for query_path, gallery_images in zip(query_paths, q_topn_gallery_image_names)]
             
-            
-            # 打印出gallery_image_names的总行数（n）
-            #print("Total number of queries (n):", len(n_topn_gallery_image_names)) #20
-            # 打印每一行的长度（应该每行都是topn）
-            #for i, names in enumerate(n_topn_gallery_image_names):
-            #    print(f"Number of image paths for query {i+1} (should be topn):", len(names)) #每一行都是10+1=11
-            
-            if self.writer is not None:
-                self.writer.add_scalar(f'Test/{name}/rank1', rank1, self.epoch)
-                self.writer.add_scalar(f'Test/{name}/mAP', mAP, self.epoch)
-        
-        #return rank1
-        #pzy
-        return n_topn_gallery_image_names, rank1, mAP
+            print("调试354", q_topn_gallery_image_names)
+            return q_topn_gallery_image_names
     
-
+    #pzy 制作结果
+    #列表
+    # def get_gallery_image_path(self, topn_matches, gallery_dataset):
+    #     gallery_image_path = []
+    #     for query_indices in topn_matches:
+    #         gallery_image_path = [gallery_dataset[idx][0] for idx in query_indices]  # [0]是地址，[1][2]是其他信息
+    #         gallery_image_path.append(gallery_image_path)
+    #     return gallery_image_path
+    def get_gallery_imagePath(self, topn_matches, gallery_dataset):
+        # 初始化用于存储所有查询结果的图库图像路径的列表
+        gallery_image_paths = []
+        # 遍历每个查询的匹配结果
+        for query_indices in topn_matches:
+            # 对于当前查询，获取对应的所有图库图像路径
+            x = [gallery_dataset[idx][0] for idx in query_indices]  # [0]是地址，[1][2]是其他信息
+            # 将当前查询的图库图像路径列表添加到累积列表中
+            gallery_image_paths.append(x)
+        return gallery_image_paths
+        
+    #字典
+    def get_gallery_image_names_dict(self, topn_matches, gallery_dataset):
+        gallery_image_names_dict = {}
+        for query_index, query_indices in enumerate(topn_matches):
+            gallery_image_dir = [gallery_dataset[idx][0] for idx in query_indices]  
+            gallery_image_names_dict[query_index] = gallery_image_dir
+        return gallery_image_names_dict
+    
+    def get_gallery_image_names(self, topn_matches, gallery_dataset):
+        gallery_image_names = []
+        for query_indices in topn_matches:
+            query_image_names = [gallery_dataset[idx][0] for idx in query_indices]  # Assuming gallery_dataset contains paths or identifiers
+            gallery_image_names.append(query_image_names)
+        return gallery_image_names
         
 
     @torch.no_grad()
@@ -405,9 +401,9 @@ class Engine(object):
         visrank_topk=10,
         save_dir='',
         use_metric_cuhk03=False,
-        ranks=[1, 5, 10, 20],
+        ranks=[1, 5, 10],
         rerank=False,
-        topn=5  #pzy 添加一个参数来指定topn 
+        top_n_matches=10  #危险   硬编码
     ):
         batch_time = AverageMeter()
 
@@ -422,8 +418,8 @@ class Engine(object):
                 batch_time.update(time.time() - end)
                 features = features.cpu()
                 f_.append(features)
-                pids_.extend(pids.tolist())
-                camids_.extend(camids.tolist())
+                # pids_.extend(pids.tolist())
+                # camids_.extend(camids.tolist())
             f_ = torch.cat(f_, 0)
             pids_ = np.asarray(pids_)
             camids_ = np.asarray(camids_)
@@ -431,8 +427,8 @@ class Engine(object):
 
         print('Extracting features from query set ...')
         qf, q_pids, q_camids = _feature_extraction(query_loader)
-        print(q_pids,q_pids.shape,"engine.py __Line434")
-        print(q_camids,q_camids.shape,"engine.py __Line435")  
+        print(q_pids,"调试代码 q_pids   engine.py Line434")
+        print(q_camids,"调试代码 q_camid  engine.py Line435")  
         print('Done, obtained {}-by-{} matrix'.format(qf.size(0), qf.size(1)))
 
         print('Extracting features from gallery set ...')
@@ -457,55 +453,26 @@ class Engine(object):
             distmat_gg = metrics.compute_distance_matrix(gf, gf, dist_metric)
             distmat = re_ranking(distmat, distmat_qq, distmat_gg)
         #######------------------#################
-        #pzy:line408_line425 chatgpt
         else:
             print('Computing distance matrix with metric={} ...'.format(dist_metric))
             distmat = metrics.compute_distance_matrix(qf, gf, dist_metric)
             distmat = distmat.numpy()
-        
-        # 添加一个新的函数来获取每个查询的topn匹配项
-        def _get_top_n_matches(distmat, topn):
-            # 对每个查询的距离进行排序，并获取前topn个最小距离的索引
-            indices = np.argsort(distmat, axis=1)
-            top_n_indices = indices[:, :topn]
-            return top_n_indices
 
         # 使用新函数获取topn匹配项
-        topn_matches = _get_top_n_matches(distmat, topn)
-        #print(topn_matches.shape) #[n,topn]
-        #######------------------###############
-        print('Computing CMC and mAP ...')
-        cmc, mAP = metrics.evaluate_rank(
-            distmat,
-            q_pids,
-            g_pids,
-            q_camids,
-            g_camids,
-            use_metric_cuhk03=use_metric_cuhk03
-        )
-
-        print('** Results **')
-        print('mAP: {:.1%}'.format(mAP))
-        print('CMC curve')
-        #在这里输出rank1、rank5等.
-        for r in ranks:
-            print('Rank-{:<3}: {:.1%}'.format(r, cmc[r - 1])) 
-
-        if visrank:
-            visualize_ranked_results(
-                distmat,
-                self.datamanager.fetch_test_loaders(dataset_name),
-                self.datamanager.data_type,
-                width=self.datamanager.width,
-                height=self.datamanager.height,
-                save_dir=osp.join(save_dir, 'visrank_' + dataset_name),
-                topk=visrank_topk
-            )
+        topn_matches = self.get_top_n_matches(distmat, top_n_matches)
         
-        #但是结果值返回rank1(cmc[0])和mAP
-        #print(topn_matches,"!!!!!!!!!!!!!!!!!!!scripts/torchreid/engine/engine.py Line455")
-        return topn_matches, cmc[0], mAP
+        print("调试代码 enigne.py line522 返回topn_matches")
+        return topn_matches
 
+
+    def get_top_n_matches(self, distmat, top_n_matches):
+        # 对每一个query的所有gallery结果距离进行排序，并获取前topn个最小距离的gallery的索引
+        indices = np.argsort(distmat, axis=1)
+        # 确保不会超出distmat的列数
+        top_n = min(top_n_matches, indices.shape[1])
+        top_n_indices = indices[:, :top_n]
+        return top_n_indices
+    
     def compute_loss(self, criterion, outputs, targets):
         if isinstance(outputs, (tuple, list)):
             loss = DeepSupervision(criterion, outputs, targets)

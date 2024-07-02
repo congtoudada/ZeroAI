@@ -331,20 +331,20 @@ class ImageDataManager(DataManager):
             self.test_dataset[name]['query'] = queryset.query
             self.test_dataset[name]['gallery'] = galleryset.gallery
 
-        print('\n')
-        print('  **************** Summary ****************')
-        print('  source            : {}'.format(self.sources))
-        print('  # source datasets : {}'.format(len(self.sources)))
-        print('  # source ids      : {}'.format(self.num_train_pids))
-        print('  # source images   : {}'.format(len(trainset)))
-        print('  # source cameras  : {}'.format(self.num_train_cams))
-        if load_train_targets:
-            print(
-                '  # target images   : {} (unlabeled)'.format(len(trainset_t))
-            )
-        print('  target            : {}'.format(self.targets))
-        print('  *****************************************')
-        print('\n')
+        # print('\n')
+        # print('  **************** Summary ****************')
+        # print('  source            : {}'.format(self.sources))
+        # print('  # source datasets : {}'.format(len(self.sources)))
+        #print('  # source ids      : {}'.format(self.num_train_pids))
+        #print('  # source images   : {}'.format(len(trainset)))
+        #print('  # source cameras  : {}'.format(self.num_train_cams))
+        # if load_train_targets:
+        #     print(
+        #         '  # target images   : {} (unlabeled)'.format(len(trainset_t))
+        #     )
+        # print('  target            : {}'.format(self.targets))
+        # print('  *****************************************')
+        # print('\n')
 
 
 class VideoDataManager(DataManager):
