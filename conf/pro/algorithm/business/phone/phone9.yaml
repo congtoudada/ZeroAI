@@ -1,0 +1,12 @@
+INCLUDE:
+  - conf/pro/algorithm/business/common.yaml
+  - conf/pro/algorithm/business/phone/phone_root.yaml
+
+warning_path: output/business/phone/warning/
+timing_enable: True
+timing_path: output/business/phone/timing/
+
+input_port:
+  - camera9-bytetrack_phone
+  - camera9-bytetrack_phone_person
+output_port: None  # 不需要输出

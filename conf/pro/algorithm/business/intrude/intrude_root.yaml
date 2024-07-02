@@ -1,0 +1,9 @@
+INCLUDE:
+    - conf/pro/algorithm/business/common.yaml
+    - conf/pro/global/log.yaml
+    - conf/pro/global/output.yaml
+stream:
+  output_dir: D:\ZeroAI\output\business\intrude  # 输出目录
+intrude:
+  valid_count: 10
+  lost_frames: 60

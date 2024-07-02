@@ -1,0 +1,5 @@
+INCLUDE:
+  - conf/pro/algorithm/business/count/count_root.yaml
+  - conf/pro/algorithm/business/count/zone/count_face_points.yaml
+input_port: camera6-bytetrack_renlian
+output_port: None  # 不需要输出

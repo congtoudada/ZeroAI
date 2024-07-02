@@ -1,0 +1,19 @@
+# 计数-人脸摄像头1
+INCLUDE:
+  - conf/pro/cam/stream_root.yaml
+log:
+  analysis: False
+stream:
+  cam_id: 6  # 摄像头编号
+#  url: res/videos/renlian/renlian1.mp4  # 取流地址（输入）
+  url: rtsp://admin:zwjs1357@192.168.1.116:554/h264/ch1/main/av_stream_renlian6  # 取流地址（输入）
+  output_port: camera6  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1
+  # 画面缩放系数
+  scale: 1
+  algorithm: # 算法配置
+    - path: lib/detection/yolox_module/yolox/zero/component/yolox_comp.py  # yolox
+      conf: conf/pro/algorithm/detection/yolox/yolox_renlian_6.yaml
+    - path: lib/mot/bytetrack_module/bytetrack/zero/component/bytetrack_comp.py  # bytetrack
+      conf: conf/pro/algorithm/mot/bytetrack/bytetrack_renlian_6.yaml
+    - path: lib/business/count/extension/count_face_comp.py  # count+face
+      conf: conf/pro/algorithm/business/count/count_face/count_head_face6.yaml

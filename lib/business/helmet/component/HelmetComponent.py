@@ -11,7 +11,7 @@ from zero.core.component.based.based_mot_comp import BasedMOTComponent
 from zero.utility.config_kit import ConfigKit
 from loguru import logger
 
-from zero.utility.img_kit import ImgKit
+from zero.utility.img_kit import ImgKit,ImgKit_img_box
 from zero.utility.object_pool import ObjectPool
 from zero.utility.timer_kit import TimerKit
 
@@ -63,7 +63,11 @@ class HelmetComponent(BasedMOTComponent):
             if helmet_item.cls == 0 or helmet_item.cls == 2:
                 logger.info(f"安全帽佩戴异常: obj_id{helmet_item.obj_id} cls:{helmet_item.cls}")
                 helmet_item.has_warn = True
-                shot_img = ImgKit.crop_img(self.frame, ltrb)
+                # shot_img = ImgKit.crop_img(self.frame, ltrb)
+                # WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, 2, 1,
+                #                          shot_img, self.config.stream_export_img_enable, self.config.stream_web_enable)
+
+                shot_img = ImgKit_img_box.draw_img_box(self.frame, ltrb)
                 WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, 2, 1,
                                          shot_img, self.config.stream_export_img_enable, self.config.stream_web_enable)
 

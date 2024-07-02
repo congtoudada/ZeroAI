@@ -3,7 +3,7 @@ import re
 import glob
 import os.path as osp
 import warnings
-
+import os
 from ..dataset import ImageDataset
 
 
@@ -43,6 +43,7 @@ class dut_test(ImageDataset):
         self.train_dir = osp.join(self.data_dir, 'bounding_box_train')
         self.query_dir = osp.join(self.data_dir, 'query')
         self.gallery_dir = osp.join(self.data_dir, 'bounding_box_test')#market1501里面的三个文件夹
+        
         self.extra_gallery_dir = osp.join(self.data_dir, 'images')
         self.market1501_500k = market1501_500k
 
@@ -61,28 +62,52 @@ class dut_test(ImageDataset):
 
         super(dut_test, self).__init__(train, query, gallery, **kwargs)
 
+    # def process_dir(self, dir_path, relabel=False):
+    #     img_paths = glob.glob(osp.join(dir_path, '*.jpg'))
+    #     pattern = re.compile(r'([-\d]+)_c(\d)')
+
+    #     pid_container = set()
+    #     for img_path in img_paths:
+    #         pid, _ = map(int, pattern.search(img_path).groups())
+    #         if pid == -1:
+    #             continue # junk images are just ignored
+    #         pid_container.add(pid)
+    #     pid2label = {pid: label for label, pid in enumerate(pid_container)}
+
+    #     data = []
+    #     for img_path in img_paths:
+    #         pid, camid = map(int, pattern.search(img_path).groups())
+    #         #if pid == -1:
+    #         #    continue # junk images are just ignored
+    #         #assert 0 <= pid <= 1501 # pid == 0 means background
+    #         #assert 1 <= camid <= 6
+    #         #camid -= 1 # index starts from 0
+    #         if relabel:
+    #             pid = pid2label[pid]
+    #         data.append((img_path, pid, camid))
+
+    #     return data
     def process_dir(self, dir_path, relabel=False):
-        img_paths = glob.glob(osp.join(dir_path, '*.jpg'))
-        pattern = re.compile(r'([-\d]+)_c(\d)')
+        img_paths = glob.glob(os.path.join(dir_path, '*.jpg'))
 
         pid_container = set()
         for img_path in img_paths:
-            pid, _ = map(int, pattern.search(img_path).groups())
+            parts = os.path.basename(img_path).split('_')
+            pid = int(parts[0])
             if pid == -1:
-                continue # junk images are just ignored
+                continue  # junk images are just ignored
             pid_container.add(pid)
         pid2label = {pid: label for label, pid in enumerate(pid_container)}
 
         data = []
         for img_path in img_paths:
-            pid, camid = map(int, pattern.search(img_path).groups())
-            #if pid == -1:
-            #    continue # junk images are just ignored
-            #assert 0 <= pid <= 1501 # pid == 0 means background
-            #assert 1 <= camid <= 6
-            #camid -= 1 # index starts from 0
-            if relabel:
-                pid = pid2label[pid]
+            parts = os.path.basename(img_path).split('_')
+            pid = parts[0]
+            camid = parts[1]
+            # if pid == -1:
+            #     continue  # junk images are just ignored
+            # if relabel:
+            #     pid = pid2label[pid]
             data.append((img_path, pid, camid))
 
         return data

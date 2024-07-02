@@ -210,3 +210,20 @@ def engine_run_kwargs(cfg):
         'ranks': cfg.test.ranks,
         'rerank': cfg.test.rerank
     }
+
+def engine_run_onlyTest_kwargs(cfg):
+    return {
+        'save_dir': cfg.data.save_dir,
+        'start_eval': cfg.test.start_eval,
+        'eval_freq': cfg.test.eval_freq,
+        'test_only': cfg.test.evaluate,
+        'dist_metric': cfg.test.dist_metric,
+        'normalize_feature': cfg.test.normalize_feature,
+        'visrank': cfg.test.visrank,
+        'visrank_topk': cfg.test.visrank_topk,
+        'use_metric_cuhk03': cfg.cuhk03.use_metric_cuhk03,
+        'ranks': cfg.test.ranks,
+        'rerank': cfg.test.rerank
+    }
+
+    

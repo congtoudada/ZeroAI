@@ -1,0 +1,9 @@
+INCLUDE:
+    - conf/dev/algorithm/business/common.yaml
+    - conf/dev/global/log.yaml
+    - conf/dev/global/output.yaml
+stream:
+  output_dir: D:\ZeroAI\output\business\helmet  # 输出目录
+helmet:
+  valid_count: 10
+  lost_frames: 60

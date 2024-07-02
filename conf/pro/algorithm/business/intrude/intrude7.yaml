@@ -1,0 +1,6 @@
+INCLUDE:
+  - conf/pro/algorithm/business/intrude/intrude_root.yaml
+  - conf/pro/algorithm/business/intrude/zone/intrude_points.yaml
+
+input_port: camera7-bytetrack_intrude
+output_port: None  # 不需要输出

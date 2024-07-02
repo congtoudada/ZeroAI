@@ -1,0 +1,5 @@
+INCLUDE:
+  - conf/pro/algorithm/business/card/zone/card_points2.yaml
+  - conf/pro/algorithm/business/card/card_root.yaml
+input_port: camera8-bytetrack_card
+output_port: None  # 不需要输出
