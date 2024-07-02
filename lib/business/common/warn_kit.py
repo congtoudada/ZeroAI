@@ -28,7 +28,7 @@ class WarnKit:
         elif warnType == 4:
             warn_str = "Intrude"
         img_path = os.path.join(output_dir, f"{time_str}_{warn_str}_{per_id}.jpg")
-        if img_enable and shot_img is not None:
+        if img_enable:
             cv2.imwrite(img_path, shot_img)
             logger.info(f"{pname}存图成功，路径: {img_path}")
         if web_enable:

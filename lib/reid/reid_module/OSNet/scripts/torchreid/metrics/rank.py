@@ -140,6 +140,15 @@ def eval_market1501(distmat, q_pids, g_pids, q_camids, g_camids, max_rank):
             #使用np.invert函数得到保留的图库样本的布尔数组keep，其中True表示保留，False表示删除。
         remove = (g_pids[order] == q_pid) & (g_camids[order] == q_camid)
         
+        # #pzy1
+        # # Find the first match to remove  
+        # first_match_index = np.where(remove)[0][0] if np.any(remove) else None
+        # # Create a new keep array
+        # keep = np.ones_like(remove, dtype=bool)
+        # # Set the first match to remove
+        # if first_match_index is not None:
+        #     keep[first_match_index] = False
+        
         keep = np.invert(remove)
         keep = np.ones_like(keep, dtype=bool) #pzy2
         # compute cmc curve
@@ -201,7 +210,6 @@ def eval_market1501(distmat, q_pids, g_pids, q_camids, g_camids, max_rank):
         #将计算得到的平均准确率添加到all_AP列表中。
         all_AP.append(AP)
 
-    #pzy 重点更改 是否可以直接注释掉
     assert num_valid_q > 0, 'Error: all query identities do not appear in gallery'
     
     #类型转换,避免整数除法

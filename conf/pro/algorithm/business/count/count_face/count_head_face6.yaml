@@ -1,5 +1,0 @@
-INCLUDE:
-  - conf/pro/algorithm/business/count/count_renlian6.yaml
-
-count:
-  face_helper: conf/pro/algorithm/business/count/count_face/face_helper.yaml  # 人脸识别配置文件（可选）

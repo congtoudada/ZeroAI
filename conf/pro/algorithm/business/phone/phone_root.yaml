@@ -1,7 +1,0 @@
-INCLUDE:
-  - conf/pro/algorithm/business/common.yaml
-  - conf/pro/global/log.yaml
-  - conf/pro/global/output.yaml
-stream:
-  output_dir: output\business\phone  # 输出目录
-

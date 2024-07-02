@@ -1,5 +1,0 @@
-detection:
-  labels:
-    - wrong
-    - right
-    - no-hat

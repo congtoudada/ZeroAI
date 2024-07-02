@@ -5,7 +5,7 @@ import argparse
 import torch
 import torch.nn as nn
 #sys.path.insert(0, "/root/user66/anaconda3/envs/zuyi")
-#sys.path.append("/user66/zuyi/OSNet/torchreid")
+sys.path.append("/user66/zuyi/OSNet/torchreid")
 #print(sys.path)
 import torchreid
 from torchreid.models import build_model #pzy
@@ -18,7 +18,7 @@ from torchreid.utils import (
 )
 
 from default_config import (
-    imagedata_kwargs, optimizer_kwargs, videodata_kwargs, engine_run_kwargs, engine_run_onlyTest_kwargs,
+    imagedata_kwargs, optimizer_kwargs, videodata_kwargs, engine_run_kwargs,
     get_default_config, lr_scheduler_kwargs
 )
 from pprint import pprint
@@ -31,16 +31,14 @@ class Reid:
         self.parser.add_argument('opts', default=None, nargs=argparse.REMAINDER, help='Modify config options using the command-line')
         self.parser.add_argument('-s','--sources',type=str,nargs='+',help='source datasets (delimited by space)')
         self.parser.add_argument('-t','--targets',type=str,nargs='+',help='target datasets (delimited by space)')
-        self.parser.add_argument('--transforms', type=str, nargs='+', default=['random_flip', 'random_erase'], help='data augmentation')
-        self.parser.add_argument('--test_evaluate', action='store_true', default=True, help='whether to perform evaluation')
-        
         self.parser.add_argument('--config-file', type=str, default='conf/dev/algorithm/reid/dut_test_1c.yaml', help='path to config file')
+        self.parser.add_argument('--transforms', type=str, nargs='+', default=['random_flip', 'random_erase'], help='data augmentation')
         self.parser.add_argument('--root', type=str, default='lib/reid/reid_module/root_datasets/dut_test', help='path to data root')
         self.parser.add_argument('--model_weights', type=str, default='pretrained/reid/osnet_x1_0_market_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_labelsmooth_flip.pth', help='path to model weights')
-        
+        self.parser.add_argument('--test_evaluate', action='store_true', default=True, help='whether to perform evaluation')
         self.args = self.parser.parse_args()
         
-    def run(self,query_directory,gallery_directory):
+    def run(self,demo_data1,demo_data2):
         cfg = get_default_config()
         cfg.use_gpu = torch.cuda.is_available()
         if self.args.config_file:
@@ -50,27 +48,27 @@ class Reid:
         set_random_seed(cfg.train.seed)
         self.check_cfg(cfg)
         
-        #print(self.args.config_file,self.args.root,self.args.test_evaluate,"调试Line47")
-        #print(cfg.test.evaluate, cfg.model.load_weights)
-        print(cfg,"调试代码  reid.py line53")
-        #print(dir(self),"line54调试待删除")
+        print(self.args.config_file,self.args.root,self.args.test_evaluate,"调试Line47")
+        print(cfg.test.evaluate, cfg.model.load_weights)
+        pprint(cfg)
+        print(dir(self),"line54调试待删除")
         
-        # 如果 query_directory 是目录，则调用 replace_query_contents_with_directory 方法。
+        # 如果 demo_data1 是目录，则调用 replace_query_contents_with_directory 方法。
             #自己定义一个self.query_dir
         self.query_dir = os.path.join(cfg.data.root, 'tmp_file', 'query')
-        if os.path.isdir(query_directory):
-            print(query_directory,"调试代码待删除Line60")
-            self.replace_query_contents_with_directory(query_directory, self.query_dir)
+        if os.path.isdir(demo_data1):
+            print(demo_data1,"调试代码待删除")
+            self.replace_query_contents_with_directory(demo_data1, self.query_dir)
         else:
-            print(f"The query_directory {query_directory} is not a directory.")
-        # 如果 gallery_directory 是目录，则调用 replace_query_contents_with_directory 方法。
+            print(f"The demo_data1 {demo_data1} is not a directory.")
+        # 如果 demo_data2 是目录，则调用 replace_query_contents_with_directory 方法。
             #自己定义一个self.query_dir
         self.gallery_dir = os.path.join(cfg.data.root, 'tmp_file', 'bounding_box_test')
-        if os.path.isdir(gallery_directory):
-            print(gallery_directory,"调试代码待删除line68")
-            self.replace_query_contents_with_directory(gallery_directory, self.gallery_dir)
+        if os.path.isdir(demo_data2):
+            print(demo_data2,"调试代码待删除")
+            self.replace_query_contents_with_directory(demo_data2, self.gallery_dir)
         else:
-            print(f"The gallery_directory {gallery_directory} is not a directory.")
+            print(f"The demo_data2 {demo_data2} is not a directory.")
 
         print(dir(self),"line73调试待删除")
         
@@ -119,10 +117,20 @@ class Reid:
         print(
             'Building {}-engine for {}-reid'.format(cfg.loss.name, cfg.data.type)
         )
-        
         engine = self.build_engine(cfg, datamanager, model, optimizer, scheduler)
-        q_topn_dir = engine.run(**engine_run_kwargs(cfg))
-        return q_topn_dir
+        # engine.run(**engine_run_kwargs(cfg))
+        n_topn_gallery_image_names, rank1, mAP = engine.run(**engine_run_kwargs(cfg))
+
+
+        # 需求:
+        # for row in n_topn_gallery_image_names:
+        #     # 使用生成器表达式将元组中的每个元素转换为字符串
+        #     print(' '.join(str(item) for item in row))
+        
+        # 暂时不用，可能有问题 
+        #print(find_indices_with_target_pid(n_topn_gallery_image_names, '03'))
+        formatted_rows = self.get_formatted_rows(n_topn_gallery_image_names)
+        return formatted_rows
 
 
     def build_datamanager(self,cfg):
@@ -239,7 +247,7 @@ class Reid:
             if os.path.isfile(file_to_copy):
                 try:
                     shutil.copy(file_to_copy, target_directory)
-                    #print(f"File {file_to_copy} has been copied to {target_directory}.")
+                    print(f"File {file_to_copy} has been copied to {target_directory}.")
                 except Exception as e:
                     print(f"Failed to copy {file_to_copy} to {target_directory}. Reason: {e}")
 
@@ -278,3 +286,5 @@ class Reid:
     
 if __name__ == '__main__':
     reid_instance = Reid()
+    #demo_data1 = r"C:\Users\zuyi\Downloads\10_c1s1_000290_00.jpg"
+    #reid_instance.run(demo_data1)
