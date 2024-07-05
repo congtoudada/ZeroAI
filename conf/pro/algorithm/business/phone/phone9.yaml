@@ -1,6 +1,6 @@
 INCLUDE:
-  - conf/pro/algorithm/business/common.yaml
   - conf/pro/algorithm/business/phone/phone_root.yaml
+  - conf/pro/algorithm/business/common.yaml
 
 warning_path: output/business/phone/warning/
 timing_enable: True

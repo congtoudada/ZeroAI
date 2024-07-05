@@ -1,0 +1,7 @@
+INCLUDE:
+  - conf/pro/algorithm/business/helmet/helmet_root.yaml
+  - conf/pro/algorithm/detection/labels/detection_labels_helmet.yaml
+input_port:
+  - camera6-bytetrack_helmet
+  - camera6-bytetrack_helmet_person
+output_port: None  # 不需要输出

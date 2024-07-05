@@ -3,5 +3,6 @@ INCLUDE:
   - conf/pro/global/log.yaml
   - conf/pro/global/output.yaml
 stream:
-  output_dir: D:\ZeroAI\output\business\phone  # 输出目录
+#  output_dir: D:\ZeroAI\output\business\phone  # 输出目录
+  output_dir: output\business\phone  # 输出目录
 

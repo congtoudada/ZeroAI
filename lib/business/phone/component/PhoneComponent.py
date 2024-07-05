@@ -1,5 +1,4 @@
 
-
 # PhoneComponent
 
 import os
@@ -18,6 +17,7 @@ from zero.utility.config_kit import ConfigKit
 import glob
 import requests
 
+
 class PhoneComponent(BasedMultiMOTComponent):
     def __init__(self, shared_data, config_path: str):
         super().__init__(shared_data)
@@ -27,8 +27,8 @@ class PhoneComponent(BasedMultiMOTComponent):
         self.det_record = {}  # key: person_id  value: last_time
         self.timing_record = None  # 记录上一次定时保存的时间
         self.state = []  # 存储已经报警的id，避免重复报警
-        
-        self.last_reid_time = 0 
+
+        self.last_reid_time = 0
 
     def on_update(self) -> bool:
         """
@@ -46,8 +46,8 @@ class PhoneComponent(BasedMultiMOTComponent):
         person_bboxes = []
         phone_bboxes = []
         person_id = []
-        #phone_id = []
-        
+        # phone_id = []
+
         phonePerson_bbox_dict = {}  # 存储拿手机人员的bbox
         allPerson_bbox_dict = {}    # 存储所有检测到的人的bbox
 
@@ -58,36 +58,37 @@ class PhoneComponent(BasedMultiMOTComponent):
                     for j in range(len(self.input_mot[i])):  # 遍历每一个对象
                         cls = int(self.input_mot[i][j][5])
                         # 如果不是人或手机（类别0），则跳过
-                            # 人和手机都是0
+                        # 人和手机都是0
                         if cls != 0:
-                            continue  
-                        
+                            continue
+
                         obj_id = self.input_mot[i][j][6]
                         bbox = self.input_mot[i][j][:4]
 
                         # if self.config.input_port[i] == "camera3-bytetrack_person1": # 硬编码错误
-                        if self.config.input_port[i] == "camera9-bytetrack_phone_person" or self.config.input_port[i] == "camera10-bytetrack_phone_person":
-                            if cls == 0:  # 如果是人
-                                person_bboxes.append(bbox)
-                                person_id.append(obj_id)
-                                allPerson_bbox_dict[obj_id] = bbox          # 所有检测到的人的包围框
-                                print("这里   allPerson_bbox_dict[obj_id] = bbox ")
-                        
-                        # elif self.config.input_port[i] == "camera3-bytetrack_phone1":  # 硬编码错误
-                        elif self.config.input_port[i] == "camera9-bytetrack_phone" or self.config.input_port[i] == "camera10-bytetrack_phone":
-                            if cls == 0:  # 如果是手机
-                                phone_bboxes.append(bbox)
-                                #phone_id.append(obj_id)
-                                
+                        # if self.config.input_port[i] == "camera9-bytetrack_phone_person" or self.config.input_port[i] == "camera10-bytetrack_phone_person":
+                        #     if cls == 0:  # 如果是人
+                        if i == 1:
+                            person_bboxes.append(bbox)
+                            person_id.append(obj_id)
+                            allPerson_bbox_dict[obj_id] = bbox          # 所有检测到的人的包围框
+                            print("这里   allPerson_bbox_dict[obj_id] = bbox ")
+
+                        if i == 0:
+                            # elif self.config.input_port[i] == "camera3-bytetrack_phone1":  # 硬编码错误
+                            # elif self.config.input_port[i] == "camera9-bytetrack_phone" or self.config.input_port[i] == "camera10-bytetrack_phone":
+                            #     if cls == 0:  # 如果是手机
+                            phone_bboxes.append(bbox)
+                            # phone_id.append(obj_id)
 
                     # 检测到有人拿手机  则算并存一下拿手机人的包围框
-                    if phone_bboxes:  
+                    if phone_bboxes:
                         # 通过人和手机 bbox 之间的几何距离找到拿手机的人
                         output_bboxes, output_idx = self.on_calculate(person_bboxes, phone_bboxes)
                         for idx, bbox in zip(output_idx, output_bboxes):
                             phonePerson_bbox_dict[person_id[idx]] = bbox     # 拿手机的人的包围框
-                            
-                    
+
+
                     # 调用on_execute方法，传递所有人的边界框和拿手机的人的边界框
                     self.on_execute(allPerson_bbox_dict, phonePerson_bbox_dict)
 
@@ -99,25 +100,25 @@ class PhoneComponent(BasedMultiMOTComponent):
 
 
     def on_calculate(self, person_bboxes, phone_bboxes):
-        """    
+        """
         返回拿手机人员的包围框框和索引列表
         通过计算人的包围框和手机包围框中心点的距离，来看这个手机是谁拿的
         """
         res_bbox = [] # 存储拿手机人员的包围框
         res_idx = [] # 存储拿手机人员的索引
-        
+
         # 计算每个人的包围框中心点
         person_centres = []
         for person_bbox in person_bboxes:
             person_centres.append([(person_bbox[0] + person_bbox[2]) / 2, (person_bbox[1] + person_bbox[3]) / 2])
-        
+
         # 遍历每个手机的包围框，找到最近的人
         for phone_bbox in phone_bboxes:
             phone_centre = [(phone_bbox[0] + phone_bbox[2]) / 2, (phone_bbox[1] + phone_bbox[3]) / 2]
-            
+
             min_index = -1  # 初始化最近的人的下标
             min_dist = -1  # 初始化最小距离
-            
+
             # for index, person_centre in enumerate(person_centres):
             #     # 如果是第一次计算或者找到更近的人，更新最小距离和索引
             #         #min_dist == -1意味着第一次计算
@@ -131,12 +132,12 @@ class PhoneComponent(BasedMultiMOTComponent):
             #         if dist < min_dist:
             #             min_index = index
             #             min_dist = dist
-            
+
             # # 如果找到了最近的人，则将其包围框和索引添加到结果列表中
             # if 0 <= min_index < len(person_bboxes):
             #     res_bbox.append(person_bboxes[min_index])
             #     res_idx.append(min_index)
-            
+
             # 遍历每个人的包围框中心点，找最近的人
             for index, person_centre in enumerate(person_centres):
                 # 计算当前手机中心点与当前人中心点的距离
@@ -151,7 +152,7 @@ class PhoneComponent(BasedMultiMOTComponent):
             if min_index != -1:
                 res_bbox.append(person_bboxes[min_index])  # 添加最近人的包围框
                 res_idx.append(min_index)  # 添加最近人的索引
-                
+
         # 返回拿手机的人员的包围框和索引列表
         return res_bbox, res_idx
 
@@ -190,10 +191,10 @@ class PhoneComponent(BasedMultiMOTComponent):
                                         cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
         # 可视化并返回
         return super().on_draw_vis(frame, vis, window_name)
- 
+
     # # 定时存图
-    # def on_execute(self, all_bboxes, object_bboxes):   
-        
+    # def on_execute(self, all_bboxes, object_bboxes):
+
     #     #timming
     #     delta = timedelta(seconds=2)
     #     now = datetime.now()
@@ -220,7 +221,7 @@ class PhoneComponent(BasedMultiMOTComponent):
     #                 # 重置计数器为1并记录当前时间
     #                 self.counter[id] = 1
     #                 self.det_record[id] = now
-                
+
     #             elif now - self.det_record[id] <= max_gap: # 如果距离上次检测到现在的时间间隔小于等于设定的最大间隔
     #                 # 增加对应ID的计数器
     #                 self.counter[id] += 1
@@ -235,7 +236,7 @@ class PhoneComponent(BasedMultiMOTComponent):
     #                     # 将ID添加到已报警的状态记录中
     #                     self.state.append(id)
     #                     self.counter[id] = 0
-                        
+
     #                     # 定义临时警告图片存储路径
     #                     temporary_warning_path = "res/images/reid_tmp_data/phone_warning"
     #                     if not os.path.exists(temporary_warning_path):
@@ -260,15 +261,15 @@ class PhoneComponent(BasedMultiMOTComponent):
     #             print("zzzzzzzzzzzzzzzzzzzzyyyyyyyyyyyyyyyyyyyyyyyyy POST successfully")
     #         else:
     #             print("zzzzzzzzzzzzzzzzzzzzyyyyyyyyyyyyyyyyyyyyyyyyy POST failed, status code:", response.status_code)
-                    
-                
-                
+
+
+
     # 定时存图
-    def on_execute(self, all_bboxes, object_bboxes):   
+    def on_execute(self, all_bboxes, object_bboxes):
         reid_tmp_data_1 = "res/images/reid_tmp_data/tmp123"
         reid_tmp_data_2 = "res/images/reid_tmp_data/phone_warning"
-        
-        ####################  timming #################### 
+
+        ####################  timming ####################
         # delta = timedelta(seconds=1)
         # now = datetime.now()
         # last = self.timing_record
@@ -282,16 +283,16 @@ class PhoneComponent(BasedMultiMOTComponent):
         #     self.timing_record = now
         # # 如果指定目录中的图片数量超过1000，则清空该目录
         # if self.count_images_in_directory(self.config.timing_path) > 1000:
-            # self.clear_directory(self.config.timing_path)
-        
+        # self.clear_directory(self.config.timing_path)
+
         # 设置时间间隔为1秒
         delta = timedelta(seconds=1)
         now = datetime.now()
-        
+
         # 检查是否启用了定时保存
         if not self.config.timing_enable:
             print("调试：定时保存功能未启用！")
-        
+
         # 如果上次记录的时间为None或者已经超过了设定的时间间隔，则执行存图操作
         if self.timing_record is None or (now - self.timing_record) >= delta:
             # 检查all_bboxes是否为空
@@ -313,7 +314,7 @@ class PhoneComponent(BasedMultiMOTComponent):
 
 
 
-        ##################### warning #################### 
+        ##################### warning ####################
         w_now = datetime.now()
         max_gap = timedelta(seconds=0.5)
         # 遍历所有被检测到的对象的包围框
@@ -340,29 +341,31 @@ class PhoneComponent(BasedMultiMOTComponent):
                         # WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, 1, 1,
                         #                         img, self.config.stream_export_img_enable,
                         #                         self.config.stream_web_enable)
-                        print("发现一张,永久保存到output/warning,但是先不报警!,拷贝到临时的reid_tmp_data/tmp123,等reid算完一起报警!")
+                        print \
+                            ("发现一张,永久保存到output/warning,但是先不报警!,拷贝到临时的reid_tmp_data/tmp123,等reid算完一起报警!")
                         # 将ID添加到已报警的状态记录中
                         self.state.append(id)
                         self.counter[id] = 0
 
-                        #把图另外存一份到我的reid_tmp_data
+                        # 把图另外存一份到我的reid_tmp_data
                         shutil.copy(image_path, reid_tmp_data_1)
-        
+
 
         if self.count_images_in_directory(reid_tmp_data_1) > 5:
             # 检查时间间隔是否超过25秒
             if (time.time() - self.last_reid_time) > 25:
-                print("调试代码 reid_tmp_data/tmp123里面超过5张图, 且距离执行上一次超过25秒, 移动给reid_tmp_data/phone_warning, 并清空tmp123, 尝试发送请求给reid_task4, phone_warning作为第一个key")
-                
+                print \
+                    ("调试代码 reid_tmp_data/tmp123里面超过5张图, 且距离执行上一次超过25秒, 移动给reid_tmp_data/phone_warning, 并清空tmp123, 尝试发送请求给reid_task4, phone_warning作为第一个key")
+
                 # 更新上次执行时间
                 self.last_reid_time = time.time()
-                
+
                 # 获取所有jpg图片
                 image_files = glob.glob(os.path.join(reid_tmp_data_1, '*.jpg'))
                 # 移动每一张图片到新的目录
                 for image_file in image_files:
                     shutil.move(image_file, reid_tmp_data_2)
-                    
+
                 # 构建请求数据
                 data = {
                     "query_directory_or_id": reid_tmp_data_2,
@@ -377,7 +380,7 @@ class PhoneComponent(BasedMultiMOTComponent):
             else:
                 # 如果未超过60秒，打印一条消息
                 print(f"距离上次执行reid不足25秒,请等待。上次执行时间: {time.ctime(self.last_reid_time)}")
-                
+
     #####################################################################################################
 
     def copy_images_to_temporary_directory(self):
@@ -390,7 +393,7 @@ class PhoneComponent(BasedMultiMOTComponent):
 
         # 获取原始警告目录中的最新5个文件
         warning_files = sorted(os.listdir(original_warning_path), key=lambda x: os.path.getmtime(os.path.join(original_warning_path, x)), reverse=True)[:5]
-        
+
         # 遍历文件，并将它们复制到新的临时目录
         for file_name in warning_files:
             # 构建原始文件的完整路径
@@ -413,7 +416,7 @@ class PhoneComponent(BasedMultiMOTComponent):
         image_path = os.path.join(path, f"0_{self.stream_cam_id}_{time_str}_0.jpg")
         cv2.imwrite(image_path, img)
         return image_path, img
-    
+
     def count_images_in_directory(self, directory):
         # 返回目录中的jpg图片数量
         return len(glob.glob(os.path.join(directory, '*.jpg')))
@@ -429,9 +432,6 @@ def create_process(shared_data, config_path: str):
     phoneComp: PhoneComponent = PhoneComponent(shared_data, config_path)  # 创建组件
     phoneComp.start()  # 初始化
     phoneComp.update()  # 算法逻辑循环
-
-
-
 
 
 if __name__ == "__main__":

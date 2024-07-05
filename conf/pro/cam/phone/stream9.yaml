@@ -5,8 +5,8 @@ log:
   analysis: False
 stream:
   cam_id: 9  # 摄像头编号
-#  url: res/videos/phone/phone.mp4  # 取流地址（输入）
-  url: rtsp://admin:zwjs1357@192.168.1.119:554/h264/ch1/main/av_stream_phone9  # 取流地址（输入）
+  url: res/videos/phone/phone.mp4  # 取流地址（输入）
+#  url: rtsp://admin:zwjs1357@192.168.1.119:554/h264/ch1/main/av_stream_phone9  # 取流地址（输入）
   # 画面缩放系数
   scale: 1
   output_port: camera9  # 输出端口 eg.SharedKey.STREAM_FRAME_INFO-camera1

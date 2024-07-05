@@ -166,6 +166,7 @@ class CountComponent(BasedMOTComponent):
         :param item:
         :return:
         """
+        logger.info(f"{self.pname} {item.obj_id} flags: {item.red_cur} - {item.green_cur}")
         if item.red_cur == -1 or item.green_cur == -1:
             return
         if item.red_seq.__len__() == 0:

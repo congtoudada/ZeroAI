@@ -22,7 +22,7 @@ class Component(ABC):
         if self.shared_data is not None:
             self.esc_event = self.shared_data[SharedKey.EVENT_ESC]
         if LogKit.load_info(self.config):  # 新进程设置日志
-            pass
+            logger.info(f"{self.pname} 配置文件参数: {self.config.__dict__}")
             # logger.info(f"{self.pname} 成功运行日志模块! 输出路径: {self.config.log_output_path}")
         else:
             logger.info(f"{self.pname} 日志模块被关闭!")

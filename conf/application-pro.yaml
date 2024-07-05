@@ -2,17 +2,18 @@ INCLUDE:  # INCLUDE越先被包含，优先级越高
   - conf/pro/global/log.yaml
 cam_list:
 #  - conf/pro/cam/count_face/stream1_keliu.yaml  # 客流计数
-#  - conf/pro/cam/count_face/stream2_keliu.yaml  # 客流计数
+  - conf/pro/cam/count_face/stream2_keliu.yaml  # 客流计数
 #  - conf/pro/cam/count_face/stream4_renlian.yaml  # 客流人脸
 #  - conf/pro/cam/count_face/stream6_renlian.yaml  # 客流人脸
-#  - conf/pro/cam/helmet/stream2_helmet.yaml  # 安全帽 warnType: 2
+#  - conf/pro/cam/helmet/stream6_helmet.yaml  # 安全帽 warnType: 2
+#  - conf/pro/cam/helmet/stream6_helmet_V1.yaml  # 安全帽 warnType: 2
 #  - conf/pro/cam/intrude/stream7.yaml  # 入侵检测 warnType: 4
 #  - conf/pro/cam/card/stream8.yaml  # 代刷卡 warnType: 3
- - conf/pro/cam/phone/stream9.yaml  # 手机 warnType: 1
- - conf/pro/cam/phone/stream10.yaml  # 手机 warnType: 1
-service: # 全局服务
-  - path: lib/face/insight_module/insight/zero/component/insight_comp.py
-    conf: conf/pro/algorithm/face/insight/insight.yaml
+#  - conf/pro/cam/phone/stream9.yaml  # 手机 warnType: 1
+#  - conf/pro/cam/phone/stream10.yaml  # 手机 warnType: 1
+service: [] # 全局服务
+#  - path: lib/face/insight_module/insight/zero/component/insight_comp.py
+#    conf: conf/pro/algorithm/face/insight/insight.yaml
 app:
   running_file: bin/pro/runtime.pkl
 
