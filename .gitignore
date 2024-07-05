@@ -168,6 +168,7 @@ docs/api
 *.onnx
 *.engine
 *.mnn
+*.jpg
 events.out.tfevents*
 
 /test
