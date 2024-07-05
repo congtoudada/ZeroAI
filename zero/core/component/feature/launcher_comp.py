@@ -67,6 +67,7 @@ class LauncherComponent(Component):
             Process(target=create_process,
                     args=(self.global_shared_proxy, cam_config_path),
                     daemon=False).start()
+            time.sleep(8)
         # -------------------------------- 初始化视频流End --------------------------------------
 
         # -------------------------------- 主进程相关 --------------------------------------
