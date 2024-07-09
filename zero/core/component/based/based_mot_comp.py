@@ -14,6 +14,11 @@ class BasedMOTComponent(BasedDetComponent):
         self.config: BasedMOTInfo = None  # 由子类加载
         self.input_mot = None  # 多目标追踪算法的输出作为该组件的输入
 
+    def on_start(self):
+        super().on_start()
+        # 填充共享内存
+        self.shared_data[self.config.MOT_INFO] = None
+
     def on_resolve_stream(self) -> bool:
         """
         # mot output shape: [n, 7]
@@ -31,9 +36,12 @@ class BasedMOTComponent(BasedDetComponent):
         mot_info = self.shared_data[self.config.MOT_INFO]
         if mot_info is not None and self.current_frame_id != int(mot_info[SharedKey.MOT_ID]):
             self.current_frame_id = int(mot_info[SharedKey.MOT_ID])
-            self.frame = np.reshape(np.ascontiguousarray(np.copy(mot_info[SharedKey.MOT_FRAME])),
-                                    (self.stream_height, self.stream_width, self.stream_channel))
+            # self.frame = np.reshape(np.ascontiguousarray(np.copy(mot_info[SharedKey.MOT_FRAME])),
+            #                         (self.stream_height, self.stream_width, self.stream_channel))
+            self.frame = np.ascontiguousarray(np.copy(mot_info[SharedKey.MOT_FRAME]))
+            # self.frame = mot_info[SharedKey.MOT_FRAME]
             self.input_mot = mot_info[SharedKey.MOT_OUTPUT]
+            self.analysis(self.current_frame_id)  # 打印性能分析报告
             return True
         else:
             return False

@@ -16,6 +16,7 @@ class StreamInfo(BaseInfo):
         self.stream_height = 640  # 取流重缩放高
         self.stream_channel = 3  # 取流通道数
         self.stream_update_fps = -1  # 算法更新帧率
+        self.stream_scale = 2  # 画面缩小比例
         super().__init__(data)   # 前面是声明，一定要最后调用这段赋值
         # ----------------------------------------- output -----------------------------------------
         self.STREAM_FRAME_INFO = f"{SharedKey.STREAM_FRAME_INFO.name}-{self.stream_output_port}"  # 视频流信息 (package)

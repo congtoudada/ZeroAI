@@ -1,5 +1,6 @@
 import multiprocessing
 import os
+import pickle
 import signal
 import sys
 import time
@@ -66,13 +67,26 @@ class LauncherComponent(Component):
             Process(target=create_process,
                     args=(self.global_shared_proxy, cam_config_path),
                     daemon=False).start()
+            time.sleep(8)
         # -------------------------------- 初始化视频流End --------------------------------------
+
+        # -------------------------------- 主进程相关 --------------------------------------
+        # 写文件用于监听，文件删除算法终止
+        # 假设 self.config.app_running_file 是一个文件路径
+        dir_path = os.path.dirname(self.config.app_running_file)
+        # 如果目录不存在，则创建它
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+        if not os.path.exists(self.config.app_running_file):
+            write_data = {"main": "running"}
+            pickle.dump(write_data, open(self.config.app_running_file, 'wb'))
 
     def on_update(self) -> bool:
         time.sleep(1)
+        if not os.path.exists(self.config.app_running_file):  # 检测系统运行
+            self.esc_event.set()
         if cv2.waitKey(1) & 0xFF == ord('q'):
             self.esc_event.set()
-            self.destroy()
         return False
 
     def update(self):

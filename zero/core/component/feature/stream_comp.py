@@ -42,8 +42,10 @@ class StreamComponent(Component):
             SharedKey.STREAM_FRAME: None
         }
         self.shared_data[self.config.STREAM_FRAME_INFO] = self.stream_frame_info
-        self.shared_data[self.config.STREAM_ORIGINAL_WIDTH] = int(self.config.stream_width)
-        self.shared_data[self.config.STREAM_ORIGINAL_HEIGHT] = int(self.config.stream_height)
+        width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH) / self.config.stream_scale)
+        height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / self.config.stream_scale)
+        self.shared_data[self.config.STREAM_ORIGINAL_WIDTH] = width
+        self.shared_data[self.config.STREAM_ORIGINAL_HEIGHT] = height
         self.shared_data[self.config.STREAM_ORIGINAL_CHANNEL] = int(self.config.stream_channel)
         self.shared_data[self.config.STREAM_ORIGINAL_FPS] = self.frame_fps
         self.shared_data[self.config.STREAM_URL] = self.config.stream_url
@@ -60,39 +62,42 @@ class StreamComponent(Component):
         self.algo_group_comp.start()
         # 等待所有算法初始化完成
         while self.shared_data[SharedKey.STREAM_WAIT_COUNTER] < self.shared_data[SharedKey.STREAM_WAIT_COUNTER_MAX]:
-            time.sleep(0.2)
-        logger.info(f"{self.pname} 所有算法成功初始化！开始取流 URL: {self.config.stream_url} fps: {self.frame_fps}")
+            if self.config.stream_delay:
+                time.sleep(0.2)
+            else:
+                self.cap.grab()
+        logger.info(f"{self.pname} 所有算法成功初始化！开始取流 URL: {self.config.stream_url} "
+                    f"width:{int(self.config.stream_width)} height:{int(self.config.stream_height)} fps: {self.frame_fps}")
 
     def on_update(self) -> bool:
         """
         每帧调用一次
         :return:
         """
-        try:
-            if self.cap.isOpened() and self._can_read():
-                # self.face_helper.update()
-                status, frame = self.cap.read()
-                if status:
-                    self.success_frame = (self.success_frame + 1) % sys.maxsize
-                    frame = cv2.resize(frame, (self.config.stream_width, self.config.stream_height))
-                    self.stream_frame_info[SharedKey.STREAM_FRAME_ID] = self.success_frame
-                    # self.stream_frame_info[SharedKey.STREAM_FRAME_TIME] = time.time()
-                    # self.stream_frame_info[SharedKey.STREAM_FRAME] = frame
-                    self.stream_frame_info[SharedKey.STREAM_FRAME] = frame.flatten()
-                    # self.stream_frame_info[SharedKey.STREAM_FRAME] = cv2.imencode(".jpg", frame)[1].tobytes()
-                    # 填充输出
-                    self.shared_data[self.config.STREAM_FRAME_INFO] = self.stream_frame_info
-                    if self.config.stream_delay:
-                        time.sleep(1.0 / (self.frame_fps * self.config.stream_delay_speed))
-                    self.analysis(self.success_frame)  # 分析报告
-                else:
-                    # logger.error(f"{self.pname} 取流结束或异常！")
-                    time.sleep(1)
-
-        except Exception as e:
-            logger.error(f"{self.pname} {traceback.format_exc()}")
-            time.sleep(1)  # 等待1s
-            self.cap = cv2.VideoCapture(self.config.stream_url)  # 尝试重新取流
+        # try:
+        if self._can_read():
+            # self.face_helper.update()
+            status, frame = self.cap.retrieve()
+            if status:
+                # cv2.imshow("window", frame)
+                # key = cv2.waitKey(1) & 0xFF
+                self.success_frame = (self.success_frame + 1) % sys.maxsize
+                # frame = cv2.resize(frame, (self.config.stream_width, self.config.stream_height))  # 开发用
+                frame = frame[::self.config.stream_scale, ::self.config.stream_scale, :]   # 部署用
+                self.stream_frame_info[SharedKey.STREAM_FRAME_ID] = self.success_frame
+                self.stream_frame_info[SharedKey.STREAM_FRAME] = frame
+                # 填充输出
+                self.shared_data[self.config.STREAM_FRAME_INFO] = self.stream_frame_info
+                if self.config.stream_delay:
+                    time.sleep(1.0 / (self.frame_fps * self.config.stream_delay_speed))
+                self.analysis(self.success_frame)  # 分析报告
+            else:
+                # logger.error(f"{self.pname} 取流结束或异常！")
+                time.sleep(1)
+            # except Exception as e:
+            #     logger.error(f"{self.pname} {traceback.format_exc()}")
+            #     time.sleep(1)  # 等待1s
+            #     self.cap = cv2.VideoCapture(self.config.stream_url)  # 尝试重新取流
         return False
 
     def on_analysis(self):
@@ -100,10 +105,12 @@ class StreamComponent(Component):
 
     def _can_read(self) -> bool:
         self.drop_flag += 1
+        self.cap.grab()
         if self.drop_flag >= self.config.stream_drop_interval:
             self.drop_flag = 0
+            return True
+        else:
             return False
-        return True
 
 
 def create_process(shared_data, config_path: str):

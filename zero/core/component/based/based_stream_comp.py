@@ -11,11 +11,11 @@ from zero.core.component.base.component import Component
 from zero.core.component.helper.feature.save_video_helper_comp import SaveVideoHelperComponent
 from zero.core.info.based.based_stream_info import BasedStreamInfo
 from zero.core.key.shared_key import SharedKey
+from zero.utility.rtsp_kit import RtspKit
 from zero.utility.timer_kit import TimerKit
 
 
 class BasedStreamComponent(Component):
-    IsLinux = sys.platform.startswith('linux')
     """
     基于视频流的算法组件
     """
@@ -35,8 +35,9 @@ class BasedStreamComponent(Component):
         self.stream_cam_id = []
         self.update_fps = []
         self.video_writer: List[SaveVideoHelperComponent] = []  # 存储视频组件
+        self.rtsp_writer: List[RtspKit] = []  # rtsp推流工具
         self.window_name = []  # 窗口名
-        self.output_dir = []
+        self.output_dir = []  # 输出目录
         # self.time_count = 0
         # self.time_diff_sum = 0
 
@@ -67,6 +68,12 @@ class BasedStreamComponent(Component):
                                              self.config.stream_save_video_height,
                                              self.config.stream_save_video_fps))
                 logger.info(f"{self.pname} 输出视频路径: {output_path}")
+            if self.config.stream_rtsp_enable:
+                self.rtsp_writer.append(RtspKit(self.config.stream_rtsp_url, self.stream_width[i],
+                                                self.stream_height[i], self.stream_fps[i]))
+            # 填充共享内存
+            for i, info_key in enumerate(self.config.STREAM_FRAME_INFO):
+                self.shared_data[info_key] = None
 
     def on_resolve_stream(self) -> bool:
         # 只有不同帧才有必要计算
@@ -76,25 +83,7 @@ class BasedStreamComponent(Component):
                 frame_info = self.shared_data[info_key]
                 if frame_info is not None and self.current_frame_id[i] != int(frame_info[SharedKey.STREAM_FRAME_ID]):
                     self.current_frame_id[i] = int(frame_info[SharedKey.STREAM_FRAME_ID])
-                    # self.frame = np.reshape(np.ascontiguousarray(np.copy(frame_info[SharedKey.STREAM_FRAME])),
-                    #                         (self.stream_height[i], self.stream_width[i], self.stream_channel[i]))
-                    self.frame = np.reshape(frame_info[SharedKey.STREAM_FRAME],
-                                            (self.stream_height[i], self.stream_width[i], self.stream_channel[i]))
-
-                    # self.frame = frame_info[SharedKey.STREAM_FRAME]
-                    # self.frame = np.copy(frame_info[SharedKey.STREAM_FRAME])
-                    # self.frame = np.ascontiguousarray(np.copy(frame_info[SharedKey.STREAM_FRAME]))
-                    # self.frame = np.frombuffer(frame_info[SharedKey.STREAM_FRAME], dtype=np.uint8)\
-                    #     .reshape((self.stream_height[i], self.stream_width[i], self.stream_channel[i]))
-                    # self.frame = np.copy(frame_info[SharedKey.STREAM_FRAME])\
-                    #     .reshape((self.stream_height[i], self.stream_width[i], self.stream_channel[i]))
-                    # image_np = np.frombuffer(frame_info[SharedKey.STREAM_FRAME], np.uint8)
-                    # 将NumPy数组解码为图片格式
-                    # self.frame = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
-                    # frame_time = frame_info[SharedKey.STREAM_FRAME_TIME]
-                    # self.time_diff_sum += time.time() - frame_time
-                    # self.time_count += 1
-                    # logger.info(f"{self.pname} transfer diff avg: {self.time_diff_sum / self.time_count}")
+                    self.frame = np.copy(frame_info[SharedKey.STREAM_FRAME])  # 拷贝
                     self.analysis(frame_info[SharedKey.STREAM_FRAME_ID])  # 打印性能分析报告
                     return True
         return False
@@ -113,10 +102,10 @@ class BasedStreamComponent(Component):
         return ret
 
     def on_draw_vis(self, frame, vis=False, window_name="window", is_copy=True):
-        if vis and frame is not None and not BasedStreamComponent.IsLinux:
+        if vis and frame is not None:
             cv2.imshow(window_name, frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            self.shared_data[SharedKey.EVENT_ESC].set()  # 退出程序
         return frame
 
     def start(self):
@@ -129,13 +118,17 @@ class BasedStreamComponent(Component):
         while True:
             if self.enable:
                 self.on_update()
-                # 需要可视化和录制视频时才需要绘图
-                if self.config.stream_draw_vis_enable or self.config.stream_save_video_enable:
+                # 需要可视化、录制视频或推流时才需要绘图
+                if (self.config.stream_draw_vis_enable or
+                        self.config.stream_save_video_enable or
+                        self.config.stream_rtsp_enable):
                     if self.frame is not None:
                         im = self.on_draw_vis(self.frame, self.config.stream_draw_vis_enable,
                                               self.window_name[self.cur_stream_idx])
-                        if self.config.stream_save_video_enable:
+                        if self.config.stream_save_video_enable:  # 录制视频
                             self.save_video(im, self.video_writer[self.cur_stream_idx])
+                        if self.config.stream_rtsp_enable:  # 推rtsp流
+                            self.rtsp_writer[self.cur_stream_idx].push(im)
             if self.esc_event.is_set():
                 self.destroy()
                 return

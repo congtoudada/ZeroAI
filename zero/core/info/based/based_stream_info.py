@@ -11,6 +11,10 @@ class BasedStreamInfo(BaseInfo):
         self.stream_save_video_height = 480  # 存储视频高
         self.stream_save_video_fps = 24  # 存储视频帧率
         self.stream_draw_vis_enable = False  # 是否可视化
+        self.stream_export_img_enable = False  # 是否导出图片
+        self.stream_web_enable = False  # 是否与web交互
+        self.stream_rtsp_enable = False  # 是否推rtsp流
+        self.stream_rtsp_url = ""  # rtsp推流路径
         super().__init__(data)
         # ----------------------------------------- input -----------------------------------------
         self.STREAM_FRAME_INFO = []

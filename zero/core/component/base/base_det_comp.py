@@ -24,8 +24,12 @@ class BaseDetComponent(BasedStreamComponent):
     def resolve_output(self, inference_outputs):
         self.output_detect_info.clear()
         self.output_detect_info[SharedKey.DETECTION_ID] = self.current_frame_id[self.cur_stream_idx]
-        self.output_detect_info[SharedKey.DETECTION_FRAME] = self.frame.flatten()
-        self.output_detect_info[SharedKey.DETECTION_OUTPUT] = self.on_resolve_output(inference_outputs)
+        self.output_detect_info[SharedKey.DETECTION_FRAME] = self.frame
+        # 有没有推理结果都更新
+        if inference_outputs is not None:
+            self.output_detect_info[SharedKey.DETECTION_OUTPUT] = self.on_resolve_output(inference_outputs)
+        else:
+            self.output_detect_info[SharedKey.DETECTION_OUTPUT] = None
         output_port = self.config.DETECTION_INFO[self.cur_stream_idx]
         self.shared_data[output_port] = self.output_detect_info  # 填充输出
 

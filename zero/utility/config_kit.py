@@ -1,9 +1,14 @@
+import os
+
 from zero.utility.yaml_kit import YamlKit
 
 
 class ConfigKit:
     @staticmethod
     def load(path: str) -> dict:
+        if not os.path.exists(path):  # 检测系统运行
+            print(f"没有找到配置文件，无法加载: {path}")
+            return {}
         file: dict = YamlKit.read_yaml(file=path)
         if file.__contains__("INCLUDE"):
             for key in file["INCLUDE"]:

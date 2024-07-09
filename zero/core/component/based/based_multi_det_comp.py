@@ -27,6 +27,10 @@ class BasedMultiDetComponent(BasedStreamComponent):
         self.stream_url = self.stream_url[0]
         self.stream_cam_id = self.stream_cam_id[0]
         self.current_frame_id = self.current_frame_id[0]
+        self.output_dir = self.output_dir[0]
+        # 初始化端口内容，避免Key不存在
+        for i in range(self.ports_len):
+            self.shared_data[self.config.DETECTION_INFO[i]] = None
 
 
     def on_resolve_stream(self) -> bool:
@@ -45,8 +49,9 @@ class BasedMultiDetComponent(BasedStreamComponent):
         det_info = self.shared_data[self.config.DETECTION_INFO[self.ports_len - 1]]  # 取最后一个模型的信息用于判断是否更新id和frame
         if det_info is not None and self.current_frame_id != int(det_info[SharedKey.DETECTION_ID]):
             self.current_frame_id = int(det_info[SharedKey.DETECTION_ID])  # 更新帧id
-            self.frame = np.reshape(np.ascontiguousarray(np.copy(det_info[SharedKey.DETECTION_FRAME])),
-                                    (self.stream_height, self.stream_width, self.stream_channel))  # 更新帧
+            # self.frame = np.reshape(np.ascontiguousarray(np.copy(det_info[SharedKey.DETECTION_FRAME])),
+            #                         (self.stream_height, self.stream_width, self.stream_channel))  # 更新帧
+            self.frame = np.ascontiguousarray(np.copy(det_info[SharedKey.DETECTION_FRAME]))
             for i in range(self.ports_len):
                 det_output = self.shared_data[self.config.DETECTION_INFO[i]]  # 取出每一个目标检测算法的检测结果
                 if det_output is not None:
