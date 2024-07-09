@@ -1,4 +1,6 @@
-# ZeroAI（持续更新中）
+# ZeroAI v0.2.0文档
+
+
 
 ZeroAI是一个由**配置文件驱动**的**组件式**，基于**视频流**的**多进程**AI框架，支持任意数量AI算法的快速部署与整合。
 
@@ -932,10 +934,20 @@ python bin/main.yaml
 
 * 【人脸识别帮助组件】：`lib/face/insight_module`
 
-## TODO
+# 更新日志
 
-* 找工作（游戏开发）
-* 拓展算法
-* 接入Web后端
+## v0.2.0
+
+* 使用`UltraDict`代替`Manager().dict()`，运行效率大幅提升
+
+![image-20240709135431611](README.assets/image-20240709135431611.png)
+
+* 合并大量子进程，减少进程间通信和拷贝开销，同时简化代码和配置
+* 按需修改文档和教程示例，并做相应简化，降低使用者门槛
+
+# TODO
+
+* 备战秋招：游戏开发
+* 服务进程的自定义
 * Tensor RT、Cython加速
   * Cython参考：https://www.bilibili.com/video/BV1NF411i74S?p=1
