@@ -6,6 +6,7 @@ import time
 from multiprocessing import Process
 
 import cv2
+from UltraDict import UltraDict
 from loguru import logger
 
 from zero.core.component.base.component import Component
@@ -43,7 +44,8 @@ class LauncherComponent(Component):
         signal.signal(signal.SIGTERM, self.handle_termination)
 
         # -------------------------------- 1.初始化共享内存 --------------------------------
-        self.global_shared_proxy: dict = multiprocessing.Manager().dict()
+        # self.global_shared_proxy: dict = multiprocessing.Manager().dict()
+        self.global_shared_proxy: dict = UltraDict()
         self.global_shared_proxy[SharedKey.LOCK] = multiprocessing.Manager().Lock()
         self.global_shared_proxy[SharedKey.EVENT_ESC] = self.esc_event
         self.global_shared_proxy[SharedKey.WAIT_COUNTER] = 0
