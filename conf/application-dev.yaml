@@ -11,6 +11,7 @@ stream_list:
 
 # 算法
 algorithm_list:
+  # 示例1.打印视频流
   - path: examples/p1_empty_stream_comp.py
     conf: conf/dev/examples/p1_empty_stream.yaml
 
