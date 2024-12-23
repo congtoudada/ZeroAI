@@ -1,9 +1,22 @@
 INCLUDE:
-  - conf/global/log.yaml
-cam_list:
-  - conf/cam/stream1.yaml
-#  - conf/cam/stream2.yaml
-service: # 全局服务
-  - path: lib/face/insight_module/insight/zero/component/insight_comp.py
-    conf: conf/algorithm/face/insight/insight.yaml
+  - conf/dev/global/config.yaml
 
+# 全局服务
+service_list: []
+
+# 视频流
+stream_list:
+  - path: lib/zero/core/stream_comp.py
+    conf: conf/dev/stream/stream1.yaml
+
+# 算法
+algorithm_list:
+  - path: examples/p1_empty_stream_comp.py
+    conf: conf/dev/examples/p1_empty_stream.yaml
+
+app:
+  running_file: bin/dev/runtime.pkl  # 框架运行时标识路径，运行时生成，删除该文件可以关闭算法端
+  analysis_enable: True  # 是否打印性能分析报告
+  analysis_interval: 5  # 每隔x秒打印一次性能分析报告
+
+update_fps: 1  # 主进程更新帧率

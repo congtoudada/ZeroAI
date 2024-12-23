@@ -1,7 +1,0 @@
-INCLUDE:
-  - samples/conf/algorithm/print_stream/print_stream_root.yaml
-input_port: camera1  # 获取来自camera1的输出
-stream:
-  output_dir: output/samples/print_stream  # 输出目录（赋值优先级最高）
-print_stream:
-  show_title: custom_stream_sample  # 窗口名（赋值优先级最高）

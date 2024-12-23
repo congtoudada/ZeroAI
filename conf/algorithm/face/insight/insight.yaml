@@ -1,5 +1,0 @@
-INCLUDE:
-  - conf/algorithm/face/insight/insight_root.yaml
-
-insight:
-  port: face1

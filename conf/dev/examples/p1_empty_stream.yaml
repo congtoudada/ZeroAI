@@ -1,0 +1,10 @@
+INCLUDE:
+  - conf/dev/global/config.yaml
+  - conf/dev/global/based_stream.yaml
+
+input_ports:  # 输入端口
+  - camera1
+
+stream:
+  draw_vis:
+    enable: True  # 开启可视化

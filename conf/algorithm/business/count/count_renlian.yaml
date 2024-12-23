@@ -1,5 +1,0 @@
-INCLUDE:
-  - conf/algorithm/business/count/count_root.yaml
-  - conf/algorithm/business/count/zone/count_renlian_points.yaml
-input_port: camera1-bytetrack
-output_port: None  # 不需要输出
