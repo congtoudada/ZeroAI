@@ -11,9 +11,12 @@ stream_list:
 
 # 算法
 algorithm_list:
-  # 示例1.打印视频流
-  - path: examples/p1_empty_stream_comp.py
-    conf: conf/dev/examples/p1_empty_stream.yaml
+#  # 示例1.打印视频流
+#  - path: examples/p1_empty_stream_comp.py
+#    conf: conf/dev/examples/p1_empty_stream.yaml
+  # 示例2.目标检测
+  - path: lib/detection/yolox/zero/yolox_comp.py
+    conf: conf/dev/algorithm/yolox/yolox_person.yaml
 
 app:
   running_file: bin/dev/runtime.pkl  # 框架运行时标识路径，运行时生成，删除该文件可以关闭算法端
