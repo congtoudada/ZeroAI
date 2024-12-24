@@ -10,7 +10,7 @@ from yolox.exp import get_exp
 from yolox.zero.predictor import create_zero_predictor
 from yolox.zero.yolox_info import YoloxInfo
 from zero.core.based_stream_comp import BasedStreamComponent
-from yolox.zero.detection_key import DetectionKey
+from zero.key.detection_key import DetectionKey
 from zero.key.global_key import GlobalKey
 from zero.key.stream_key import StreamKey
 from utility.config_kit import ConfigKit
