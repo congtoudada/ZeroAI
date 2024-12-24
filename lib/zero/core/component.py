@@ -4,8 +4,8 @@ from abc import ABC
 from loguru import logger
 import json
 
-from utility.log_kit import LogKit
-from utility.timer_kit import TimerKit
+from utility.core.log_kit import LogKit
+from utility.core.timer_kit import TimerKit
 from zero.info.base_info import BaseInfo
 from zero.key.global_key import GlobalKey
 
