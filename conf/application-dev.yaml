@@ -2,7 +2,11 @@ INCLUDE:
   - conf/dev/global/config.yaml
 
 # 全局服务
-service_list: []
+service_list:
+  - path: lib/network/simple_http/simple_http_comp.py  # HTTP服务
+    conf: conf/dev/service/http/http.yaml
+  - path: lib/facr/insight/zero/component/insight_comp.py  # 人脸识别服务
+    conf: conf/dev/service/facr/insight/insight.yaml
 
 # 视频流
 stream_list:
@@ -11,12 +15,14 @@ stream_list:
 
 # 算法
 algorithm_list:
-#  # 示例1.打印视频流
-#  - path: examples/p1_empty_stream_comp.py
-#    conf: conf/dev/examples/p1_empty_stream.yaml
-  # 示例2.目标检测
+  # ------------------- 目标检测算法 -------------------
   - path: lib/detection/yolox/zero/yolox_comp.py
     conf: conf/dev/algorithm/yolox/yolox_person.yaml
+  # ------------------- 业务算法 -------------------
+#  - path: src/count/count_comp.py  # 计数
+#    conf: conf/dev/feature/count/count1.yaml
+  - path: src/renlian/renlian_comp.py  # 人脸
+    conf: conf/dev/feature/renlian/renlian1.yaml
 
 app:
   running_file: bin/dev/runtime.pkl  # 框架运行时标识路径，运行时生成，删除该文件可以关闭算法端
