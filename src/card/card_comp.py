@@ -3,19 +3,20 @@ import traceback
 import cv2
 from typing import Dict
 import numpy as np
+from loguru import logger
 
 from src.card.card_info import CardInfo
 from src.card.card_item import CardItem
 from bytetrack.zero.bytetrack_helper import BytetrackHelper
 from simple_http.simple_http_helper import SimpleHttpHelper
+from src.utility.warn_proxy import WarnProxy
 from zero.core.based_stream_comp import BasedStreamComponent
 from zero.key.detection_key import DetectionKey
 from zero.key.global_key import GlobalKey
 from zero.key.stream_key import StreamKey
-from zero.utility.config_kit import ConfigKit
-from loguru import logger
-from zero.utility.object_pool import ObjectPool
-from zero.utility.timer_kit import TimerKit
+from utility.config_kit import ConfigKit
+from utility.object_pool import ObjectPool
+from utility.timer_kit import TimerKit
 
 
 class CardComponent(BasedStreamComponent):
@@ -80,7 +81,8 @@ class CardComponent(BasedStreamComponent):
         card_clear_keys = []
         for key, item in self.item_dict.items():
             #  检查当前帧序号与上次更新帧序号之间的差值是否大于配置中指定的丢失帧数阈值
-            if self.frame_id_cache[0] - item.last_update_id > self.config.card_item_lost_frames:  # card_lost_frames丢失帧数阈值
+            # card_lost_frames丢失帧数阈值
+            if self.frame_id_cache[0] - item.last_update_id > self.config.card_item_lost_frames:
                 item_clear_keys.append(key)
         item_clear_keys.reverse()  # 从尾巴往前删除，确保索引正确性
         # 遍历需要清除的键列表
@@ -98,8 +100,8 @@ class CardComponent(BasedStreamComponent):
         for key in card_clear_keys:
             self.card_dict.pop(key)  # 从字典中移除
 
-    def on_resolve_per_stream(self, read_idx):
-        frame, _ = super().on_resolve_per_stream(read_idx)  # 解析视频帧id+视频帧
+    def on_get_stream(self, read_idx):
+        frame, _ = super().on_get_stream(read_idx)  # 解析视频帧id+视频帧
         if frame is None:  # 没有有效帧
             return frame, None
         # 解析额外数据
@@ -107,7 +109,7 @@ class CardComponent(BasedStreamComponent):
         input_det = stream_package[DetectionKey.DET_PACKAGE_RESULT.name]  # 目标检测结果
         return frame, input_det
 
-    def on_process_per_stream(self, idx, frame, input_det):
+    def on_handle_stream(self, idx, frame, input_det):
         """
         处理视频流
         :param idx: 固定为0（只从input_ports[0]取数据）
@@ -214,12 +216,9 @@ class CardComponent(BasedStreamComponent):
             screen_x = int(base[0] * self.stream_width)
             screen_y = int(base[1] * self.stream_height)
             cv2.circle(frame, (screen_x, screen_y), 12, (0, 0, 255), 3)
-            # WarnKit.send_warn_result(self.pname, self.output_dir, self.stream_cam_id, 3, 1, self.frame,
-            #                          self.config.stream_export_img_enable, self.config.stream_web_enable)
-            self.http_helper.send_warn_result(self.pname, self.output_dir[0], self.cam_id,
-                                              3, 1, frame, 1,
-                                              self.config.stream_export_img_enable,
-                                              self.config.stream_web_enable)
+            # 发送报警信息给后端
+            WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, 3, 1,
+                           frame, 1, self.config.stream_export_img_enable, self.config.stream_web_enable)
         else:
             self.gate_dict[key] = 2
             # print(str(key)+"正常通过")   #控制台打印
@@ -243,7 +242,7 @@ class CardComponent(BasedStreamComponent):
 
     #  用于在图像上进行可视化操
     def on_draw_vis(self, idx, frame, input_mot):
-        text_scale = 2
+        text_scale = 1
         text_thickness = 2
         line_thickness = 2
         # 标题线
@@ -333,6 +332,6 @@ def create_process(shared_memory, config_path: str):
         comp.on_destroy()
     except Exception as e:
         # 使用 traceback 打印堆栈信息
-        traceback_info = ''.join(traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__))
-        logger.error(f"CardComponent: {e}\n{traceback_info}")
+        logger.error(f"CardComponent: {e}")
+        logger.error(traceback.format_exc())  # 打印完整的堆栈信息
         comp.on_destroy()

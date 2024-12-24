@@ -1,0 +1,6 @@
+INCLUDE:
+  - conf/dev/feature/card/card1_zone.yaml
+  - conf/dev/feature/card/card_root.yaml
+input_ports:
+  - yolox-person1
+output_ports: []
