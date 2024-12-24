@@ -1,5 +1,7 @@
 import os
 import time
+import traceback
+
 import cv2
 import numpy as np
 from loguru import logger
@@ -144,4 +146,5 @@ def create_process(shared_memory, config_path: str):
         comp.on_destroy()
     except Exception as e:
         logger.error(f"YoloxComponent: {e}")
+        logger.error(traceback.format_exc())  # 打印完整的堆栈信息
         comp.on_destroy()
