@@ -1,0 +1,7 @@
+INCLUDE:
+  - conf/dev/feature/intrude/intrude1_zone.yaml
+  - conf/dev/feature/intrude/intrude_root.yaml
+
+input_ports:  # 输入端口
+  - yolox-person1
+output_port: []  # 输出端口
