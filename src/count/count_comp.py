@@ -11,7 +11,7 @@ from src.count.count_info import CountInfo
 from bytetrack.zero.bytetrack_helper import BytetrackHelper
 from simple_http.simple_http_helper import SimpleHttpHelper
 from zero.core.based_stream_comp import BasedStreamComponent
-from yolox.zero.detection_key import DetectionKey
+from zero.key.detection_key import DetectionKey
 from zero.key.global_key import GlobalKey
 from zero.key.stream_key import StreamKey
 from utility.config_kit import ConfigKit
