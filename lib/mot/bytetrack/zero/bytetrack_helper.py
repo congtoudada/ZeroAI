@@ -3,8 +3,8 @@ from typing import List
 import cv2
 import numpy as np
 
-from bytetrack.zero.info.bytetrack_info import BytetrackInfo
-from bytetrack.zero.tracker.byte_tracker import BYTETracker, STrack
+from bytetrack.zero.bytetrack_info import BytetrackInfo
+from bytetrack.zero.byte_tracker import BYTETracker, STrack
 from utility.config_kit import ConfigKit
 
 

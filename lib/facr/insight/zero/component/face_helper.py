@@ -7,6 +7,7 @@ from insight.zero.component.face_process_helper import FaceProcessHelper
 from insight.zero.component.insight_comp import InsightComponent
 from insight.zero.info.face_helper_info import FaceHelperInfo
 from utility.config_kit import ConfigKit
+from utility.img_kit import ImgKit
 
 
 class FaceHelper:
@@ -33,7 +34,7 @@ class FaceHelper:
         """
         self.handler.tick()
 
-    def try_send(self, obj_id, image, diff, per_y, retry) -> bool:
+    def try_send(self, frame, ltrb, obj_id, diff, per_y, retry) -> bool:
         """
         是否可以发送
         :param obj_id:
@@ -52,7 +53,11 @@ class FaceHelper:
         if not self.config.face_cull_up_y < per_y < 1.0 - self.config.face_cull_down_y:  # 在剔除区域，不发送
             return False
         # 尝试发送人脸识别请求（内部可能还会判断）
-        return self.handler.send(obj_id, image)
+        if frame is not None:
+            image = ImgKit.crop_img(frame, ltrb)
+            return self.handler.send(obj_id, image)
+        else:
+            return False
 
     def destroy_obj(self, obj_id):
         """
