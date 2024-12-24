@@ -70,7 +70,6 @@ detection/yolox/utils/model_utils.py
 detection/yolox/utils/setup_env.py
 detection/yolox/utils/visualize.py
 detection/yolox/zero/__init__.py
-detection/yolox/zero/detection_key.py
 detection/yolox/zero/predictor.py
 detection/yolox/zero/yolox_comp.py
 detection/yolox/zero/yolox_info.py
@@ -173,6 +172,7 @@ network/simple_http/simple_http_key.py
 network/simple_http/simple_http_task.py
 utility/__init__.py
 utility/config_kit.py
+utility/img_kit.py
 utility/log_kit.py
 utility/object_pool.py
 utility/rtsp_kit.py
@@ -198,5 +198,6 @@ zero/info/based_stream_info.py
 zero/info/launch_info.py
 zero/info/stream_info.py
 zero/key/__init__.py
+zero/key/detection_key.py
 zero/key/global_key.py
 zero/key/stream_key.py

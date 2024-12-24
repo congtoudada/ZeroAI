@@ -34,10 +34,13 @@ class ImgKit:
         return np.ascontiguousarray(np.copy(im[int(y1): int(y2), int(x1): int(x2)]))
 
     @staticmethod
-    def draw_img_box(im, ltrb, color='red', line_thickness=2):
+    def draw_img_box(im, ltrb, color='red', line_thickness=1):
         """
         画包围框
         """
-        cv2.rectangle(im, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
-                      color=color, thickness=line_thickness)
+        if im is not None:
+            if ltrb[0] < 0 or ltrb[1] > 0 or ltrb[2] > im.shape[1] or ltrb[3] > im.shape[0]:
+                return
+            cv2.rectangle(im, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
+                          color=color, thickness=line_thickness)
 
