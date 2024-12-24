@@ -9,7 +9,7 @@ from zero.core.component import Component
 from zero.info.stream_info import StreamInfo
 from zero.key.global_key import GlobalKey
 from zero.key.stream_key import StreamKey
-from utility.core.config_kit import ConfigKit
+from utility.config_kit import ConfigKit
 
 
 class StreamComponent(Component):

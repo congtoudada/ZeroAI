@@ -5,7 +5,7 @@ import traceback
 import cv2
 from loguru import logger
 
-from utility.core.config_kit import ConfigKit
+from utility.config_kit import ConfigKit
 from zero.core.based_stream_comp import BasedStreamComponent
 from zero.info.based_stream_info import BasedStreamInfo
 from zero.key.global_key import GlobalKey
