@@ -1,4 +1,4 @@
-from zero.core.info.base_info import BaseInfo
+from zero.info.base_info import BaseInfo
 
 
 class BytetrackInfo(BaseInfo):

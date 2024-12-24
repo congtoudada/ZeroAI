@@ -1,0 +1,20 @@
+numpy
+matplotlib
+Pillow
+easydict
+opencv-contrib-python
+opencv-python
+pandas
+PyYAML
+scikit-image
+scikit-learn
+scipy
+seaborn
+tensorboard
+tensorboardX
+# torch
+# torchvision
+tqdm
+xmltodict
+basetrainer
+pybaseutils
