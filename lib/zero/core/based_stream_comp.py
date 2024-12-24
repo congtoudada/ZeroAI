@@ -10,7 +10,7 @@ from zero.helper.save_video_helper import SaveVideoHelper
 from zero.info.based_stream_info import BasedStreamInfo
 from zero.key.global_key import GlobalKey
 from zero.key.stream_key import StreamKey
-from utility.core.rtsp_kit import RtspKit
+from utility.rtsp_kit import RtspKit
 from abc import ABC, abstractmethod
 
 
