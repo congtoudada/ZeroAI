@@ -51,3 +51,9 @@ requests
 
 # for docker env
 markdown-it-py==2.2.0
+
+# for reid
+yacs
+timm
+ftfy
+regex
