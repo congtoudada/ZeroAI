@@ -14,15 +14,14 @@ from clip_reid.datasets.make_dataloader_clipreid import make_dataloader
 from clip_reid.model.make_model_clipreid import make_model
 from clip_reid.processor.processor_clipreid_stage2 import do_inference
 from clip_reid.utils.logger import setup_logger
-from clip_reid.zero.helper.faiss_reid_helper import FaissReidHelper
+from clip_reid.zero.component.faiss_reid_helper import FaissReidHelper
 
 
 def get_feat(model, img_path):
     # 打开图片
     img = Image.open(img_path).convert('RGB')  # 确保图片是 RGB 格式
     # 显示图片
-    # img_ndarray = np.array(img)
-
+    img_ndarray = np.array(img)
     val_transforms = transforms.Compose([
         transforms.Resize(cfg.INPUT.SIZE_TEST),
         transforms.ToTensor(),
@@ -52,7 +51,7 @@ if __name__ == "__main__":
 
     if args.config_file != "":
         cfg.merge_from_file(args.config_file)
-    cfg.merge_from_list(args.opts)
+    # cfg.merge_from_list(args.opts)
     cfg.freeze()
 
     output_dir = cfg.OUTPUT_DIR
@@ -92,8 +91,8 @@ if __name__ == "__main__":
     os.environ['CUDA_VISIBLE_DEVICES'] = cfg.MODEL.DEVICE_ID
 
     # 构建向量库
-    # d = 1280  # vit
-    d = 3072  # res50
+    d = 1280  # vit
+    # d = 3072  # res50
     faiss_helper = FaissReidHelper(d)
     for img_path in img_database:
         feat = get_feat(model, img_path)

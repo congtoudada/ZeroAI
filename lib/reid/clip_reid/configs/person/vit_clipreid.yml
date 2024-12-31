@@ -3,7 +3,8 @@ MODEL:
   METRIC_LOSS_TYPE: 'triplet'
   IF_LABELSMOOTH: 'on'
   IF_WITH_CENTER: 'no'
-  NAME: 'RN50'
+#  NAME: 'RN50'
+  NAME: 'ViT-B-16'
   STRIDE_SIZE: [16, 16]
   ID_LOSS_WEIGHT : 0.25
   TRIPLET_LOSS_WEIGHT : 1.0
@@ -63,7 +64,8 @@ TEST:
   EVAL: True
   IMS_PER_BATCH: 1
   RE_RANKING: False
-  WEIGHT: 'pretrained/reid/clip_reid/MSMT17_clipreid_RN50_120.pth'
+  # WEIGHT: 'pretrained/reid/clip_reid/MSMT17_clipreid_RN50_120.pth'
+  WEIGHT: 'pretrained/reid/clip_reid/MSMT17_clipreid_ViT-B-16_60.pth'
   NECK_FEAT: 'before'
   FEAT_NORM: 'yes'
 
@@ -86,7 +88,7 @@ TEST:
 DATASETS:
    NAMES: ('cong2025')
    ROOT_DIR: ('H:/BaiduNetdiskDownload/dataset/ReID/Custom')
-OUTPUT_DIR: 'output/cong2025'
+OUTPUT_DIR: 'output/service/clip_reid'
 
 # CUDA_VISIBLE_DEVICES=3 python train_clipreid.py --config_file configs/VehicleID/vit_clipreid.yml
 # CUDA_VISIBLE_DEVICES=0 python test_clipreid.py --config_file configs/person/vit_clipreid.yml TEST.WEIGHT 'pretrained/reid/clip_reid/MSMT17_clipreid_ViT-B-16_60.pth'

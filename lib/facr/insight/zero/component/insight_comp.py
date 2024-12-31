@@ -75,7 +75,7 @@ class InsightComponent(Component):
             # debug输出
             if self.config.insight_debug_enable:
                 cv2.imwrite(os.path.join(self.config.insight_debug_output,
-                                         f"obj{obj_id}_cam{cam_id}_per{per_id}_score{score:.2f}.jpg"), face_image)
+                                         f"facr_cam{cam_id}_per{per_id}_score{score:.2f}.jpg"), face_image)
 
             # 响应输出结果
             rsp_key = FaceKey.FACE_RSP.name + str(pid)
