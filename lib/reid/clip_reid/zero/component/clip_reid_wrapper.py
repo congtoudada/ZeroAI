@@ -40,7 +40,6 @@ class ClipReidWrapper(object):
         model.load_param(cfg.TEST.WEIGHT)
 
         # 获取模型的设备
-        os.environ['CUDA_VISIBLE_DEVICES'] = cfg.MODEL.DEVICE_ID
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model.to(device)
         model.eval()

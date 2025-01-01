@@ -22,6 +22,7 @@ from zero.helper.analysis_helper import AnalysisHelper
 from zero.key.global_key import GlobalKey
 from utility.config_kit import ConfigKit
 from utility.timer_kit import TimerKit
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
 class ClipReidComponent(Component):
@@ -76,7 +77,7 @@ class ClipReidComponent(Component):
             # break  # 每次最多处理一个响应
         # 记录推理平均耗时
         if self.config.log_analysis:
-            AnalysisHelper.refresh("Face inference average time", self.infer_timer.average_time * 1000)
+            AnalysisHelper.refresh("Reid inference average time", self.infer_timer.average_time * 1000)
         # tick faiss
         self.time_flag = (self.time_flag + 1) % sys.maxsize
         self.camera_gallery.tick(self.time_flag)
@@ -117,7 +118,7 @@ class ClipReidComponent(Component):
         #                                               self.config.clip_reid_refresh_mode,
         #                                               self.config.clip_reid_refresh_interval,
         #                                               self.config.clip_reid_refresh_count)
-        if reid_method == 0:  # 1.普通存图请求
+        if reid_method == 1:  # 1.普通存图请求
             # 将图片写入本地磁盘
             time_str = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())
             img_path = os.path.join(self.config.clip_reid_camera_gallery_dir, f"{cam_id}_{time_str}_{obj_id}.jpg")
@@ -126,13 +127,17 @@ class ClipReidComponent(Component):
             extra_info = {"cam_id": cam_id, "time": time_str, "path": img_path, "feat": feat}
             self.camera_gallery.add(feat, extra_info)  # 将特征加入特征库
             n = self.camera_gallery.get_total()
-            if n % 10 == 0:
+            if self.config.clip_reid_debug_enable and n % 50 == 0:
                 logger.info(f"{self.pname} 当前camera gallery有效特征数: {n}")
-        elif reid_method == 1:  # 2.reid识别请求，需要跟人脸截到的人像配准
+        elif reid_method == 2:  # 2.reid识别请求，需要跟人脸截到的人像配准
             # 更新本地face shot特征库
             self.update_face_shot()
             k = 1  # topK的K值
             extra_info = self.face_gallery.search(feat, k)
+            if len(extra_info) == 0:
+                logger.info(
+                    f"{self.pname} Reid failed to fast reid: pid:{pid} cam_id:{cam_id} obj_id:{obj_id}")
+                return
             per_id = extra_info[0]['per_id']
             score = extra_info[0]['score']
             if score < self.config.clip_reid_threshold:
@@ -142,10 +147,11 @@ class ClipReidComponent(Component):
                 if per_id != 1:
                     logger.info(
                         f"{self.pname} 识别成功! cam_id: {cam_id}, obj_id: {obj_id}, per_id: {per_id}, score: {score}")
-                cv2.imwrite(os.path.join(self.config.clip_reid_debug_enable,
+                reid_img = cv2.cvtColor(reid_img, cv2.COLOR_RGB2BGR)
+                cv2.imwrite(os.path.join(self.config.clip_reid_debug_output,
                                          f"reid_cam{cam_id}_per{per_id}_score{score:.2f}.jpg"), reid_img)
             # 响应输出结果
-            rsp_key = ReidKey.REID_RSP.name + str(pid)
+            rsp_key = ReidKey.REID_RSP.name + str(pid)  # KEY: REID_RSP
             if self.reid_shared_memory.__contains__(rsp_key):
                 self.reid_shared_memory[rsp_key].put({
                     ReidKey.REID_RSP_OBJ_ID.name: obj_id,
@@ -153,10 +159,14 @@ class ClipReidComponent(Component):
                     ReidKey.REID_RSP_SCORE.name: score
                 })
                 logger.info(
-                    f"{self.pname} 响应Reid请求成功: pid:{pid} obj_id:{obj_id} per_id:{per_id} score:{score:.2f}")
+                    f"{self.pname} 响应Reid请求成功: pid:{pid} cam_id:{cam_id} obj_id:{obj_id} per_id:{per_id} score:{score:.2f}")
         elif reid_method == 3:  # 找人
             k = 3  # topK的K值
             extra_info = self.camera_gallery.search(feat, k)
+            if len(extra_info) == 0:
+                logger.info(
+                    f"{self.pname} Reid failed to search person: pid:{pid} cam_id:{cam_id} obj_id:{obj_id}")
+                return
             invalid_indices = []
             for i, info in enumerate(extra_info):  # extra_info是一个List[Dict]
                 score = info['score']
@@ -166,7 +176,7 @@ class ClipReidComponent(Component):
             invalid_indices.reverse()
             for i, idx in enumerate(invalid_indices):
                 extra_info.pop(idx)
-            rsp_key = ReidKey.REID_RSP_SP.name + str(pid)
+            rsp_key = ReidKey.REID_RSP_SP.name + str(pid)  # KEY: REID_RSP_SP
             if self.reid_shared_memory.__contains__(rsp_key):
                 self.reid_shared_memory[rsp_key].put({
                     ReidKey.REID_RSP_SP_PACKAGE.name: extra_info,
@@ -182,6 +192,7 @@ class ClipReidComponent(Component):
         added, removed, modified, new_mtime = FileModifyKit.check_changes(self.config.clip_reid_face_gallery_dir,
                                                                           self.last_modify_time)
         added.update(modified)
+        logger.info(f"{self.pname} update face gallery, modified num: {len(added)}")
         for file in added:
             per_id = file.split('_')[0]  # 首位存per id
             if self.face_gallery_dict.__contains__(per_id):  # 已经存在该特征
@@ -222,7 +233,8 @@ if __name__ == '__main__':
     shared_memory[GlobalKey.EVENT_ESC.name] = multiprocessing.Manager().Event()
     reid_comp = ClipReidComponent(shared_memory, config_path="conf/dev/service/reid/clip_reid/clip_reid.yaml")
     reid_comp.start()
-    # 测试reid_method 0: 存图
+
+    print('---------------------------- 测试请求方式1: 存图 ----------------------------')
     # 指定文件夹路径
     folder_path = Path("res/images/reid/gallery")
 
@@ -237,14 +249,44 @@ if __name__ == '__main__':
     for i, img_path in enumerate(img_database):
         img = Image.open(img_path).convert('RGB')  # 确保图片是 RGB 格式
         img_ndarray = np.array(img)
-        req_package1 = {
+        req_package = {
             ReidKey.REID_REQ_CAM_ID.name: 1,
             ReidKey.REID_REQ_PID.name: 991101,
             ReidKey.REID_REQ_OBJ_ID.name: i,
             ReidKey.REID_REQ_IMAGE.name: img_ndarray,
-            ReidKey.REID_REQ_METHOD.name: 0
+            ReidKey.REID_REQ_METHOD.name: 1  # 方式1
         }
-        reid_comp.process_request(req_package1)
+        reid_comp.process_request(req_package)
 
+    # 测试特征库刷新
+    reid_comp.camera_gallery.tick(1)
+    reid_comp.camera_gallery.tick(reid_comp.config.clip_reid_refresh_interval+2)  # 切换半区
+    # reid_comp.camera_gallery.tick(reid_comp.config.clip_reid_refresh_interval*2 + 3)  # 切换半区
 
+    print('---------------------------- 测试请求方式2: Fast Reid ----------------------------')
+    query_path = "res/images/reid/query/0002_000_01_02.jpg"
+    img = Image.open(query_path).convert('RGB')  # 确保图片是 RGB 格式
+    img_ndarray = np.array(img)
+    req_package = {
+        ReidKey.REID_REQ_CAM_ID.name: 1,
+        ReidKey.REID_REQ_PID.name: 991101,
+        ReidKey.REID_REQ_OBJ_ID.name: 888,
+        ReidKey.REID_REQ_IMAGE.name: img_ndarray,
+        ReidKey.REID_REQ_METHOD.name: 2  # 方式2
+    }
+    reid_comp.process_request(req_package)
 
+    print('---------------------------- 测试请求方式3: Search Person ----------------------------')
+    query_path = "res/images/reid/query/0002_000_01_02.jpg"
+    img = Image.open(query_path).convert('RGB')  # 确保图片是 RGB 格式
+    img_ndarray = np.array(img)
+    req_package = {
+        ReidKey.REID_REQ_CAM_ID.name: 1,
+        ReidKey.REID_REQ_PID.name: 991101,
+        ReidKey.REID_REQ_OBJ_ID.name: 888,
+        ReidKey.REID_REQ_IMAGE.name: img_ndarray,
+        ReidKey.REID_REQ_METHOD.name: 3  # 方式3
+    }
+    reid_comp.process_request(req_package)
+    print(f"process average time: {reid_comp.infer_timer.average_time * 1000}ms")
+    print(f"process max time: {reid_comp.infer_timer.max_time * 1000}ms")

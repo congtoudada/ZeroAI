@@ -22,14 +22,11 @@ class FaissReidHelper:
         self.refresh_mode = refresh_mode
         self.refresh_interval = refresh_interval
         self.refresh_count = refresh_count
-        self.upper_database = faiss.index_factory(self.dimension, "Flat", faiss.METRIC_INNER_PRODUCT)  # 上半区特征库
-        self.upper_dict = {}
-        self.down_database = faiss.index_factory(self.dimension, "Flat", faiss.METRIC_INNER_PRODUCT)  # 下半区特征库
-        self.down_dict = {}
+        self.upper_indices = []  # 上半区特征库索引
+        self.down_indices = []  # 下半区特征库索引
         self.is_upper = True  # 是否激活上半区
-        self.activate_database = self.upper_database  # 当前激活特征库
-        self.activate_dict = self.upper_dict  # 当前激活字典，存储额外信息
-        self.map = {}
+        self.activate_database = faiss.index_factory(self.dimension, "Flat", faiss.METRIC_INNER_PRODUCT)  # 特征库
+        self.activate_dict = {}  # 特征库索引字典，存储额外信息
         self.last_refresh = 0  # 上次刷新帧
 
     def add(self, feat, info_dict) -> int:
@@ -45,22 +42,37 @@ class FaissReidHelper:
         idx = self.activate_database.ntotal - 1
         self.activate_dict[idx] = info_dict
         info_dict['index'] = idx
+        if self.is_upper:
+            self.upper_indices.append(idx)
+        else:
+            self.down_indices.append(idx)
         return idx
 
     def remove(self, idx):
         if self.activate_dict.__contains__(idx):
             ids_to_remove = np.array([idx])
-            self.activate_database.remove(ids_to_remove)
+            self.activate_database.remove_ids(ids_to_remove)
             self.activate_dict.pop(idx)
 
+    def remove_range(self, ids):
+        if len(ids) == 0:
+            return
+        ids_to_remove = np.array(ids)
+        self.activate_database.remove_ids(ids_to_remove)
+        for i, idx in enumerate(ids):
+            if self.activate_dict.__contains__(idx):
+                self.activate_dict.pop(idx)
+
     def get_total(self):
-        return self.upper_database.ntotal + self.down_database.ntotal
+        return self.activate_database.ntotal
 
     def search(self, query, top_k=4):
         assert query.shape == (1, self.dimension), \
             f"Expected feat to have shape (1, {self.dimension}), but got {query.shape}"
         D, I = self.activate_database.search(query, k=top_k)
         logger.info(f"{self.pname} 查询结果: \nI: {I} \nD: {D}")
+        if I[0][0] == -1:
+            return []
         # values = [self.activate_dict[key] for key in I.flatten().tolist()]
         values_with_scores = [
             {**self.activate_dict[key], 'score': D[0][i]}  # 合并字典并添加 score 键
@@ -71,6 +83,7 @@ class FaissReidHelper:
     def tick(self, now):
         if self.last_refresh == 0:  # 第一次tick不刷新
             self.last_refresh = now
+            return
         if self.refresh_mode == 0:
             if abs(now - self.last_refresh) > self.refresh_interval:
                 self.refresh(now)
@@ -82,31 +95,27 @@ class FaissReidHelper:
                 self.refresh(now)
 
     def refresh(self, now):
+        logger.info(f"{self.pname} before switch total: {self.get_total()}")
         # 刷新半区
         if self.is_upper:
             # 清空下半区数据
-            self.down_database.reset()
-            self.down_dict.clear()
+            self.remove_range(self.down_indices)
+            self.down_indices.clear()
             # 切换成下半区
-            self.activate_database = self.down_database
-            self.activate_dict = self.down_dict
             self.is_upper = False
-            logger.info(f"{self.pname} switch to down!")
+            logger.info(f"{self.pname} after switch to down, current total: {self.get_total()}")
         else:
             # 清空上半区数据
-            self.upper_database.reset()
-            self.upper_dict.clear()
+            self.remove_range(self.upper_indices)
+            self.upper_indices.clear()
             # 切换成上半区
-            self.activate_database = self.upper_database
-            self.activate_dict = self.upper_dict
             self.is_upper = True
-            logger.info(f"{self.pname} switch to upper!")
+            logger.info(f"{self.pname} switch to upper, current total: {self.get_total()}")
         self.last_refresh = now
 
     def destroy(self):
-        self.activate_database = None
-        self.activate_dict = None
-        self.upper_dict.clear()
-        self.upper_database.reset()
-        self.down_database.reset()
-        self.down_dict.clear()
+        self.activate_database.reset()
+        self.activate_dict.clear()
+        self.upper_indices.clear()
+        self.down_indices.clear()
+

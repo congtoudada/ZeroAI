@@ -13,5 +13,5 @@ clip_reid:
   white_list: []  # 只有当开启白名单制时有效，在白名单的摄像头id会参与reid计算，其他不会
   black_list: []  # 只有当开启黑名单制时有效，在黑名单的摄像头id会不参与reid计算，其他都会
   debug_enable: True  # 是否debug
-  debug_output: output/service/clip_reid  # debug输出路径
+  debug_output: output/service/clip_reid/debug  # debug输出路径
 update_fps: 30

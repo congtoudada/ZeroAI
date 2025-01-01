@@ -12,7 +12,7 @@ class ReidKey(Enum):
     REID_REQ_PID = 2  # 请求pid
     REID_REQ_OBJ_ID = 4  # 请求对象id
     REID_REQ_IMAGE = 5  # 请求图像
-    REID_REQ_METHOD = 6  # 请求方式 0:存图请求 1:Reid请求 2:找人请求
+    REID_REQ_METHOD = 6  # 请求方式 1:存图请求 2:Reid请求 3:找人请求
     # --- 实际响应key RSP + port + pid ---
     REID_RSP = 10  # Reid识别响应Key 对应METHOD1
     REID_RSP_OBJ_ID = 11  # 对象id
