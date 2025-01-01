@@ -14,8 +14,14 @@ class ReidKey(Enum):
     REID_REQ_IMAGE = 5  # 请求图像
     REID_REQ_METHOD = 6  # 请求方式 0:存图请求 1:Reid请求 2:找人请求
     # --- 实际响应key RSP + port + pid ---
-    REID_RSP = 10
+    REID_RSP = 10  # Reid识别响应Key 对应METHOD1
     REID_RSP_OBJ_ID = 11  # 对象id
     REID_RSP_PER_ID = 12  # Reid识别结果（1为陌生人）
     REID_RSP_SCORE = 13  # Reid识别分数(0~1)
+    # 找人
+    REID_RSP_SP = 20  # SP<=>Search Person 找人响应key 对应METHOD2
+    REID_RSP_SP_PACKAGE = 21  # 响应包，返回List[Dict{"cam_id":xxx, "path": xxx, "score": xxx}]
+    # REID_RSP_CAM_IDS = 22  # 摄像头ids
+    # REID_RSP_SCORES = 23  # 识别分数
+    # REID_RSP_IMAGES = 24  # 图片路径
 

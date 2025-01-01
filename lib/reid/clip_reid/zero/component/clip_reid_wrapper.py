@@ -2,6 +2,7 @@ import os
 import faiss
 import numpy as np
 import torch
+from PIL import Image
 from torchvision.transforms import transforms
 
 from clip_reid.datasets.make_dataloader_clipreid import make_dataloader
@@ -49,20 +50,20 @@ class ClipReidWrapper(object):
         """
         抽特征，输入必须是 ndarray (w,h,3) 0-255
         """
-        if img.ndim == 3 and img.shape[2] == 3:
-            # 确保数值范围是0-255，转换为uint8类型
-            img_rgb = np.clip(img, 0, 255).astype(np.uint8)
-        else:
-            # 如果不是RGB图像，可以考虑转换或报错
+        if not img.ndim == 3 or not img.shape[2] == 3:
             self.logger.error("Unsupported image shape: {}".format(img.shape))
+        #     # 确保数值范围是0-255，转换为uint8类型
+        #     img = np.clip(img, 0, 255).astype(np.uint8)
+            return None
 
+        pil_img = Image.fromarray(img).convert('RGB')
         preprocess = transforms.Compose([
             transforms.Resize(cfg.INPUT.SIZE_TEST),
             transforms.ToTensor(),
             transforms.Normalize(mean=cfg.INPUT.PIXEL_MEAN, std=cfg.INPUT.PIXEL_STD)
         ])
 
-        img_tensor = preprocess(img).unsqueeze(0).to(self.device)
+        img_tensor = preprocess(pil_img).unsqueeze(0).to(self.device)
         with torch.no_grad():
             feat = self.model(img_tensor)
 

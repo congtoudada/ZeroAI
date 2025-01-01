@@ -53,6 +53,9 @@ class FaissReidHelper:
             self.activate_database.remove(ids_to_remove)
             self.activate_dict.pop(idx)
 
+    def get_total(self):
+        return self.upper_database.ntotal + self.down_database.ntotal
+
     def search(self, query, top_k=4):
         assert query.shape == (1, self.dimension), \
             f"Expected feat to have shape (1, {self.dimension}), but got {query.shape}"
