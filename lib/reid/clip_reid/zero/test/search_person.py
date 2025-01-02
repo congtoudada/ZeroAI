@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 import faiss
-import cv2
 import numpy as np
 import torch
 from matplotlib import pyplot as plt, image as mpimg
@@ -12,9 +11,8 @@ from PIL import Image
 
 from clip_reid.datasets.make_dataloader_clipreid import make_dataloader
 from clip_reid.model.make_model_clipreid import make_model
-from clip_reid.processor.processor_clipreid_stage2 import do_inference
 from clip_reid.utils.logger import setup_logger
-from clip_reid.zero.component.faiss_reid_helper import FaissReidHelper
+from zero.helper.faiss_helper import FaissHelper
 
 
 def get_feat(model, img_path):
@@ -93,7 +91,7 @@ if __name__ == "__main__":
     # 构建向量库
     d = 1280  # vit
     # d = 3072  # res50
-    faiss_helper = FaissReidHelper(d)
+    faiss_helper = FaissHelper(d)
     for img_path in img_database:
         feat = get_feat(model, img_path)
         faiss.normalize_L2(feat)

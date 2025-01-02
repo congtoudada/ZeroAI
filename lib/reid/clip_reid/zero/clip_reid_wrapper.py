@@ -8,27 +8,27 @@ from torchvision.transforms import transforms
 from clip_reid.datasets.make_dataloader_clipreid import make_dataloader
 from clip_reid.model.make_model_clipreid import make_model
 from clip_reid.utils.logger import setup_logger
-from clip_reid.zero.info.clip_reid_info import ClipReidInfo
 from clip_reid.config import cfg
+from reid_core.reid_info import ReidInfo
 
 
 class ClipReidWrapper(object):
-    def __init__(self, config: ClipReidInfo):
+    def __init__(self, config: ReidInfo):
         self.config = config
         self.model, self.logger, self.device = self.make_model()
 
     def make_model(self):
-        if self.config.clip_reid_config_file != "":
-            cfg.merge_from_file(self.config.clip_reid_config_file)
+        if self.config.reid_config_file != "":
+            cfg.merge_from_file(self.config.reid_config_file)
         # cfg.merge_from_list(args.opts)
         cfg.freeze()
         output_dir = cfg.OUTPUT_DIR
         if output_dir and not os.path.exists(output_dir):
             os.makedirs(output_dir)
         logger = setup_logger("transreid", output_dir, if_train=False)
-        if self.config.clip_reid_config_file != "":
-            logger.info("Loaded configuration file {}".format(self.config.clip_reid_config_file))
-            with open(self.config.clip_reid_config_file, 'r') as cf:
+        if self.config.reid_config_file != "":
+            logger.info("Loaded configuration file {}".format(self.config.reid_config_file))
+            with open(self.config.reid_config_file, 'r') as cf:
                 config_str = "\n" + cf.read()
                 logger.info(config_str)
         logger.info("Running with config:\n{}".format(cfg))

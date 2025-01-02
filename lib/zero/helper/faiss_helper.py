@@ -5,7 +5,7 @@ import numpy as np
 from loguru import logger
 
 
-class FaissReidHelper:
+class FaissHelper:
     def __init__(self, dimension, refresh_mode=0, refresh_interval=54000, refresh_count=10000):
         """
         faiss注意点：
