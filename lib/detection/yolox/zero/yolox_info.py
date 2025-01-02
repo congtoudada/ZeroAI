@@ -3,6 +3,8 @@ from zero.info.based_stream_info import BasedStreamInfo
 
 class YoloxInfo(BasedStreamInfo):
     def __init__(self, data: dict = None):
+        self.detection_reid_enable = False  # 是否支持reid存图(若支持，会定期对第0个类别发送reid存图请求)
+        self.detection_reid_interval = 30  # 间隔多少帧发送一次reid存图请求
         self.yolox_args_expn = ""  # 实验名称
         self.yolox_args_path = None  # 取流路径（为None则通过内部框架取流）
         self.yolox_args_exp_file = ""  # 通过.py选择模型

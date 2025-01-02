@@ -3,6 +3,10 @@ INCLUDE:
   - conf/dev/global/config.yaml
   - conf/dev/global/based_stream.yaml
 
+detection:
+  reid_enable: False  # 是否支持reid存图(若支持，会定期对第0个类别发送reid存图请求)
+  reid_interval: 20  # 间隔多少帧发送一次reid存图请求
+
 yolox:
   args:
     name: null  # 通过模型名选择预置模型（建议使用exp_file自定义选择）

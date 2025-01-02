@@ -3,10 +3,10 @@ from abc import ABC, abstractmethod
 
 class IReidWrapper(ABC):
     @abstractmethod
-    def extract_feature(self, img):
+    def inference(self, img):
         """
-        抽取特征
-        :param img: 输入图像(ndarray格式)
+        输入图像，返回特征
+        :param img: 输入图像(ndarray格式 h,w,3 RGB)
         """
         pass
 

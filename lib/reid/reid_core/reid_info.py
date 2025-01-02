@@ -5,6 +5,7 @@ class ReidInfo(BaseInfo):
     def __init__(self, data: dict):
         self.reid_dimension = 1280  # VIT特征维度
         self.reid_threshold = 0.86  # reid相似度阈值
+        self.reid_search_person_threshold = 0.8  # 找人相似度阈值
         # self.data_shape = 3072  # RN50特征维度
         self.reid_config_file = "lib/reid/clip_reid/configs/person/vit_clipreid.yml"  # 模型配置文件
         self.reid_face_gallery_dir = "output/service/clip_reid/face_gallery"  # 由人脸识别捕捉的带id的人像gallery

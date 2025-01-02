@@ -10,6 +10,7 @@ from loguru import logger
 from insight.zero.component.face_recognizer import FaceRecognizer
 from insight.zero.info.insight_info import InsightInfo
 from insight.zero.key.face_key import FaceKey
+from utility.img_kit import ImgKit
 from zero.core.component import Component
 from zero.helper.analysis_helper import AnalysisHelper
 from zero.key.global_key import GlobalKey
@@ -74,9 +75,9 @@ class InsightComponent(Component):
             #     logger.info(f"{self.pname} 识别成功! cam_id: {cam_id}, obj_id: {obj_id}, per_id: {per_id}, score: {score}")
             # debug输出
             if self.config.insight_debug_enable:
-                cv2.imwrite(os.path.join(self.config.insight_debug_output,
-                                         f"facr_cam{cam_id}_per{per_id}_score{score:.2f}.jpg"), face_image)
-
+                img_path = os.path.join(self.config.insight_debug_output,
+                                        f"facr_cam{cam_id}_per{per_id}_score{score:.2f}.jpg")
+                cv2.imwrite(img_path, face_image)
             # 响应输出结果
             rsp_key = FaceKey.FACE_RSP.name + str(pid)
             if self.face_shared_memory.__contains__(rsp_key):

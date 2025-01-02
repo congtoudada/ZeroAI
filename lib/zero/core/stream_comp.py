@@ -1,6 +1,8 @@
 import os
 import sys
 import time
+import traceback
+
 import cv2
 from UltraDict import UltraDict
 from loguru import logger
@@ -80,7 +82,8 @@ class StreamComponent(Component):
             # 读取帧并解码
             status, frame = self.cap.read()
             if status:
-                self.process_frame(frame)
+                self.process_frame(frame)  # BGR
+                # self.process_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))  # BGR->RGB
         else:
             # 丢帧
             self.cap.grab()
@@ -117,6 +120,7 @@ def create_process(shared_memory, config_path: str):
     except KeyboardInterrupt:
         comp.on_destroy()
     except Exception as e:
+        logger.error(traceback.format_exc())  # 打印完整的堆栈信息
         logger.error(f"StreamComponent: {e}")
         comp.on_destroy()
 

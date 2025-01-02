@@ -12,9 +12,9 @@ class ImgKit:
         """
         x1, y1, x2, y2 = ltrb[0], ltrb[1], ltrb[2], ltrb[3]
         if x1 < 0 or y1 < 0 or x2 > im.shape[1] or y2 > im.shape[0]:
-            return im
+            return None
         if x1 > x2 or y1 > y2:
-            return im
+            return None
         return np.ascontiguousarray(np.copy(im[int(y1): int(y2), int(x1): int(x2)]))
 
     @staticmethod

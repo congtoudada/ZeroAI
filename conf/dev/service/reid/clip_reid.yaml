@@ -1,9 +1,12 @@
 INCLUDE:
   - conf/dev/global/config.yaml
-clip_reid:
+reid:
   dimension: 1280  # VIT特征维度(1280) RN50(3072)
+  # dimension: 3072  # VIT特征维度(1280) RN50(3072)
   threshold: 0.86  # reid相似度阈值
-  config_file: lib/reid/clip_reid/configs/person/vit_clipreid.yml  # 模型配置文件
+  search_person_threshold: 0.8  # 找人相似度阈值
+  config_file: lib/reid/clip_reid/configs/person/vit_clipreid.yml  # vit模型配置文件
+  # config_file: lib/reid/clip_reid/configs/person/cnn_clipreid.yml  # cnn模型配置文件
   face_gallery_dir: output/service/clip_reid/face_gallery  # 由人脸识别捕捉的带id的人像gallery
   camera_gallery_dir: output/service/clip_reid/camera_gallery  # 由摄像头定期截图的gallery
   refresh_mode: 0  # 刷新模式 0:基于时间刷新 1:基于特征数量刷新 2:综合刷新(满足其中一项就刷新)

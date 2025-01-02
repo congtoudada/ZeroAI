@@ -1,6 +1,4 @@
 import os
-import faiss
-import numpy as np
 import torch
 from PIL import Image
 from torchvision.transforms import transforms
@@ -46,7 +44,7 @@ class ClipReidWrapper(IReidWrapper):
         model.eval()
         return model, logger, device
 
-    def extract_feature(self, img):
+    def inference(self, img):
         """
         抽特征，输入必须是 ndarray (w,h,3) 0-255
         """
@@ -68,5 +66,4 @@ class ClipReidWrapper(IReidWrapper):
             feat = self.model(img_tensor)
 
         ret = feat.to('cpu').detach().numpy()
-        faiss.normalize_L2(ret)
         return ret
