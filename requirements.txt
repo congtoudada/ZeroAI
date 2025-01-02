@@ -42,6 +42,7 @@ cython_bbox
 # video_stream
 mediapipe
 httpx
+flask
 
 # optimize
 ultradict
