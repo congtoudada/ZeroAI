@@ -33,7 +33,6 @@ class LaunchComponent(Component):
         :return:
         """
         # -------------------------------- 1.初始化变量 --------------------------------
-        super().on_start()
         # 设置子进程开启方式
         if sys.platform.startswith('linux'):  # linux默认fork，但fork可能不支持cuda
             multiprocessing.set_start_method('spawn')
@@ -90,7 +89,7 @@ class LaunchComponent(Component):
             pickle.dump(write_data, open(self.config.app_running_file, 'wb'))
         # ########################## 主进程相关 End ############################
 
-    def on_update(self) -> bool:
+    def on_update(self):
         self.analysis_flag += 1
         if self.config.app_analysis_enable and self.analysis_flag >= self.config.app_analysis_interval:  # 打印分析报告
             self.analysis_flag = 0
@@ -98,7 +97,6 @@ class LaunchComponent(Component):
                 AnalysisHelper.show()
         if not os.path.exists(self.config.app_running_file):  # 当运行文件删除时程序退出
             self.esc_event.set()
-        return False
 
     def on_destroy(self):
         self.shared_memory[GlobalKey.ALL_READY.name] = True

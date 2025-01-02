@@ -41,7 +41,6 @@ class InsightComponent(Component):
         self.infer_timer = TimerKit()  # 推理计时器
 
     def on_start(self):
-        super().on_start()
         # 初始化请求缓存
         self.req_queue = multiprocessing.Manager().Queue()
         self.face_shared_memory[FaceKey.FACE_REQ.name] = self.req_queue
@@ -49,7 +48,7 @@ class InsightComponent(Component):
             if not os.path.exists(self.config.insight_debug_output):
                 os.makedirs(self.config.insight_debug_output, exist_ok=True)
 
-    def on_update(self) -> bool:
+    def on_update(self):
         # 检查特征库是否需要重建
         self.time_flag = (self.time_flag + 1) % sys.maxsize
         if self.time_flag % self.check_database_time == 0:
@@ -91,7 +90,6 @@ class InsightComponent(Component):
         # 记录推理平均耗时
         if self.config.log_analysis:
             AnalysisHelper.refresh("Face inference average time", self.infer_timer.average_time * 1000)
-        return False
 
     def on_destroy(self):
         self.face_shared_memory.unlink()

@@ -33,7 +33,6 @@ class BasedStreamComponent(Component, ABC):
         self.write_dict = []  # 输出字典
 
     def on_start(self):
-        super().on_start()
         for i, input_port in enumerate(self.config.input_ports):
             # 初始化读字典
             self.read_dict.append(UltraDict(name=input_port,
@@ -81,8 +80,7 @@ class BasedStreamComponent(Component, ABC):
                 self.write_dict[i][StreamKey.STREAM_FPS.name] = fps
             # 初始化http请求帮助类
 
-    def on_update(self) -> bool:
-        super().on_update()
+    def on_update(self):
         # 处理每一个输入端口
         for i, input_port in enumerate(self.config.input_ports):
             frame, user_data = self.on_get_stream(i)  # 解析流
@@ -115,7 +113,6 @@ class BasedStreamComponent(Component, ABC):
         # opencv等待
         if cv2.waitKey(1) & 0xFF == ord('q'):
             self.shared_memory[GlobalKey.EVENT_ESC.name].set()  # 退出程序
-        return True
 
     def on_get_stream(self, read_idx):
         """

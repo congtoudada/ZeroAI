@@ -34,7 +34,7 @@ class YoloxComponent(BasedStreamComponent):
         初始化时调用一次
         :return:
         """
-        super().on_start()
+        super().on_start()  # 不是直接继承Component，需要调一下super
         # 初始化yolox
         exp = get_exp(self.config.yolox_args_exp_file, self.config.yolox_args_name)
         # 创建zero框架版的yolox目标检测器

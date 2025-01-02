@@ -20,77 +20,49 @@ class Component(ABC):
         self.config: BaseInfo = None  # 配置文件
         self.pname = f"[ {os.getpid()}:component ]"
         self.esc_event = None  # 退出事件
-        self.is_child = False  # 是否为子组件
-        self.has_child = False  # 是否有孩子
-        self.children = []  # 子组件列表
         self.update_delay = 1.0 / 60  # 每帧延迟
         self.default_update_delay = 1.0 / 60  # 默认帧延迟（避免反复计算）
         self.update_timer = TimerKit()
 
-    def on_start(self):
-        """
-        初始化时调用一次
-        """
+    def __on_start(self):
         # 绑定退出事件（根组件绑定即可）
-        if not self.is_child and self.shared_memory is not None:
+        if self.shared_memory is not None:
             self.esc_event = self.shared_memory[GlobalKey.EVENT_ESC.name]
         # 初始化日志模块，只有root组件才需要配置
-        if not self.is_child:
-            if not LogKit.load_info(self.config):
-                logger.info(f"{self.pname} 日志模块被关闭!")
+        if not LogKit.load_info(self.config):
+            logger.info(f"{self.pname} 日志模块被关闭!")
         # 转换为带缩进的JSON字符串并输出
         json_string = json.dumps(self.config.__dict__, indent=4)
         logger.info(f"{self.pname} {type(self)} 配置文件参数: \n{json_string}")
         self.default_update_delay = 1.0 / self.config.update_fps
         self.update_delay = self.default_update_delay
+        self.on_start()
 
-    def on_update(self) -> bool:
+    def on_start(self):
+        """
+        初始化时调用一次
+        """
+        self.on_start()
+
+    def __on_update(self):
+        self.update_delay = self.default_update_delay
+        self.on_update()
+
+    def on_update(self):
         """
         每帧执行
         """
-        self.update_delay = self.default_update_delay
-        return True
+        pass
+
+    def __on_destroy(self):
+        logger.info(f"{self.pname} destroy!")
+        self.on_destroy()
 
     def on_destroy(self):
         """
         组件销毁时执行
         """
-        logger.info(f"{self.pname} destroy!")
-
-    def add_component(self, component):
-        """
-        添加组件
-        """
-        if isinstance(component, Component):
-            component.is_child = True
-            self.has_child = True
-            self.children.append(component)
-
-    def get_component(self, class_type):
-        """
-        获取组件
-        :param class_type:
-        :return:
-        """
-        for child in self.children:
-            if isinstance(child, class_type):
-                return child
-        logger.error(f"{self.pname} 找不到组件: {class_type}")
-        return None
-
-    def get_components(self, class_type):
-        """
-        获取指定类型的组件
-        :param class_type:
-        :return:
-        """
-        ret = []
-        for child in self.children:
-            if isinstance(child, class_type):
-                ret.append(child)
-        if len(ret) == 0:
-            logger.error(f"{self.pname} 找不到组件: {class_type}")
-        return ret
+        pass
 
     def pause(self):
         """
@@ -108,30 +80,19 @@ class Component(ABC):
 
     def start(self):
         # 组件初始化
-        self.on_start()  # 先初始化父组件（通常在该函数内添加相应子组件）
-        for child in self.children:  # 再执行子组件更新
-            self.has_child = True
-            child.on_start()
+        self.__on_start()
 
     def update(self):
         # 收到退出信号
         if self.esc_event.is_set():
-            for child in self.children:  # 先销毁子组件
-                child.on_destroy()
-            self.on_destroy()  # 再销毁父组件
+            self.__on_destroy()
             return
         # 组件更新
         while True:
             if self.enable:
-                self.on_update()  # 先执行父组件的更新
-                if self.has_child:  # 多一层判断（更省性能？）
-                    for child in self.children:  # 再执行子组件更新
-                        if child.enable:
-                            child.on_update()
+                self.__on_update()  # 先执行父组件的更新
             if self.esc_event.is_set():
-                for child in self.children:  # 先销毁子组件
-                    child.on_destroy()
-                self.on_destroy()  # 再销毁父组件
+                self.__on_destroy()
                 return
             if self.update_delay >= 0:
                 time.sleep(self.update_delay)

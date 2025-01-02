@@ -37,8 +37,6 @@ class StreamComponent(Component):
         初始化时调用一次
         :return:
         """
-        super().on_start()
-
         self.cap = cv2.VideoCapture(self.config.stream_url)
         self.frame_fps = self.cap.get(cv2.CAP_PROP_FPS)
         width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -70,7 +68,7 @@ class StreamComponent(Component):
                 self.cap.grab()
         logger.info(f"{self.pname} 所有算法成功初始化！开始取流 URL: {self.config.stream_url}")
 
-    def on_update(self) -> bool:
+    def on_update(self):
         """
         每帧调用一次
         :return:
@@ -89,7 +87,6 @@ class StreamComponent(Component):
             self.cap.grab()
         if not self.config.stream_runtime_enable:  # 非实时视频流，额外引入延迟
             time.sleep(1.0 / self.frame_fps)
-        return False
 
     def process_frame(self, frame):
         """

@@ -51,7 +51,6 @@ class ReidComponent(Component):
         self.infer_timer = TimerKit()  # 推理计时器
 
     def on_start(self):
-        super().on_start()
         # 初始化请求缓存
         self.req_queue = multiprocessing.Manager().Queue()
         self.reid_shared_memory[ReidKey.REID_REQ.name] = self.req_queue
@@ -80,7 +79,7 @@ class ReidComponent(Component):
                                         self.config.log_enable,
                                         self.config.log_analysis)
 
-    def on_update(self) -> bool:
+    def on_update(self):
         # 处理请求
         while not self.req_queue.empty():
             req_package = self.req_queue.get()
@@ -93,7 +92,6 @@ class ReidComponent(Component):
         # tick faiss
         self.time_flag = (self.time_flag + 1) % sys.maxsize
         self.camera_gallery.tick(self.time_flag)
-        return False
 
     def process_request(self, req_package):
         cam_id = req_package[ReidKey.REID_REQ_CAM_ID.name]  # 请求的摄像头id

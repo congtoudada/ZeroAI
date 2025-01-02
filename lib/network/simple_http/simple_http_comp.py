@@ -33,12 +33,11 @@ class SimpleHttpComponent(Component):
         self.task_pool: ObjectPool = ObjectPool(20, SimpleHttpTask)  # 对象池
 
     def on_start(self):
-        super().on_start()
         # 初始化请求缓存
         self.req_queue = multiprocessing.Manager().Queue()
         self.http_shared_memory[self.config.input_port] = self.req_queue
 
-    def on_update(self) -> bool:
+    def on_update(self):
         # 处理请求
         while not self.req_queue.empty():
             req_package = self.req_queue.get()
@@ -63,7 +62,6 @@ class SimpleHttpComponent(Component):
             # for i in range(len(remove_keys)):
             for i, key in enumerate(remove_keys):
                 self.delay_queue.pop(key)
-        return False
 
     def send_request_delay(self, url, method, content):
         task: SimpleHttpTask = self.task_pool.pop()
