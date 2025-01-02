@@ -10,7 +10,7 @@ class BaseInfo:
         self.log_output_path = ""  # 日志输出路径
         self.log_analysis = True  # 性能日志
         self.update_fps = 60  # 更新帧率（-1代表无上限）
-        self.lock_mode = False  # Ultradict是否加锁
+        # self.lock_mode = False  # Ultradict是否加锁
         self.set_attrs(data)
 
     def set_attrs(self, data: Dict[str, Any], prefix: str = ""):

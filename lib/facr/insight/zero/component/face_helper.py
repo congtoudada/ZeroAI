@@ -8,6 +8,7 @@ from insight.zero.component.insight_comp import InsightComponent
 from insight.zero.info.face_helper_info import FaceHelperInfo
 from utility.config_kit import ConfigKit
 from utility.img_kit import ImgKit
+from zero.core.global_constant import GlobalConstant
 
 
 class FaceHelper:
@@ -20,7 +21,7 @@ class FaceHelper:
         else:
             self.config: FaceHelperInfo = config
         self.pname = f"[ {os.getpid()}:face_helper ]"
-        self.face_shared_memory = UltraDict(name=InsightComponent.SHARED_MEMORY_NAME)
+        self.face_shared_memory = UltraDict(name=InsightComponent.SHARED_MEMORY_NAME, shared_lock=GlobalConstant.LOCK_MODE)
         self.handler = FaceProcessHelper(self.face_shared_memory, self.config, cam_id, self.face_callback)
         # key: obj_id
         # value: { "per_id": 1, "score": 0 }

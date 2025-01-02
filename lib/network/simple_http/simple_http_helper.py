@@ -7,6 +7,7 @@ from loguru import logger
 from simple_http.simple_http_helper_info import SimpleHttpHelperInfo
 from simple_http.simple_http_key import SimpleHttpKey
 from utility.config_kit import ConfigKit
+from zero.core.global_constant import GlobalConstant
 
 
 class SimpleHttpHelper:
@@ -14,7 +15,7 @@ class SimpleHttpHelper:
         if config is None or config == "":
             return
         self.config: SimpleHttpHelperInfo = SimpleHttpHelperInfo(ConfigKit.load(config))
-        self.shared_memory = UltraDict(name=self.config.output_port)
+        self.shared_memory = UltraDict(name=self.config.output_port, shared_lock=GlobalConstant.LOCK_MODE)
 
     def get(self, uri: str):
         """

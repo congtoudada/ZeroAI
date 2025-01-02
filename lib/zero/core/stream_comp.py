@@ -8,6 +8,7 @@ from UltraDict import UltraDict
 from loguru import logger
 
 from zero.core.component import Component
+from zero.core.global_constant import GlobalConstant
 from zero.info.stream_info import StreamInfo
 from zero.key.global_key import GlobalKey
 from zero.key.stream_key import StreamKey
@@ -23,7 +24,7 @@ class StreamComponent(Component):
         super().__init__(shared_memory)
         self.config: StreamInfo = StreamInfo(ConfigKit.load(config_path))
         self.stream_shared_memory = UltraDict(name=self.config.output_port,
-                                              shared_lock=self.config.lock_mode)
+                                              shared_lock=GlobalConstant.LOCK_MODE)
         self.pname = f"[ {os.getpid()}:camera{self.config.stream_cam_id} ]"
         self.cap = None
         self.frame_fps = 24

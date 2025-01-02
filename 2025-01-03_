@@ -1,0 +1,62 @@
+2025-01-03 00:25:06.723 | INFO     | zero.core.component:__on_start:36 - [ 9456:clip_reid ] <class 'reid_comp.ReidComponent'> 配置文件参数: 
+{
+    "reid_dimension": 1280,
+    "reid_threshold": 0.86,
+    "reid_search_person_threshold": 0.8,
+    "reid_config_file": "lib/reid/clip_reid/configs/person/vit_clipreid.yml",
+    "reid_face_gallery_dir": "output/service/clip_reid/face_gallery",
+    "reid_camera_gallery_dir": "output/service/clip_reid/camera_gallery",
+    "reid_refresh_mode": 0,
+    "reid_refresh_interval": 54000,
+    "reid_refresh_count": 10000,
+    "reid_cull_mode": 0,
+    "reid_white_list": [
+        1,
+        2,
+        3
+    ],
+    "reid_black_list": [
+        1,
+        2,
+        3
+    ],
+    "reid_debug_enable": true,
+    "reid_debug_output": "output/service/clip_reid",
+    "log_enable": true,
+    "log_level": 1,
+    "log_clean": true,
+    "log_output_path": "",
+    "log_analysis": true,
+    "update_fps": 60
+}
+2025-01-03 00:26:56.687 | INFO     | zero.core.component:__on_start:36 - [ 21280:clip_reid ] <class 'reid_comp.ReidComponent'> 配置文件参数: 
+{
+    "reid_dimension": 1280,
+    "reid_threshold": 0.86,
+    "reid_search_person_threshold": 0.8,
+    "reid_config_file": "lib/reid/clip_reid/configs/person/vit_clipreid.yml",
+    "reid_face_gallery_dir": "output/service/clip_reid/face_gallery",
+    "reid_camera_gallery_dir": "output/service/clip_reid/camera_gallery",
+    "reid_refresh_mode": 0,
+    "reid_refresh_interval": 54000,
+    "reid_refresh_count": 10000,
+    "reid_cull_mode": 0,
+    "reid_white_list": [
+        1,
+        2,
+        3
+    ],
+    "reid_black_list": [
+        1,
+        2,
+        3
+    ],
+    "reid_debug_enable": true,
+    "reid_debug_output": "output/service/clip_reid",
+    "log_enable": true,
+    "log_level": 1,
+    "log_clean": true,
+    "log_output_path": "",
+    "log_analysis": true,
+    "update_fps": 60
+}

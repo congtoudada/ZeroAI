@@ -3,12 +3,15 @@ import os
 import pickle
 import sys
 import time
+import requests
 from UltraDict import UltraDict
 from loguru import logger
 
+from zero.core.base_web_comp import BaseWebComponent
 from zero.core.component import Component
-from zero.helper.analysis_helper import AnalysisHelper
+from zero.core.global_constant import GlobalConstant
 from zero.helper.launch_helper import LaunchHelper
+from zero.helper.analysis_helper import AnalysisHelper
 from zero.info.launch_info import LaunchInfo
 from zero.key.global_key import GlobalKey
 from utility.config_kit import ConfigKit
@@ -16,6 +19,7 @@ from utility.timer_kit import TimerKit
 
 
 class LaunchComponent(Component):
+
     """
     LauncherComponent: 算法启动入口组件
     """
@@ -43,7 +47,7 @@ class LaunchComponent(Component):
         # signal.signal(signal.SIGTERM, self.handle_termination)
 
         # self.shared_memory: dict = multiprocessing.Manager().dict()
-        self.shared_memory = UltraDict(name="global", shared_lock=self.config.lock_mode)
+        self.shared_memory = UltraDict(name="global", shared_lock=GlobalConstant.LOCK_MODE)
         self.shared_memory[GlobalKey.EVENT_ESC.name] = self.esc_event
         self.shared_memory[GlobalKey.LAUNCH_COUNTER.name] = 0
         self.shared_memory[GlobalKey.ALL_READY.name] = False
@@ -100,6 +104,7 @@ class LaunchComponent(Component):
 
     def on_destroy(self):
         self.shared_memory[GlobalKey.ALL_READY.name] = True
+        requests.get(f'http://localhost:{BaseWebComponent.port}/shutdown')
         logger.info("程序将在3s后退出！")
         for i in [3, 2, 1]:
             logger.info(f"倒计时: {i}")

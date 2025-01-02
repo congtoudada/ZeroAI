@@ -19,6 +19,7 @@ from reid_core.reid_key import ReidKey
 from utility.file_modify_kit import FileModifyKit
 from utility.img_kit import ImgKit
 from zero.core.component import Component
+from zero.core.global_constant import GlobalConstant
 from zero.helper.analysis_helper import AnalysisHelper
 from zero.helper.faiss_helper import FaissHelper
 from zero.key.global_key import GlobalKey
@@ -39,7 +40,7 @@ class ReidComponent(Component):
         super().__init__(shared_memory)
         self.config: ReidInfo = ReidInfo(ConfigKit.load(config_path))  # 配置文件内容
         self.pname = f"[ {os.getpid()}:clip_reid ]"
-        self.reid_shared_memory = UltraDict(name=ReidComponent.SHARED_MEMORY_NAME)
+        self.reid_shared_memory = UltraDict(name=ReidComponent.SHARED_MEMORY_NAME, shared_lock=GlobalConstant.LOCK_MODE)
         self.req_queue = None  # reid请求队列
         self.reid_model: IReidWrapper = ClipReidWrapper(self.config)  # clip_reid模型（这里理论上使用工厂模式更解耦，但我懒）
         # self.faiss_dict: Dict[int, FaissReidHelper] = {}  # 根据cam id分类的faiss字典(根据不同摄像头找人，暂不实现)
@@ -251,7 +252,7 @@ def create_process(shared_memory, config_path: str):
 
 
 if __name__ == '__main__':
-    shared_memory = UltraDict(name="global", shared_lock=True)
+    shared_memory = UltraDict(name="global", shared_lock=GlobalConstant.LOCK_MODE)
     shared_memory[GlobalKey.EVENT_ESC.name] = multiprocessing.Manager().Event()
     reid_comp = ReidComponent(shared_memory, config_path="conf/dev/service/reid/clip_reid/clip_reid.yaml")
     reid_comp.start()

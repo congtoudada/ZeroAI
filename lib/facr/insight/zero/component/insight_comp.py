@@ -12,6 +12,7 @@ from insight.zero.info.insight_info import InsightInfo
 from insight.zero.key.face_key import FaceKey
 from utility.img_kit import ImgKit
 from zero.core.component import Component
+from zero.core.global_constant import GlobalConstant
 from zero.helper.analysis_helper import AnalysisHelper
 from zero.key.global_key import GlobalKey
 from utility.config_kit import ConfigKit
@@ -30,7 +31,7 @@ class InsightComponent(Component):
         super().__init__(shared_memory)
         self.config: InsightInfo = InsightInfo(ConfigKit.load(config_path))  # 配置文件内容
         self.pname = f"[ {os.getpid()}:insight_face ]"
-        self.face_shared_memory = UltraDict(name=InsightComponent.SHARED_MEMORY_NAME)
+        self.face_shared_memory = UltraDict(name=InsightComponent.SHARED_MEMORY_NAME, shared_lock=GlobalConstant.LOCK_MODE)
         self.req_queue = None  # 人脸请求队列
         self.database_file = os.path.join(os.path.dirname(self.config.insight_database),
                                           "database-{}.json".format(self.config.insight_rec_feature))  # 人脸特征库配置文件路径

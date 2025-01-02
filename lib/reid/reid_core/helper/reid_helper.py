@@ -8,26 +8,26 @@ from reid_core.reid_comp import ReidComponent
 from reid_core.helper.reid_helper_info import ReidHelperInfo
 from reid_core.reid_key import ReidKey
 from utility.config_kit import ConfigKit
+from zero.core.global_constant import GlobalConstant
+from zero.core.launch_comp import LaunchComponent
 
 
 class ReidHelper:
     """
     人脸识别帮助类，由用户持有
     """
-    reid_shared_memory = UltraDict(name=ReidComponent.SHARED_MEMORY_NAME)
+    reid_shared_memory = UltraDict(name=ReidComponent.SHARED_MEMORY_NAME, shared_lock=GlobalConstant.LOCK_MODE)
 
-    def __init__(self, config, cam_id, reid_callback, search_person_callback):
+    def __init__(self, config, reid_callback, search_person_callback):
         if isinstance(config, str):
             self.config: ReidHelperInfo = ReidHelperInfo(ConfigKit.load(config))
         else:
             self.config: ReidHelperInfo = config
         self.pname = f"[ {os.getpid()}:reid_helper ]"
         self.req_lock: set = set()  # 请求队列
-        # self.reid_shared_memory = UltraDict(name=ReidComponent.SHARED_MEMORY_NAME)
         # FastReid
         self.rsp_queue = None
         self.rsp_key = ReidKey.REID_RSP.name + str(os.getpid())
-        self.cam_id = cam_id
         # key: obj_id
         # value: { "per_id": 1, "score": 0, "retry": 1, "last_time": 10 }
         self.reid_dict: Dict[int, dict] = {}  # Reid结果集

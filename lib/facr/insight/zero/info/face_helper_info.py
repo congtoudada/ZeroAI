@@ -3,7 +3,7 @@ from zero.info.base_info import BaseInfo
 
 class FaceHelperInfo(BaseInfo):
     def __init__(self, data: dict = None):
-        self.face_ports = []  # 请求端口
+        # self.face_ports = []  # 请求端口
         self.face_cull_up_y = 0.1  # 从上剔除百分比，只有当对象进入中间区域才识别
         self.face_cull_down_y = 0.1  # 从下剔除百分比，只有当对象进入中间区域才识别
         self.face_min_send_interval = 60  # 最快每多少帧发送一次人脸请求（小于0为不限）

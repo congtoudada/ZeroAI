@@ -5,6 +5,7 @@ from UltraDict import UltraDict
 from loguru import logger
 
 from zero.core.component import Component
+from zero.core.global_constant import GlobalConstant
 from zero.helper.analysis_helper import AnalysisHelper
 from zero.helper.save_video_helper import SaveVideoHelper
 from zero.info.based_stream_info import BasedStreamInfo
@@ -36,7 +37,7 @@ class BasedStreamComponent(Component, ABC):
         for i, input_port in enumerate(self.config.input_ports):
             # 初始化读字典
             self.read_dict.append(UltraDict(name=input_port,
-                                            shared_lock=self.config.lock_mode))
+                                            shared_lock=GlobalConstant.LOCK_MODE))
             if not self.read_dict[i].__contains__(input_port):  # 如果字典不存在视频流输出Key，报错！
                 logger.error(f"{self.pname} 输入端口不存在: {input_port} 请检查拼写错误！")
                 break
@@ -73,7 +74,7 @@ class BasedStreamComponent(Component, ABC):
             # 初始化输出端口（可选）
             if self.config.output_ports and len(self.config.output_ports) > 0:
                 self.write_dict.append(UltraDict(name=f"{self.config.output_ports[i]}",
-                                                 shared_lock=self.config.lock_mode))
+                                                 shared_lock=GlobalConstant.LOCK_MODE))
                 self.write_dict[i][StreamKey.STREAM_CAM_ID.name] = cam_id
                 self.write_dict[i][StreamKey.STREAM_WIDTH.name] = width
                 self.write_dict[i][StreamKey.STREAM_HEIGHT.name] = height
