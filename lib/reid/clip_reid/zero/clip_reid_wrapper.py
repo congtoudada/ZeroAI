@@ -9,10 +9,11 @@ from clip_reid.datasets.make_dataloader_clipreid import make_dataloader
 from clip_reid.model.make_model_clipreid import make_model
 from clip_reid.utils.logger import setup_logger
 from clip_reid.config import cfg
+from reid_core.i_reid_wrapper import IReidWrapper
 from reid_core.reid_info import ReidInfo
 
 
-class ClipReidWrapper(object):
+class ClipReidWrapper(IReidWrapper):
     def __init__(self, config: ReidInfo):
         self.config = config
         self.model, self.logger, self.device = self.make_model()

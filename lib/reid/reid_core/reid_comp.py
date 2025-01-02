@@ -13,6 +13,7 @@ from UltraDict import UltraDict
 from loguru import logger
 
 from clip_reid.zero.clip_reid_wrapper import ClipReidWrapper
+from reid_core.i_reid_wrapper import IReidWrapper
 from reid_core.reid_info import ReidInfo
 from reid_core.reid_key import ReidKey
 from utility.file_modify_kit import FileModifyKit
@@ -39,7 +40,7 @@ class ReidComponent(Component):
         self.pname = f"[ {os.getpid()}:clip_reid ]"
         self.reid_shared_memory = UltraDict(name=ReidComponent.SHARED_MEMORY_NAME)
         self.req_queue = None  # reid请求队列
-        self.reid_model: ClipReidWrapper = ClipReidWrapper(self.config)  # clip_reid模型
+        self.reid_model: IReidWrapper = ClipReidWrapper(self.config)  # clip_reid模型（这里理论上使用工厂模式更解耦，但我懒）
         # self.faiss_dict: Dict[int, FaissReidHelper] = {}  # 根据cam id分类的faiss字典(根据不同摄像头找人，暂不实现)
         self.camera_gallery: FaissHelper = None  # 根据cam id分类的faiss字典
         self.time_flag = 0  # 时间标识，用于检查是否刷新特征半区
@@ -134,14 +135,16 @@ class ReidComponent(Component):
             self.update_face_shot()
             k = 1  # topK的K值
             extra_info = self.face_gallery.search(feat, k)
+            per_id = 1
+            score = 0
             if len(extra_info) == 0:
                 logger.info(
                     f"{self.pname} Reid failed to fast reid: pid:{pid} cam_id:{cam_id} obj_id:{obj_id}")
-                return
-            per_id = extra_info[0]['per_id']
-            score = extra_info[0]['score']
-            if score < self.config.reid_threshold:
-                per_id = 1  # 分数低视为陌生人
+            else:
+                per_id = extra_info[0]['per_id']
+                score = extra_info[0]['score']
+                if score < self.config.reid_threshold:
+                    per_id = 1  # 分数低视为陌生人
             # debug输出
             if self.config.reid_debug_enable:
                 if per_id != 1:
@@ -164,8 +167,9 @@ class ReidComponent(Component):
             k = 3  # topK的K值
             extra_info = self.camera_gallery.search(feat, k)
             if len(extra_info) == 0:
+                # method3中 obj_id是per_id
                 logger.info(
-                    f"{self.pname} Reid failed to search person: pid:{pid} cam_id:{cam_id} obj_id:{obj_id}")
+                    f"{self.pname} Reid failed to search person: pid:{pid} cam_id:{cam_id} per_id:{obj_id}")
                 return
             invalid_indices = []
             for i, info in enumerate(extra_info):  # extra_info是一个List[Dict]
@@ -244,8 +248,8 @@ if __name__ == '__main__':
         for file in folder_path.iterdir()
         if file.is_file()  # 只保留文件
     ]
-    shutil.rmtree(reid_comp.config.clip_reid_camera_gallery_dir)
-    os.makedirs(reid_comp.config.clip_reid_camera_gallery_dir, exist_ok=True)
+    shutil.rmtree(reid_comp.config.reid_camera_gallery_dir)
+    os.makedirs(reid_comp.config.reid_camera_gallery_dir, exist_ok=True)
     for i, img_path in enumerate(img_database):
         img = Image.open(img_path).convert('RGB')  # 确保图片是 RGB 格式
         img_ndarray = np.array(img)
@@ -260,8 +264,8 @@ if __name__ == '__main__':
 
     # 测试特征库刷新
     reid_comp.camera_gallery.tick(1)
-    reid_comp.camera_gallery.tick(reid_comp.config.clip_reid_refresh_interval+2)  # 切换半区
-    # reid_comp.camera_gallery.tick(reid_comp.config.clip_reid_refresh_interval*2 + 3)  # 切换半区
+    reid_comp.camera_gallery.tick(reid_comp.config.reid_refresh_interval+2)  # 切换半区
+    # reid_comp.camera_gallery.tick(reid_comp.config.reid_refresh_interval*2 + 3)  # 切换半区
 
     print('---------------------------- 测试请求方式2: Fast Reid ----------------------------')
     query_path = "res/images/reid/query/0002_000_01_02.jpg"
