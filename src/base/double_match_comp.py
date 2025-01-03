@@ -24,13 +24,13 @@ class DoubleMatchComponent(BasedStreamComponent, ABC):
     """
     检测类别1 + 追踪类别2 (二者互相匹配)
     检测的类别1是我们重点关注，决定了任务的性质，我们称为主体(main)；追踪的类别2是次要关注的，我们称为次要个体(sub)
-    * 安全帽任务中: 检测安全帽(main) + 追踪人(sub)
+    * 主体任务中: 检测主体(main) + 追踪人(sub)
     * 手机任务中: 检测手机(main) + 追踪人(sub)
     """
 
     Warn_Desc = {
         1: "打电话异常",
-        2: "安全帽异常"
+        2: "主体异常"
     }
 
     def __init__(self, shared_memory, config_path: str):
@@ -93,10 +93,10 @@ class DoubleMatchComponent(BasedStreamComponent, ABC):
         if input_det is None:
             return None
 
-        if idx == 0:  # 安全帽
+        if idx == 0:  # 主体
             for i in range(len(self.main_records)):
                 self.det_pool.push(self.main_records[i])  # 归还到对象池
-            self.main_records.clear()  # 有新的检测结果，清空旧安全帽检测记录
+            self.main_records.clear()  # 有新的检测结果，清空旧主体检测记录
             for i, item in enumerate(input_det):
                 ltrb = (item[0], item[1], item[2], item[3])
                 score = item[4]
@@ -105,7 +105,7 @@ class DoubleMatchComponent(BasedStreamComponent, ABC):
                 record.init(ltrb, score, cls)
                 self.main_records.append(record)
             return None
-        else:  # 人（此时安全帽记录已经填充）
+        else:  # 人（此时主体记录已经填充）
             input_det = input_det[input_det[:, 5] == 0]
             mot_result = self.tracker.inference(input_det)  # 返回对齐输出后的mot结果
             if mot_result is not None:
@@ -153,7 +153,7 @@ class DoubleMatchComponent(BasedStreamComponent, ABC):
             record.init(ltrb, score, cls, obj_id)
             self.sub_records.append(record)
 
-        # 使用包围盒里外匹配，先遍历安全帽，再遍历人
+        # 使用包围盒里外匹配，先遍历主体，再遍历人
         if self.config.dm_match_method:
             main_results, sub_results = MatchKit.match_bboxes(self.main_records, self.sub_records,
                                                               self.config.dm_match_tolerance)
@@ -171,7 +171,7 @@ class DoubleMatchComponent(BasedStreamComponent, ABC):
             main_record = self.main_records[main_idx]
             # 更新结果
             item = self.item_dict[sub_record.obj_id]
-            item.main_update(main_record.cls, main_record.ltrb, main_record.score)  # 安全帽类别更新
+            item.main_update(main_record.cls, main_record.ltrb, main_record.score)  # 主体类别更新
             # 结果收集
             self.process_result(frame, item)
 
@@ -202,7 +202,7 @@ class DoubleMatchComponent(BasedStreamComponent, ABC):
             return False
 
     def on_draw_vis(self, idx, frame, input_mot):
-        if input_mot is None:  # 检测安全帽的端口，不显示任何内容
+        if input_mot is None:  # 检测主体的端口，不显示任何内容
             return None
         text_scale = 1
         text_thickness = 1
@@ -215,9 +215,12 @@ class DoubleMatchComponent(BasedStreamComponent, ABC):
                     cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
         # 合法检测区域
         if len(self.config.dm_zone) > 0:
-            helmet_zone = self.config.dm_zone
-            cv2.rectangle(frame, pt1=(int(helmet_zone[0] * self.stream_width), int(helmet_zone[1] * self.stream_height)),
-                          pt2=(int(helmet_zone[2] * self.stream_width), int(helmet_zone[3] * self.stream_height)),
+            valid_zone_zone = self.config.dm_zone
+            cv2.rectangle(frame,
+                          pt1=(int(valid_zone_zone[0] * self.stream_width),
+                                      int(valid_zone_zone[1] * self.stream_height)),
+                          pt2=(int(valid_zone_zone[2] * self.stream_width),
+                               int(valid_zone_zone[3] * self.stream_height)),
                           color=(0, 255, 0), thickness=line_thickness)
         # 对象基准点、包围盒
         if len(self.config.detection_labels) == 0:
@@ -242,7 +245,7 @@ class DoubleMatchComponent(BasedStreamComponent, ABC):
                     cv2.putText(frame, f"{obj_id}",
                                 (int(ltrb[0]), int(ltrb[1])),
                                 cv2.FONT_HERSHEY_PLAIN, text_scale, self._get_color(obj_id), thickness=text_thickness)
-        # 安全帽
+        # 主体
         for i, item in enumerate(self.main_records):
             ltrb = item.ltrb
             cls = int(item.cls)
