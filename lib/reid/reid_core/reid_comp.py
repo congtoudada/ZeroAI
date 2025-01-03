@@ -288,18 +288,18 @@ if __name__ == '__main__':
     # reid_comp.camera_gallery.tick(reid_comp.config.reid_refresh_interval*2 + 3)  # 切换半区
 
     print('---------------------------- 测试请求方式2: Fast Reid ----------------------------')
-    # query_path = "res/images/reid/query/0002_000_01_02.jpg"
-    # query_path = "output/service/clip_reid/tmp/Snipaste_2025-01-02_18-47-20.png"
-    # img = Image.open(query_path).convert('RGB')
-    # img_ndarray = np.array(img)[..., ::-1]  # RGB->BGR
-    # req_package = {
-    #     ReidKey.REID_REQ_CAM_ID.name: 1,
-    #     ReidKey.REID_REQ_PID.name: 991101,
-    #     ReidKey.REID_REQ_OBJ_ID.name: 888,
-    #     ReidKey.REID_REQ_IMAGE.name: img_ndarray,
-    #     ReidKey.REID_REQ_METHOD.name: 2  # 方式2
-    # }
-    # reid_comp.process_request(req_package)
+    query_path = "res/images/reid/query/0002_000_01_02.jpg"
+    query_path = "output/service/clip_reid/tmp/Snipaste_2025-01-02_18-47-20.png"
+    img = Image.open(query_path).convert('RGB')
+    img_ndarray = np.array(img)[..., ::-1]  # RGB->BGR
+    req_package = {
+        ReidKey.REID_REQ_CAM_ID.name: 1,
+        ReidKey.REID_REQ_PID.name: 991101,
+        ReidKey.REID_REQ_OBJ_ID.name: 888,
+        ReidKey.REID_REQ_IMAGE.name: img_ndarray,
+        ReidKey.REID_REQ_METHOD.name: 2  # 方式2
+    }
+    reid_comp.process_request(req_package)
 
     print('---------------------------- 测试请求方式3: Search Person ----------------------------')
     # query_path = "res/images/reid/query/0002_000_01_02.jpg"
