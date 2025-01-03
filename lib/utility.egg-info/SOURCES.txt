@@ -1,5 +1,9 @@
 setup.py
 detection/setup.py
+detection/detection_core/__init__.py
+detection/detection_core/detection_comp.py
+detection/detection_core/detection_info.py
+detection/detection_core/i_detection_wrapper.py
 detection/yolox/__init__.py
 detection/yolox/core/__init__.py
 detection/yolox/core/launch.py
@@ -228,9 +232,15 @@ reid/clip_reid/zero/clip_reid_wrapper.py
 reid/clip_reid/zero/test/__init__.py
 reid/clip_reid/zero/test/search_person.py
 reid/reid_core/__init__.py
+reid/reid_core/i_reid_wrapper.py
 reid/reid_core/reid_comp.py
 reid/reid_core/reid_info.py
 reid/reid_core/reid_key.py
+reid/reid_core/reid_search_person_comp.py
+reid/reid_core/reid_search_person_info.py
+reid/reid_core/helper/__init__.py
+reid/reid_core/helper/reid_helper.py
+reid/reid_core/helper/reid_helper_info.py
 utility/__init__.py
 utility/config_kit.py
 utility/file_modify_kit.py
@@ -246,8 +256,10 @@ utility.egg-info/dependency_links.txt
 utility.egg-info/top_level.txt
 zero/__init__.py
 zero/core/__init__.py
+zero/core/base_web_comp.py
 zero/core/based_stream_comp.py
 zero/core/component.py
+zero/core/global_constant.py
 zero/core/launch_comp.py
 zero/core/stream_comp.py
 zero/helper/__init__.py
