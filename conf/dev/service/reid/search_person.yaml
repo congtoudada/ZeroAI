@@ -1,0 +1,4 @@
+INCLUDE:
+  - conf/dev/global/config.yaml
+reid_sp:
+  helper_config: conf/dev/service/reid/helper/search_person_helper.yaml

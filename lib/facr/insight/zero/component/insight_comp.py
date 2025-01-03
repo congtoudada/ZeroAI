@@ -10,7 +10,9 @@ from loguru import logger
 from insight.zero.component.face_recognizer import FaceRecognizer
 from insight.zero.info.insight_info import InsightInfo
 from insight.zero.key.face_key import FaceKey
+from utility.img_kit import ImgKit
 from zero.core.component import Component
+from zero.core.global_constant import GlobalConstant
 from zero.helper.analysis_helper import AnalysisHelper
 from zero.key.global_key import GlobalKey
 from utility.config_kit import ConfigKit
@@ -29,7 +31,7 @@ class InsightComponent(Component):
         super().__init__(shared_memory)
         self.config: InsightInfo = InsightInfo(ConfigKit.load(config_path))  # 配置文件内容
         self.pname = f"[ {os.getpid()}:insight_face ]"
-        self.face_shared_memory = UltraDict(name=InsightComponent.SHARED_MEMORY_NAME)
+        self.face_shared_memory = UltraDict(name=InsightComponent.SHARED_MEMORY_NAME, shared_lock=GlobalConstant.LOCK_MODE)
         self.req_queue = None  # 人脸请求队列
         self.database_file = os.path.join(os.path.dirname(self.config.insight_database),
                                           "database-{}.json".format(self.config.insight_rec_feature))  # 人脸特征库配置文件路径
@@ -40,7 +42,6 @@ class InsightComponent(Component):
         self.infer_timer = TimerKit()  # 推理计时器
 
     def on_start(self):
-        super().on_start()
         # 初始化请求缓存
         self.req_queue = multiprocessing.Manager().Queue()
         self.face_shared_memory[FaceKey.FACE_REQ.name] = self.req_queue
@@ -48,7 +49,7 @@ class InsightComponent(Component):
             if not os.path.exists(self.config.insight_debug_output):
                 os.makedirs(self.config.insight_debug_output, exist_ok=True)
 
-    def on_update(self) -> bool:
+    def on_update(self):
         # 检查特征库是否需要重建
         self.time_flag = (self.time_flag + 1) % sys.maxsize
         if self.time_flag % self.check_database_time == 0:
@@ -74,9 +75,9 @@ class InsightComponent(Component):
             #     logger.info(f"{self.pname} 识别成功! cam_id: {cam_id}, obj_id: {obj_id}, per_id: {per_id}, score: {score}")
             # debug输出
             if self.config.insight_debug_enable:
-                cv2.imwrite(os.path.join(self.config.insight_debug_output,
-                                         f"obj{obj_id}_cam{cam_id}_per{per_id}_score{score:.2f}.jpg"), face_image)
-
+                img_path = os.path.join(self.config.insight_debug_output,
+                                        f"facr_cam{cam_id}_per{per_id}_score{score:.2f}.jpg")
+                cv2.imwrite(img_path, face_image)
             # 响应输出结果
             rsp_key = FaceKey.FACE_RSP.name + str(pid)
             if self.face_shared_memory.__contains__(rsp_key):
@@ -90,7 +91,6 @@ class InsightComponent(Component):
         # 记录推理平均耗时
         if self.config.log_analysis:
             AnalysisHelper.refresh("Face inference average time", self.infer_timer.average_time * 1000)
-        return False
 
     def on_destroy(self):
         self.face_shared_memory.unlink()

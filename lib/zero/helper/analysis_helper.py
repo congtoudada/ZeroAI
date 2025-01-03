@@ -2,12 +2,14 @@ from UltraDict import UltraDict
 from loguru import logger
 from tabulate import tabulate
 
+from zero.core.global_constant import GlobalConstant
+
 
 class AnalysisHelper:
     """
     性能分析器
     """
-    global_shared_memory = UltraDict(name="analysis", shared_lock=True)
+    global_shared_memory = UltraDict(name="analysis", shared_lock=GlobalConstant.LOCK_MODE)
 
     @staticmethod
     def register_key(key):

@@ -1,11 +1,14 @@
 import os
 import sys
 import time
+import traceback
+
 import cv2
 from UltraDict import UltraDict
 from loguru import logger
 
 from zero.core.component import Component
+from zero.core.global_constant import GlobalConstant
 from zero.info.stream_info import StreamInfo
 from zero.key.global_key import GlobalKey
 from zero.key.stream_key import StreamKey
@@ -21,7 +24,7 @@ class StreamComponent(Component):
         super().__init__(shared_memory)
         self.config: StreamInfo = StreamInfo(ConfigKit.load(config_path))
         self.stream_shared_memory = UltraDict(name=self.config.output_port,
-                                              shared_lock=self.config.lock_mode)
+                                              shared_lock=GlobalConstant.LOCK_MODE)
         self.pname = f"[ {os.getpid()}:camera{self.config.stream_cam_id} ]"
         self.cap = None
         self.frame_fps = 24
@@ -35,8 +38,6 @@ class StreamComponent(Component):
         初始化时调用一次
         :return:
         """
-        super().on_start()
-
         self.cap = cv2.VideoCapture(self.config.stream_url)
         self.frame_fps = self.cap.get(cv2.CAP_PROP_FPS)
         width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -68,7 +69,7 @@ class StreamComponent(Component):
                 self.cap.grab()
         logger.info(f"{self.pname} 所有算法成功初始化！开始取流 URL: {self.config.stream_url}")
 
-    def on_update(self) -> bool:
+    def on_update(self):
         """
         每帧调用一次
         :return:
@@ -80,13 +81,13 @@ class StreamComponent(Component):
             # 读取帧并解码
             status, frame = self.cap.read()
             if status:
-                self.process_frame(frame)
+                self.process_frame(frame)  # BGR
+                # self.process_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))  # BGR->RGB
         else:
             # 丢帧
             self.cap.grab()
         if not self.config.stream_runtime_enable:  # 非实时视频流，额外引入延迟
             time.sleep(1.0 / self.frame_fps)
-        return False
 
     def process_frame(self, frame):
         """
@@ -117,6 +118,7 @@ def create_process(shared_memory, config_path: str):
     except KeyboardInterrupt:
         comp.on_destroy()
     except Exception as e:
+        logger.error(traceback.format_exc())  # 打印完整的堆栈信息
         logger.error(f"StreamComponent: {e}")
         comp.on_destroy()
 

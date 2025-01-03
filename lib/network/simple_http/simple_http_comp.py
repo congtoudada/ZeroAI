@@ -11,6 +11,7 @@ from simple_http.simple_http_info import SimpleHttpInfo
 from simple_http.simple_http_key import SimpleHttpKey
 from simple_http.simple_http_task import SimpleHttpTask
 from zero.core.component import Component
+from zero.core.global_constant import GlobalConstant
 from zero.key.global_key import GlobalKey
 from utility.config_kit import ConfigKit
 from utility.object_pool import ObjectPool
@@ -23,7 +24,7 @@ class SimpleHttpComponent(Component):
     def __init__(self, shared_memory, config_path: str):
         super().__init__(shared_memory)
         self.config: SimpleHttpInfo = SimpleHttpInfo(ConfigKit.load(config_path))  # 配置文件内容
-        self.http_shared_memory = UltraDict(name=self.config.input_port)
+        self.http_shared_memory = UltraDict(name=self.config.input_port, shared_lock=GlobalConstant.LOCK_MODE)
         self.pname = f"[ {os.getpid()}:{self.config.input_port} ]"
         self.req_queue = None  # 后端请求队列
         self.headers = {
@@ -33,12 +34,11 @@ class SimpleHttpComponent(Component):
         self.task_pool: ObjectPool = ObjectPool(20, SimpleHttpTask)  # 对象池
 
     def on_start(self):
-        super().on_start()
         # 初始化请求缓存
         self.req_queue = multiprocessing.Manager().Queue()
         self.http_shared_memory[self.config.input_port] = self.req_queue
 
-    def on_update(self) -> bool:
+    def on_update(self):
         # 处理请求
         while not self.req_queue.empty():
             req_package = self.req_queue.get()
@@ -63,7 +63,6 @@ class SimpleHttpComponent(Component):
             # for i in range(len(remove_keys)):
             for i, key in enumerate(remove_keys):
                 self.delay_queue.pop(key)
-        return False
 
     def send_request_delay(self, url, method, content):
         task: SimpleHttpTask = self.task_pool.pop()

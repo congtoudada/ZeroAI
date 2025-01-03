@@ -4,5 +4,3 @@ log:
   level: 1 # 0~7: TRACE, DEBUG, INFO, SUCCESS, WARNING, ERROR, CRITICAL
   clean: True # 定时清理 (通常为每2个月清理1个月的日志)
   analysis: True # 是否开启性能分析（额外生成性能日志信息）
-
-lock_mode: True  # Ultradict是否加锁

@@ -20,7 +20,7 @@ class FaceProcessHelper:
         self.pname = f"[ {os.getpid()}:face_process_helper ]"
         self.rsp_queue = multiprocessing.Manager().Queue()  # 接收队列
         self.send_lock: set = set()  # 已发送的数据，只有接收到响应后才可以再次发送
-        self.ports = self.config.face_ports
+        # self.ports = self.config.face_ports
         # 多个接收端口，收集来自不同人脸识别进程的响应（由自身维护）
         self.rsp_key = FaceKey.FACE_RSP.name + str(os.getpid())
         self.cam_id = cam_id
