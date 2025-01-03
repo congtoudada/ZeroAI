@@ -133,8 +133,8 @@ class ReidComponent(Component):
         #                                               self.config.reid_refresh_count)
         if reid_method == 1:  # 1.普通存图请求
             # 将图片写入本地磁盘
-            time_str = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())
-            img_path = os.path.join(self.config.reid_camera_gallery_dir, f"{cam_id}_{time_str}_{obj_id}.jpg")
+            time_str = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())
+            img_path = os.path.join(self.config.reid_camera_gallery_dir, f"{obj_id}_{time_str}_{cam_id}.jpg")
             cv2.imwrite(img_path, reid_img)
             extra_info = {"cam_id": cam_id, "time": time_str, "img_path": img_path}
             self.camera_gallery.add(feat, extra_info)  # 将特征加入特征库
@@ -182,7 +182,6 @@ class ReidComponent(Component):
                 # method3中 obj_id是per_id
                 logger.info(
                     f"{self.pname} Reid failed to search person: pid:{pid} cam_id:{cam_id} per_id:{obj_id}")
-                return
             invalid_indices = []
             for i, info in enumerate(extra_info):  # extra_info是一个List[Dict]
                 score = info['score']
@@ -194,6 +193,8 @@ class ReidComponent(Component):
                 extra_info.pop(idx)
             rsp_key = ReidKey.REID_RSP_SP.name + str(pid)  # KEY: REID_RSP_SP
             if self.reid_shared_memory.__contains__(rsp_key):
+                for item in extra_info:
+                    item.pop("index")
                 self.reid_shared_memory[rsp_key].put({
                     ReidKey.REID_RSP_SP_PACKAGE.name: extra_info,
                 })
@@ -275,7 +276,7 @@ if __name__ == '__main__':
         req_package = {
             ReidKey.REID_REQ_CAM_ID.name: 1,
             ReidKey.REID_REQ_PID.name: 991101,
-            ReidKey.REID_REQ_OBJ_ID.name: i,
+            ReidKey.REID_REQ_OBJ_ID.name: i+1,
             ReidKey.REID_REQ_IMAGE.name: img_ndarray,
             ReidKey.REID_REQ_METHOD.name: 1  # 方式1
         }
@@ -288,21 +289,21 @@ if __name__ == '__main__':
 
     print('---------------------------- 测试请求方式2: Fast Reid ----------------------------')
     # query_path = "res/images/reid/query/0002_000_01_02.jpg"
-    query_path = "output/service/clip_reid/tmp/Snipaste_2025-01-02_18-47-20.png"
-    img = Image.open(query_path).convert('RGB')
-    img_ndarray = np.array(img)[..., ::-1]  # RGB->BGR
-    req_package = {
-        ReidKey.REID_REQ_CAM_ID.name: 1,
-        ReidKey.REID_REQ_PID.name: 991101,
-        ReidKey.REID_REQ_OBJ_ID.name: 888,
-        ReidKey.REID_REQ_IMAGE.name: img_ndarray,
-        ReidKey.REID_REQ_METHOD.name: 2  # 方式2
-    }
-    reid_comp.process_request(req_package)
+    # query_path = "output/service/clip_reid/tmp/Snipaste_2025-01-02_18-47-20.png"
+    # img = Image.open(query_path).convert('RGB')
+    # img_ndarray = np.array(img)[..., ::-1]  # RGB->BGR
+    # req_package = {
+    #     ReidKey.REID_REQ_CAM_ID.name: 1,
+    #     ReidKey.REID_REQ_PID.name: 991101,
+    #     ReidKey.REID_REQ_OBJ_ID.name: 888,
+    #     ReidKey.REID_REQ_IMAGE.name: img_ndarray,
+    #     ReidKey.REID_REQ_METHOD.name: 2  # 方式2
+    # }
+    # reid_comp.process_request(req_package)
 
     print('---------------------------- 测试请求方式3: Search Person ----------------------------')
     # query_path = "res/images/reid/query/0002_000_01_02.jpg"
-    query_path = "output/service/clip_reid/tmp/Snipaste_2025-01-02_18-47-20.png"
+    query_path = "output/service/clip_reid/face_gallery/4_2025-01-01_23-53-48_9.png"
     img = Image.open(query_path).convert('RGB')
     img_ndarray = np.array(img)[..., ::-1]  # RGB->BGR
     req_package = {

@@ -1,8 +1,8 @@
+import json
 import multiprocessing
 import os
 import time
 import traceback
-
 from UltraDict import UltraDict
 from flask import request
 from loguru import logger
@@ -25,6 +25,7 @@ class ReidSearchPersonComp(BaseWebComponent):
         self.tick_fps = 30
         self.tick_max_cnt = self.tick_fps * 10  # 一个请求最多处理10s
         self.tick_flag = 0
+        self.rsp_package = []
 
     def on_start(self):
         # 处理 POST 请求
@@ -34,18 +35,34 @@ class ReidSearchPersonComp(BaseWebComponent):
             per_id = request.args.get('per_id', type=int)  # 自动转换为 int 类型
             if per_id is not None:
                 # return f'Parameter received: {per_id}'
-                is_searching = True
+                self.rsp_package.clear()
+                self.is_searching = True
                 self.tick_flag = 0
-                while is_searching and self.tick_flag < self.tick_max_cnt:
+                is_valid, img_path = self.reid_helper.send_search_person(per_id)
+                if not is_valid:  # per_id没有对应的本地特征
+                    return []
+                # 添加第一张图
+                cam_id = img_path.split('_')[-1].split('.')[0]
+                self.rsp_package.append({
+                    "cam_id": cam_id,
+                    "time": time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime()),
+                    "img_path": img_path,
+                    "score": 1.0,
+                })
+                # 轮询
+                while self.is_searching and self.tick_flag < self.tick_max_cnt:
                     self.reid_helper.update()
                     self.tick_flag += 1
                     time.sleep(1.0 / self.tick_fps)
+                # 响应
+                return json.dumps(self.rsp_package)
             else:
                 return None
 
-    def search_person_callback(self, package):
-        self.is_searching = True
-        print(f"{self.pname} search success! {package}")
+    def search_person_callback(self, package: list):
+        self.is_searching = False
+        # print(f"{self.pname} search success! {package}")
+        self.rsp_package = self.rsp_package + package
 
 
 def create_process(shared_memory, config_path: str):

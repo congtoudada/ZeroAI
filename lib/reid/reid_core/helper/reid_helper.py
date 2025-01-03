@@ -3,6 +3,8 @@ import os
 from typing import Dict
 from UltraDict import UltraDict
 from loguru import logger
+import numpy as np
+from PIL import Image
 
 from reid_core.reid_comp import ReidComponent
 from reid_core.helper.reid_helper_info import ReidHelperInfo
@@ -23,11 +25,12 @@ class ReidHelper:
             self.config: ReidHelperInfo = ReidHelperInfo(ConfigKit.load(config))
         else:
             self.config: ReidHelperInfo = config
-        self.pname = f"[ {os.getpid()}:reid_helper ]"
+        self.pid = os.getpid()
+        self.pname = f"[ {self.pid}:reid_helper ]"
         self.req_lock: set = set()  # 请求队列
         # FastReid
         self.rsp_queue = None
-        self.rsp_key = ReidKey.REID_RSP.name + str(os.getpid())
+        self.rsp_key = ReidKey.REID_RSP.name + str(self.pid)
         # key: obj_id
         # value: { "per_id": 1, "score": 0, "retry": 1, "last_time": 10 }
         self.reid_dict: Dict[int, dict] = {}  # Reid结果集
@@ -35,17 +38,17 @@ class ReidHelper:
 
         # Search Person
         self.rsp_sp_queue = None
-        self.rsp_sp_key = ReidKey.REID_RSP_SP.name + str(os.getpid())
+        self.rsp_sp_key = ReidKey.REID_RSP_SP.name + str(self.pid)
         self.search_per_id = 0
         self.search_person_callback = search_person_callback
 
         self.start()
 
     def start(self):
-        if 1 in self.config.reid_quest_method:  # 支持FastReid
+        if 2 in self.config.reid_quest_method:  # 支持FastReid
             self.rsp_queue = multiprocessing.Manager().Queue()  # Fast Reid接收队列
             ReidHelper.reid_shared_memory[self.rsp_key] = self.rsp_queue
-        if 2 in self.config.reid_quest_method:
+        if 3 in self.config.reid_quest_method:
             self.rsp_sp_queue = multiprocessing.Manager().Queue()  # 找人接收队列
             ReidHelper.reid_shared_memory[self.rsp_sp_key] = self.rsp_sp_queue
 
@@ -60,8 +63,8 @@ class ReidHelper:
                 self.reid_callback(obj_id, per_id, score)  # 触发回调事件
                 self.req_lock.remove(obj_id)  # 解锁对象，使其可以再次发送请求
         if self.rsp_sp_queue is not None:
-            while not self.rsp_queue.empty():
-                data = self.rsp_queue.get()
+            while not self.rsp_sp_queue.empty():
+                data = self.rsp_sp_queue.get()
                 package = data[ReidKey.REID_RSP_SP_PACKAGE.name]
                 self.search_person_callback(package)  # 触发回调事件
                 self.req_lock.remove(self.search_per_id)  # 解锁对象，使其可以再次发送请求
@@ -108,19 +111,30 @@ class ReidHelper:
         }
         return True
 
-    def send_search_person(self, now, cam_id, pid, per_id, image) -> bool:
+    def send_search_person(self, per_id):
         """
         找人
         """
         # 如果正在请求队列，不发送
         if self.req_lock.__contains__(per_id):
-            return False
-        req_package = ReidHelper.make_package(cam_id, pid, per_id, image, 3)
+            return False, None
+        img_path = self.find_first_file(per_id)
+        if img_path is None:
+            return False, None
+        img = Image.open(img_path).convert("RGB")
+        img_np = np.array(img)[..., ::-1]  # RGB->BGR
+        req_package = ReidHelper.make_package(0, self.pid, per_id, img_np, 3)
         logger.info(f"{self.pname} 发送Search Person请求: per_id is {per_id}")
         ReidHelper.reid_shared_memory[ReidKey.REID_REQ.name].put(req_package)
         self.search_per_id = per_id
         self.req_lock.add(self.search_per_id)
-        return True
+        return True, img_path
+
+    def find_first_file(self, prefix):
+        for filename in os.listdir(self.config.reid_face_gallery_dir):
+            if filename.startswith(str(prefix)):
+                return os.path.join(self.config.reid_face_gallery_dir, filename)
+        return None
 
     @staticmethod
     def make_package(cam_id, pid, obj_id, image, method):

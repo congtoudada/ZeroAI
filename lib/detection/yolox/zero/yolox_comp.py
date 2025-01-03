@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import traceback
 
@@ -23,6 +24,7 @@ class YoloxComponent(BasedStreamComponent):
         super().__init__(shared_memory)
         self.config: YoloxInfo = YoloxInfo(ConfigKit.load(config_path))
         self.pid = os.getpid()
+        self.obj_id = 0
         self.pname = f"[ {self.pid}:yolox for {self.config.yolox_args_expn}]"
         self.cam_ids = []
         # 自身定义
@@ -106,7 +108,8 @@ class YoloxComponent(BasedStreamComponent):
                         continue
                     shot_img = ImgKit.crop_img(frame, ltrb)
                     if shot_img is not None:
-                        ReidHelper.send_save_timing(self.cam_ids[idx], self.pid, 1, shot_img)
+                        self.obj_id = (self.obj_id + 1) % sys.maxsize
+                        ReidHelper.send_save_timing(self.cam_ids[idx], self.pid, self.obj_id, shot_img)
                 self.last_reid_time[idx] = frame_id
         return result
 

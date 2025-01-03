@@ -98,7 +98,7 @@ class FaissHelper:
             return []
         # values = [self.activate_dict[key] for key in I.flatten().tolist()]
         values_with_scores = [
-            {**self.activate_dict[key], 'score': D[0][i]}  # 合并字典并添加 score 键
+            {**self.activate_dict[key], 'score': float(D[0][i])}  # 合并字典并添加 score 键
             for i, key in enumerate(I.flatten().tolist())
         ]
         if self.enable_log:
