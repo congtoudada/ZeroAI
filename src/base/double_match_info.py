@@ -10,6 +10,8 @@ class DoubleMatchInfo(BasedStreamInfo):
         self.dm_zone = []  # 次体合法检测区域 ltrb百分比 <-> [0][1][2][3]
         self.dm_match_method = 0  # 0:里外包围盒匹配  1:基于L2匹配
         self.dm_warn_type = 2  # 报警类型 (1:phone 2:helmet 3:card 4:intrude)
+        self.dm_reid_enable = False  # 是否支持次体reid
+        self.dm_reid_info_config = "conf/dev/service/reid/helper/fast_reid_helper.yaml"  # reid helper config
         super().__init__(data)  # 前面是声明，一定要最后调用这段赋值
         # 特殊处理
         # 0:像素容忍值(通常为10) 1:像素**2容忍值(通常为10000)

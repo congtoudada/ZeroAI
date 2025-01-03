@@ -7,6 +7,7 @@ import numpy as np
 from loguru import logger
 
 from bytetrack.zero.bytetrack_helper import BytetrackHelper
+from reid_core.helper.reid_helper import ReidHelper
 from simple_http.simple_http_helper import SimpleHttpHelper
 from src.base.double_match_info import DoubleMatchInfo
 from src.base.double_match_item import DoubleMatchItem
@@ -49,12 +50,16 @@ class DoubleMatchComponent(BasedStreamComponent):
         self.sub_records: List[DetectionRecord] = []  # 次体目标检测结果
         self.http_helper = SimpleHttpHelper(self.config.stream_http_config)  # http帮助类
         self.is_clear_main_records = False  # 用于延迟清理主体检测结果，当mot有值是会在匹配后清理
+        self.reid_info = {}  # reid 额外信息
+        self.reid_helper = None
 
     def on_start(self):
         super().on_start()
         self.cam_id = self.read_dict[0][StreamKey.STREAM_CAM_ID.name]
         self.stream_width = self.read_dict[0][StreamKey.STREAM_WIDTH.name]
         self.stream_height = self.read_dict[0][StreamKey.STREAM_HEIGHT.name]
+        if self.config.dm_reid_enable:
+            self.reid_helper = ReidHelper(self.config.dm_reid_info_config, self.reid_callback)
 
     def on_update(self):
         self.release_unused()  # 清理无用资源（一定要在最前面调用）
@@ -62,6 +67,15 @@ class DoubleMatchComponent(BasedStreamComponent):
         if self.is_clear_main_records:
             self.is_clear_main_records = False
             self.main_records.clear()
+
+    def reid_callback(self, obj_id, per_id, score):
+        if self.reid_info.__contains__(obj_id):
+            # 发送报警信息给后端
+            WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, self.config.dm_warn_type,
+                           per_id, self.reid_info[obj_id], score, self.config.stream_export_img_enable,
+                           self.config.stream_web_enable)
+            self.reid_info.pop(obj_id)
+            self.reid_helper.destroy_obj(obj_id)  # 主动销毁对象数据缓存(可选)
 
     def release_unused(self):
         # 清空长期未更新点
@@ -190,11 +204,24 @@ class DoubleMatchComponent(BasedStreamComponent):
                 logger.info(f"{self.pname} {DoubleMatchComponent.Warn_Desc[self.config.dm_warn_type]}: "
                             f"obj_id:{item.sub_obj_id} score:{item.main_score}")
                 item.has_warn = True  # 一旦视为异常，则一直为异常，避免一个人重复报警
-                shot_img = ImgKit.draw_img_box(frame, item.main_ltrb)
-                # 发送报警信息给后端
-                WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, self.config.dm_warn_type,
-                               item.sub_per_id, shot_img, item.main_score, self.config.stream_export_img_enable,
-                               self.config.stream_web_enable)
+
+                if not self.config.dm_reid_enable:  # 不支持reid就直接发送后端
+                    img = ImgKit.draw_img_box(frame, item.main_ltrb)  # 画框
+                    # 发送报警信息给后端
+                    WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, self.config.dm_warn_type,
+                                   item.sub_per_id, img, item.main_score, self.config.stream_export_img_enable,
+                                   self.config.stream_web_enable)
+                else:
+                    shot_img = ImgKit.crop_img(frame, item.sub_ltrb)  # 扣出人的包围框
+                    if shot_img is not None:
+                        # 发送人脸识别
+                        ret = self.reid_helper.send_reid(self.frame_id_cache[1], self.cam_id, os.getpid(),
+                                                         item.sub_obj_id, self.reid_info[item.sub_obj_id])
+                        if ret:
+                            img = ImgKit.draw_img_box(frame, item.main_ltrb).copy()
+                            self.reid_info[item.sub_obj_id] = img  # TODO: 内存自动释放！！！！
+                    else:
+                        logger.error(f"{self.pname} Fatal Error! Sub ltrb is invalid: {item.sub_ltrb}")
 
     def _is_in_zone(self, sub_ltrb, zone_ltrb):
         if len(zone_ltrb) == 0:

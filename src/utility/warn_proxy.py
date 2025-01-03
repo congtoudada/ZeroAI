@@ -53,3 +53,4 @@ class WarnProxy(object):
             if http_helper.config.debug_enable:
                 logger.info(f"{pname} 发送数据: {data}")
             http_helper.post("/algorithm/warn", data)
+

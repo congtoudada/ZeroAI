@@ -35,6 +35,7 @@ class ReidHelper:
         # value: { "per_id": 1, "score": 0, "retry": 1, "last_time": 10 }
         self.reid_dict: Dict[int, dict] = {}  # Reid结果集
         self.reid_callback = reid_callback
+        self.lost_frames = 30 * 30  # 超过一定时间未销毁的对象自动销毁
 
         # Search Person
         self.rsp_sp_queue = None
@@ -82,6 +83,15 @@ class ReidHelper:
         """
         Reid请求: 在face shot中匹配
         """
+        # 清除长期未使用对象
+        clear_keys = []
+        for key, item in self.reid_dict.items():
+            if now - item["last_time"] > self.lost_frames:
+                clear_keys.append(key)
+        clear_keys.reverse()
+        for key in clear_keys:
+            self.reid_dict.pop(key)  # 从字典中移除item
+
         # 如果正在请求队列，不发送
         if self.req_lock.__contains__(obj_id):
             return False
@@ -158,7 +168,7 @@ class ReidHelper:
             self.reid_dict.pop(obj_id)
 
     def reid_callback(self, obj_id, per_id, score):
-        logger.info(f"{self.pname} 收到人脸响应: {obj_id} {per_id} {score}")
+        logger.info(f"{self.pname} 收到reid响应: {obj_id} {per_id} {score}")
         # 添加到结果集缓存
         rsp = {
             "per_id": per_id,
