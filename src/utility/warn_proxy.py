@@ -48,7 +48,7 @@ class WarnProxy(object):
                 "warnType": warnType,
                 "personId": per_id,
                 "shotImg": img_path,
-                "warnScore": warn_score
+                "warnScore": float(warn_score)
             }
             if http_helper.config.debug_enable:
                 logger.info(f"{pname} 发送数据: {data}")

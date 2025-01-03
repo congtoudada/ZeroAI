@@ -1,3 +1,6 @@
+from src.base.double_match_info import DoubleMatchInfo
+
+
 class DoubleMatchItem:
     """
     生命周期随次要个体(sub)
@@ -7,6 +10,7 @@ class DoubleMatchItem:
         self.last_update_id = 0  # 上次更新帧
         self.valid_count = 0  # 有效更新阈值（连续检测多少帧报警，才报警）
         self.has_warn = False  # 是否已经报警
+        self.config: DoubleMatchInfo = None
         # 主体属性(通常是手机、安全帽等)
         self.main_cls = 0   # 主体类别
         self.main_ltrb = (0, 0, 1, 1)  # 主体ltrb
@@ -22,11 +26,11 @@ class DoubleMatchItem:
         self.last_update_id = last_update_id
         self.valid_count = 0
         self.has_warn = False
-        self.main_score = 0
         # 主体属性
         self.main_cls = 0
         self.main_ltrb = (0, 0, 1, 1)
         self.main_valid = False
+        self.main_score = 0
         # 次体属性
         self.sub_obj_id = obj_id
         self.sub_ltrb = sub_ltrb

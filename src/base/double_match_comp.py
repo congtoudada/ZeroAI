@@ -1,7 +1,7 @@
 import os
-from abc import ABC
+import time
+import traceback
 from typing import Dict, List
-
 import cv2
 import numpy as np
 from loguru import logger
@@ -17,10 +17,11 @@ from utility.img_kit import ImgKit
 from utility.object_pool import ObjectPool
 from zero.core.based_stream_comp import BasedStreamComponent
 from zero.key.detection_key import DetectionKey
+from zero.key.global_key import GlobalKey
 from zero.key.stream_key import StreamKey
 
 
-class DoubleMatchComponent(BasedStreamComponent, ABC):
+class DoubleMatchComponent(BasedStreamComponent):
     """
     检测类别1 + 追踪类别2 (二者互相匹配)
     检测的类别1是我们重点关注，决定了任务的性质，我们称为主体(main)；追踪的类别2是次要关注的，我们称为次要个体(sub)
@@ -30,7 +31,7 @@ class DoubleMatchComponent(BasedStreamComponent, ABC):
 
     Warn_Desc = {
         1: "打电话异常",
-        2: "主体异常"
+        2: "安全帽异常"
     }
 
     def __init__(self, shared_memory, config_path: str):
@@ -101,6 +102,9 @@ class DoubleMatchComponent(BasedStreamComponent, ABC):
                 ltrb = (item[0], item[1], item[2], item[3])
                 score = item[4]
                 cls = item[5]
+                # 主体类别映射
+                if cls in self.config.dm_aggregate_cls:
+                    cls = self.config.dm_aggregate_cls[0]
                 record = self.det_pool.pop()
                 record.init(ltrb, score, cls)
                 self.main_records.append(record)
@@ -154,12 +158,12 @@ class DoubleMatchComponent(BasedStreamComponent, ABC):
             self.sub_records.append(record)
 
         # 使用包围盒里外匹配，先遍历主体，再遍历人
-        if self.config.dm_match_method:
+        if self.config.dm_match_method == 0:
             main_results, sub_results = MatchKit.match_bboxes(self.main_records, self.sub_records,
                                                               self.config.dm_match_tolerance)
         else:
-            main_results, sub_results = MatchKit.match_bboxes(self.main_records, self.sub_records,
-                                                              self.config.dm_match_tolerance)
+            main_results, sub_results = MatchKit.match_l2(self.main_records, self.sub_records,
+                                                          self.config.dm_match_tolerance)
 
         # 遍历结果集 (sub和main一一对应)
         for i in range(len(sub_results)):
@@ -182,14 +186,15 @@ class DoubleMatchComponent(BasedStreamComponent, ABC):
     def process_result(self, frame, item: DoubleMatchItem):
         # 没有报过警且异常状态保持一段时间才发送
         if not item.has_warn and item.valid_count > self.config.dm_valid_count:
-            logger.info(f"{self.pname} {DoubleMatchComponent.Warn_Desc[self.config.dm_warn_type]}: "
-                        f"obj_id:{item.sub_obj_id} score:{item.main_score}")
-            item.has_warn = True  # 一旦视为异常，则一直为异常，避免一个人重复报警
-            shot_img = ImgKit.draw_img_box(frame, item.main_ltrb)
-            # 发送报警信息给后端
-            WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, self.config.dm_warn_type,
-                           item.sub_per_id, shot_img, item.main_score, self.config.stream_export_img_enable,
-                           self.config.stream_web_enable)
+            if item.main_cls in self.config.dm_anomaly_cls:
+                logger.info(f"{self.pname} {DoubleMatchComponent.Warn_Desc[self.config.dm_warn_type]}: "
+                            f"obj_id:{item.sub_obj_id} score:{item.main_score}")
+                item.has_warn = True  # 一旦视为异常，则一直为异常，避免一个人重复报警
+                shot_img = ImgKit.draw_img_box(frame, item.main_ltrb)
+                # 发送报警信息给后端
+                WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, self.config.dm_warn_type,
+                               item.sub_per_id, shot_img, item.main_score, self.config.stream_export_img_enable,
+                               self.config.stream_web_enable)
 
     def _is_in_zone(self, sub_ltrb, zone_ltrb):
         if len(zone_ltrb) == 0:
@@ -263,3 +268,21 @@ class DoubleMatchComponent(BasedStreamComponent, ABC):
         idx = (1 + idx) * 3
         color = ((37 * idx) % 255, (17 * idx) % 255, (29 * idx) % 255)
         return color
+
+
+def create_process(shared_memory, config_path: str):
+    comp: DoubleMatchComponent = DoubleMatchComponent(shared_memory, config_path)  # 创建组件
+    try:
+        comp.start()  # 初始化
+        # 初始化结束通知
+        shared_memory[GlobalKey.LAUNCH_COUNTER.name] += 1
+        while not shared_memory[GlobalKey.ALL_READY.name]:
+            time.sleep(0.1)
+        comp.update()  # 算法逻辑循环
+    except KeyboardInterrupt:
+        comp.on_destroy()
+    except Exception as e:
+        # 使用 traceback 打印堆栈信息
+        logger.error(f"HelmetComponent: {e}")
+        logger.error(traceback.format_exc())  # 打印完整的堆栈信息
+        comp.on_destroy()

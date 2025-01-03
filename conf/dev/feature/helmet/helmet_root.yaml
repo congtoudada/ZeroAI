@@ -1,18 +1,11 @@
 INCLUDE:
-  - conf/dev/feature/common.yaml
-  - conf/dev/global/based_stream.yaml
-  - conf/dev/global/config.yaml
+  - conf/dev/feature/double_match.yaml
   - conf/dev/algorithm/yolox/labels/helmet_labels.yaml
+
 stream:
   output_dir: output/feature/helmet  # 输出目录
   save_video:
     filename: helmet
-helmet:
-  valid_count: 5  # 对象有效帧阈值
-  lost_frames: 60  # 消失多少帧丢弃
-  y_sort: False  # 分配id前进行y轴排序（时间换精度）
-  zone:
-    - 0.05  # l
-    - 0.30  # t
-    - 0.95  # r
-    - 0.95  # b
+dm:
+  match_method: 0  # 0:里外包围盒匹配  1:基于L2匹配
+  warn_type: 2  # 报警类型 (1:phone 2:helmet 3:card 4:intrude)

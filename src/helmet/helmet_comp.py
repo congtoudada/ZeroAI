@@ -11,9 +11,9 @@ class HelmetComponent(DoubleMatchComponent):
     """
     规范佩戴安全帽检测组件
     """
-
     def __init__(self, shared_memory, config_path: str):
         super().__init__(shared_memory, config_path)
+        self.pname = f"[ {os.getpid()}:helmet for {self.config.input_ports[0]}&{self.config.input_ports[1]} ]"
 
 
 def create_process(shared_memory, config_path: str):

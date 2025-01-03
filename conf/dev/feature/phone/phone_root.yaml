@@ -1,0 +1,11 @@
+INCLUDE:
+  - conf/dev/feature/double_match.yaml
+  - conf/dev/algorithm/yolox/labels/phone_labels.yaml
+
+stream:
+  output_dir: output/feature/phone  # 输出目录
+  save_video:
+    filename: phone
+dm:
+  match_method: 1  # 0:里外包围盒匹配  1:基于L2匹配
+  warn_type: 1  # 报警类型 (1:phone 2:helmet 3:card 4:intrude)

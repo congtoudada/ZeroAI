@@ -1,0 +1,14 @@
+INCLUDE:
+  - conf/dev/feature/common.yaml
+  - conf/dev/global/based_stream.yaml
+  - conf/dev/global/config.yaml
+
+dm:
+  valid_count: 5  # 对象有效帧阈值
+  lost_frames: 60  # 消失多少帧丢弃
+  y_sort: False  # 分配id前进行y轴排序（时间换精度）
+  zone:
+    - 0.05  # l
+    - 0.30  # t
+    - 0.95  # r
+    - 0.95  # b

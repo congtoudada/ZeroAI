@@ -74,8 +74,9 @@ class ReidHelper:
         """
         存图请求
         """
-        req_package = ReidHelper.make_package(cam_id, pid, obj_id, image, 1)
-        ReidHelper.reid_shared_memory[ReidKey.REID_REQ.name].put(req_package)
+        if ReidHelper.reid_shared_memory.__contains__(ReidKey.REID_REQ.name):
+            req_package = ReidHelper.make_package(cam_id, pid, obj_id, image, 1)
+            ReidHelper.reid_shared_memory[ReidKey.REID_REQ.name].put(req_package)
 
     def send_reid(self, now, cam_id, pid, obj_id, image) -> bool:
         """

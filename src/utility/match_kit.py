@@ -86,7 +86,7 @@ class MatchKit(object):
                 if diff_l2 > tolerance:  # 距离超过最大阈值
                     continue
                 if diff_l2 < min_distance:
-                    diff_l2 = min_distance
+                    min_distance = diff_l2
                     min_idx = j
             # 结果收集
             if min_idx != -1:
@@ -94,7 +94,7 @@ class MatchKit(object):
                 sub_boxes[min_idx].has_match = True
                 main_list.append(i)
                 sub_list.append(min_idx)
-                print(f"diff_l2: {min_distance}")  # 找tolerance
+                # print(f"diff_l2: {min_distance}")  # 找tolerance
         return main_list, sub_list
 
 

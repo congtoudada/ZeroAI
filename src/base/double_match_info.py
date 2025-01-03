@@ -11,11 +11,14 @@ class DoubleMatchInfo(BasedStreamInfo):
         self.dm_match_method = 0  # 0:里外包围盒匹配  1:基于L2匹配
         self.dm_warn_type = 2  # 报警类型 (1:phone 2:helmet 3:card 4:intrude)
         super().__init__(data)  # 前面是声明，一定要最后调用这段赋值
-        # TODO: 特殊处理!!!!!!!!!!!!!!!!!
+        # 特殊处理
         # 0:像素容忍值(通常为10) 1:像素**2容忍值(通常为10000)
         self.dm_match_tolerance = 10 if self.dm_match_method == 0 else 10000
         # 绘制类别(安全帽只绘制未佩戴的2, 手机则绘制0)
         self.dm_draw_cls = [2] if self.dm_warn_type == 2 else [0]
-        # 指定类别映射到正常类别（在main_update时需要）
-        self.dm_normal_cls = [0, 1] if self.dm_warn_type == 2 else [0]
-        # 指定类别映射到异常类别（在最后计算结果时需要）
+        # 指定类别映射到0类别（在main_update时需要）
+        # 安全帽未标准佩戴和正常佩戴为0，其他类别不映射
+        self.dm_aggregate_cls = [0, 1] if self.dm_warn_type == 2 else [0]
+        # 指定报警类别（在最后计算结果时需要）
+        # 安全帽未佩戴为2，其他类别默认为0
+        self.dm_anomaly_cls = [2] if self.dm_warn_type == 2 else [0]
