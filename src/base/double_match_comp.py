@@ -50,7 +50,7 @@ class DoubleMatchComponent(BasedStreamComponent):
         self.sub_records: List[DetectionRecord] = []  # 次体目标检测结果
         self.http_helper = SimpleHttpHelper(self.config.stream_http_config)  # http帮助类
         self.is_clear_main_records = False  # 用于延迟清理主体检测结果，当mot有值是会在匹配后清理
-        self.reid_info = {}  # reid 额外信息
+        self.reid_info_dict = {}  # reid 额外信息
         self.reid_helper = None
 
     def on_start(self):
@@ -69,12 +69,12 @@ class DoubleMatchComponent(BasedStreamComponent):
             self.main_records.clear()
 
     def reid_callback(self, obj_id, per_id, score):
-        if self.reid_info.__contains__(obj_id):
+        if self.reid_info_dict.__contains__(obj_id):
             # 发送报警信息给后端
             WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, self.config.dm_warn_type,
-                           per_id, self.reid_info[obj_id], score, self.config.stream_export_img_enable,
+                           per_id, self.reid_info_dict[obj_id], score, self.config.stream_export_img_enable,
                            self.config.stream_web_enable)
-            self.reid_info.pop(obj_id)
+            self.reid_info_dict.pop(obj_id)
             self.reid_helper.destroy_obj(obj_id)  # 主动销毁对象数据缓存(可选)
 
     def release_unused(self):
@@ -87,6 +87,8 @@ class DoubleMatchComponent(BasedStreamComponent):
         for key in clear_keys:
             self.item_pool.push(self.item_dict[key])
             self.item_dict.pop(key)  # 从字典中移除item
+            if self.reid_info_dict.__contains__(key):  # 顺带销毁掉回调异常的对象
+                self.reid_info_dict.pop(key)
 
     def on_get_stream(self, read_idx):
         frame, _ = super().on_get_stream(read_idx)  # 解析视频帧id+视频帧
@@ -216,10 +218,10 @@ class DoubleMatchComponent(BasedStreamComponent):
                     if shot_img is not None:
                         # 发送人脸识别
                         ret = self.reid_helper.send_reid(self.frame_id_cache[1], self.cam_id, os.getpid(),
-                                                         item.sub_obj_id, self.reid_info[item.sub_obj_id])
+                                                         item.sub_obj_id, self.reid_info_dict[item.sub_obj_id])
                         if ret:
                             img = ImgKit.draw_img_box(frame, item.main_ltrb).copy()
-                            self.reid_info[item.sub_obj_id] = img  # TODO: 内存自动释放！！！！
+                            self.reid_info_dict[item.sub_obj_id] = img  # TODO: 内存自动释放！！！！
                     else:
                         logger.error(f"{self.pname} Fatal Error! Sub ltrb is invalid: {item.sub_ltrb}")
 
