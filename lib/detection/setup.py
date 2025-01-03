@@ -50,6 +50,15 @@ with open("yolox/__init__.py", "r", encoding="utf-8") as f:
 # with open("README.md", "r", encoding="utf-8") as f:
 #     long_description = f.read()
 
+setuptools.setup(
+    name="detection_core",
+    version=version,
+    author="cong tou",
+    python_requires=">=3.6",
+    classifiers=["Programming Language :: Python :: 3", "Operating System :: OS Independent"],
+    cmdclass={"build_ext": torch.utils.cpp_extension.BuildExtension},
+    packages=setuptools.find_namespace_packages(),
+)
 
 setuptools.setup(
     name="yolox",

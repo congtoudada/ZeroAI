@@ -8,6 +8,9 @@ input_ports:  # 输入端口
 output_ports:  # 输出端口
   - yolox-person1
 
+detection:
+  reid_enable: True  # 是否支持reid存图(若支持，会定期对第0个类别发送reid存图请求)
+
 stream:
   save_video:
     filename: person

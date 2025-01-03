@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import traceback
 
@@ -6,6 +7,8 @@ import cv2
 import numpy as np
 from loguru import logger
 
+from reid_core.helper.reid_helper import ReidHelper
+from utility.img_kit import ImgKit
 from yolox.exp import get_exp
 from yolox.zero.predictor import create_zero_predictor
 from yolox.zero.yolox_info import YoloxInfo
@@ -20,22 +23,31 @@ class YoloxComponent(BasedStreamComponent):
     def __init__(self, shared_memory, config_path: str):
         super().__init__(shared_memory)
         self.config: YoloxInfo = YoloxInfo(ConfigKit.load(config_path))
-        self.pname = f"[ {os.getpid()}:yolox for {self.config.yolox_args_expn}]"
+        self.pid = os.getpid()
+        self.obj_id = 0
+        self.pname = f"[ {self.pid}:yolox for {self.config.yolox_args_expn}]"
+        self.cam_ids = []
         # 自身定义
         self.predictor = None  # 推理模型
+        self.last_reid_time = []
 
     def on_start(self):
         """
         初始化时调用一次
         :return:
         """
-        super().on_start()
+        super().on_start()  # 不是直接继承Component，需要调一下super
         # 初始化yolox
         exp = get_exp(self.config.yolox_args_exp_file, self.config.yolox_args_name)
         # 创建zero框架版的yolox目标检测器
         self.predictor = create_zero_predictor(self.config, exp, self.pname)
         for i, output_port in enumerate(self.config.output_ports):
             self.write_dict[i][output_port] = None  # yolox package
+        if self.config.detection_reid_enable:
+            for i, input_port in enumerate(self.config.input_ports):
+                cam_id = self.read_dict[i][StreamKey.STREAM_CAM_ID.name]
+                self.cam_ids.append(cam_id)
+                self.last_reid_time.append(0)
 
     def on_handle_stream(self, idx, frame, user_data):
         """
@@ -70,10 +82,35 @@ class YoloxComponent(BasedStreamComponent):
         result = outputs[0]  # List[tensor(n, 7)] -> tensor(n, 7)
         result = self.alignment_output(result, img_info)  # tensor(n, 6)
         # 填充输出
-        package = {StreamKey.STREAM_PACKAGE_FRAME_ID.name: self.frame_id_cache[idx],
+        frame_id = self.frame_id_cache[idx]
+        package = {StreamKey.STREAM_PACKAGE_FRAME_ID.name: frame_id,
                    StreamKey.STREAM_PACKAGE_FRAME.name: frame,
                    DetectionKey.DET_PACKAGE_RESULT.name: result}
         self.write_dict[idx][self.config.output_ports[idx]] = package  # 填充输出(result为None代表无目标)
+        # reid存图
+        if self.config.detection_reid_enable:
+            if frame_id - self.last_reid_time[idx] > self.config.detection_reid_interval:
+                for obj in result:
+                    cls = obj[5]
+                    # 不是类别0不存 (0一般是person)
+                    if cls != 0:
+                        continue
+                    score = obj[4]
+                    # 置信度低的不存
+                    if score < self.config.yolox_args_conf:
+                        continue
+                    ltrb = obj[:4]
+                    # 包围盒太小的不存或比例奇怪的不存
+                    w = ltrb[2] - ltrb[0]
+                    h = ltrb[3] - ltrb[1]
+                    # if w < 25 or h < 50 or (h*1.0 / w*1.0) < 1.0:
+                    if w < 50 or h < 100:
+                        continue
+                    shot_img = ImgKit.crop_img(frame, ltrb)
+                    if shot_img is not None:
+                        self.obj_id = (self.obj_id + 1) % sys.maxsize
+                        ReidHelper.send_save_timing(self.cam_ids[idx], self.pid, self.obj_id, shot_img)
+                self.last_reid_time[idx] = frame_id
         return result
 
     def alignment_output(self, result, img_info):
