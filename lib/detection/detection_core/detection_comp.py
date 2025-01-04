@@ -67,7 +67,7 @@ class DetectionComponent(BasedStreamComponent, ABC):
                    DetectionKey.DET_PACKAGE_RESULT.name: result}
         self.write_dict[idx][self.config.output_ports[idx]] = package  # 填充输出(result为None代表无目标)
         # reid存图
-        if self.config.detection_reid_enable:
+        if self.config.detection_reid_enable and result is not None:
             if frame_id - self.last_reid_time[idx] > self.config.detection_reid_interval:
                 for obj in result:
                     cls = obj[5]
