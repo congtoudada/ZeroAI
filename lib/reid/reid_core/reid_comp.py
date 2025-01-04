@@ -201,7 +201,7 @@ class ReidComponent(Component):
             k = k - len(extra_info)
             # 剩余的从普通库找
             if k > 0:
-                extra_info = extra_info + self.camera_gallery.search(feat, k)
+                extra_info = extra_info + self.camera_gallery.search(feat, k, self.config.reid_search_person_threshold)
             if len(extra_info) == 0:
                 # method3中 obj_id是per_id
                 logger.info(
