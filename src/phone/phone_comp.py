@@ -29,6 +29,6 @@ def create_process(shared_memory, config_path: str):
         comp.on_destroy()
     except Exception as e:
         # 使用 traceback 打印堆栈信息
-        logger.error(f"HelmetComponent: {e}")
+        logger.error(f"PhoneComponent: {e}")
         logger.error(traceback.format_exc())  # 打印完整的堆栈信息
         comp.on_destroy()

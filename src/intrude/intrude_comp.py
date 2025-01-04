@@ -72,7 +72,7 @@ class IntrudeComponent(BasedStreamComponent):
                 # 没有进入报警区域，就直接返回
                 if value.valid_count == 0:
                     continue
-                if self.face_helper.try_send(self.frames[0], value.ltrb, key, diff, value.base_y, value.retry):
+                if self.face_helper.try_send(self.frame_id_cache[0], self.frames[0], value.ltrb, key, diff, value.base_y, value.retry):
                     self.data_dict[key].last_send_req = self.frame_id_cache[0]
             # 人脸识别帮助tick，用于接受响应
             self.face_helper.tick()

@@ -66,7 +66,10 @@ class DoubleMatchComponent(BasedStreamComponent):
         super().on_update()
         if self.is_clear_main_records:
             self.is_clear_main_records = False
+            for record in self.main_records:
+                self.det_pool.push(record)
             self.main_records.clear()
+        self.reid_helper.update()
 
     def reid_callback(self, obj_id, per_id, score):
         if self.reid_info_dict.__contains__(obj_id):
@@ -76,6 +79,9 @@ class DoubleMatchComponent(BasedStreamComponent):
                            self.config.stream_web_enable)
             self.reid_info_dict.pop(obj_id)
             self.reid_helper.destroy_obj(obj_id)  # 主动销毁对象数据缓存(可选)
+            if self.item_dict.__contains__(obj_id):
+                self.item_dict[obj_id].sub_per_id = per_id
+                self.item_dict[obj_id].sub_score = score
 
     def release_unused(self):
         # 清空长期未更新点
@@ -196,15 +202,16 @@ class DoubleMatchComponent(BasedStreamComponent):
             self.process_result(frame, item)
 
         # 收尾，清理工作
+        for record in self.sub_records:
+            self.det_pool.push(record)
         self.sub_records.clear()
-        # self.main_records.clear()  # 延迟清理，需要可视化
 
     def process_result(self, frame, item: DoubleMatchItem):
         # 没有报过警且异常状态保持一段时间才发送
         if not item.has_warn and item.valid_count > self.config.dm_valid_count:
             if item.main_cls in self.config.dm_anomaly_cls:
                 logger.info(f"{self.pname} {DoubleMatchComponent.Warn_Desc[self.config.dm_warn_type]}: "
-                            f"obj_id:{item.sub_obj_id} score:{item.main_score}")
+                            f"obj_id:{item.sub_obj_id} score:{item.main_score:.3f}")
                 item.has_warn = True  # 一旦视为异常，则一直为异常，避免一个人重复报警
 
                 if not self.config.dm_reid_enable:  # 不支持reid就直接发送后端
@@ -216,12 +223,13 @@ class DoubleMatchComponent(BasedStreamComponent):
                 else:
                     shot_img = ImgKit.crop_img(frame, item.sub_ltrb)  # 扣出人的包围框
                     if shot_img is not None:
-                        # 发送人脸识别
+                        self.reid_info_dict[item.sub_obj_id] = shot_img
+                        # 发送reid
                         ret = self.reid_helper.send_reid(self.frame_id_cache[1], self.cam_id, os.getpid(),
                                                          item.sub_obj_id, self.reid_info_dict[item.sub_obj_id])
                         if ret:
                             img = ImgKit.draw_img_box(frame, item.main_ltrb).copy()
-                            self.reid_info_dict[item.sub_obj_id] = img  # TODO: 内存自动释放！！！！
+                            self.reid_info_dict[item.sub_obj_id] = img
                     else:
                         logger.error(f"{self.pname} Fatal Error! Sub ltrb is invalid: {item.sub_ltrb}")
 
@@ -238,7 +246,7 @@ class DoubleMatchComponent(BasedStreamComponent):
     def on_draw_vis(self, idx, frame, input_mot):
         if input_mot is None:  # 检测主体的端口，不显示任何内容
             return None
-        text_scale = 1
+        text_scale = 1.25
         text_thickness = 1
         line_thickness = 2
         # 标题线
@@ -252,7 +260,7 @@ class DoubleMatchComponent(BasedStreamComponent):
             valid_zone_zone = self.config.dm_zone
             cv2.rectangle(frame,
                           pt1=(int(valid_zone_zone[0] * self.stream_width),
-                                      int(valid_zone_zone[1] * self.stream_height)),
+                               int(valid_zone_zone[1] * self.stream_height)),
                           pt2=(int(valid_zone_zone[2] * self.stream_width),
                                int(valid_zone_zone[3] * self.stream_height)),
                           color=(0, 255, 0), thickness=line_thickness)
@@ -260,6 +268,7 @@ class DoubleMatchComponent(BasedStreamComponent):
         if len(self.config.detection_labels) == 0:
             logger.warning(f"{self.pname} detection_labels的长度为0，请在配置文件中配置detection_labels!")
             return frame
+        # 当前帧有效次体
         if input_mot is not None:
             for obj in input_mot:
                 ltrb = obj[:4]
@@ -270,15 +279,22 @@ class DoubleMatchComponent(BasedStreamComponent):
                 cv2.rectangle(frame, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
                               color=self._get_color(obj_id), thickness=line_thickness)
                 if self.item_dict.__contains__(obj_id):
-                    cls = int(self.item_dict[obj_id].main_cls)
-                    is_warn = self.item_dict[obj_id].has_warn
+                    item = self.item_dict[obj_id]
+                    cls = int(item.main_cls)
+                    is_warn = item.has_warn
                     cv2.putText(frame, f"{obj_id}:{self.config.detection_labels[cls]} warn:{is_warn}",
                                 (int(ltrb[0]), int(ltrb[1])),
-                                cv2.FONT_HERSHEY_PLAIN, text_scale, self._get_color(obj_id), thickness=text_thickness)
+                                cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
+                    # 次体的reid结果
+                    if self.config.dm_reid_enable and item.has_warn:
+                        cv2.putText(frame, f"per_id:{item.sub_per_id} score:{item.sub_score:.2f}",
+                                    (int(ltrb[0]), int(ltrb[1]) + 20),
+                                    cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
                 else:
                     cv2.putText(frame, f"{obj_id}",
                                 (int(ltrb[0]), int(ltrb[1])),
-                                cv2.FONT_HERSHEY_PLAIN, text_scale, self._get_color(obj_id), thickness=text_thickness)
+                                cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
+
         # 主体
         for i, item in enumerate(self.main_records):
             ltrb = item.ltrb
@@ -290,7 +306,6 @@ class DoubleMatchComponent(BasedStreamComponent):
             # id_text = f"cls:{self.config.detection_labels[cls]}({score:.2f})"
             # cv2.putText(frame, id_text, (int(ltrb[0]), int(ltrb[1])), cv2.FONT_HERSHEY_PLAIN,
             #             text_scale, (0, 0, 255), thickness=text_thickness)
-        # 可视化并返回
         return frame
 
     def _get_color(self, idx):

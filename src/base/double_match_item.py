@@ -20,6 +20,7 @@ class DoubleMatchItem:
         self.sub_obj_id = 0  # 追踪目标id
         self.sub_ltrb = (0, 0, 1, 1)  # 次体ltrb
         self.sub_per_id = 1  # 陌生人
+        self.sub_score = 0  # 非陌生人的置信度
 
     def init(self, obj_id, last_update_id, sub_ltrb):
         # 通用属性
@@ -34,6 +35,7 @@ class DoubleMatchItem:
         # 次体属性
         self.sub_obj_id = obj_id
         self.sub_ltrb = sub_ltrb
+        self.sub_score = 0
 
     def main_update(self, main_cls, main_ltrb, main_score):
         if not self.has_warn:
@@ -41,12 +43,19 @@ class DoubleMatchItem:
             self.main_score = main_score
             self.main_valid = True
             if self.main_cls == main_cls:  # 当前检测类别和记录的类别相同，递增
-                self.valid_count += 1
+                self.valid_count += 2
             else:  # 不同则重置
                 self.valid_count = 0
                 self.main_cls = main_cls
 
     def common_update(self, last_update_id, sub_ltrb):
         self.last_update_id = last_update_id
-        self.sub_obj_id = sub_ltrb
+        self.sub_ltrb = sub_ltrb
+        if not self.main_valid:  # 当前帧无匹配项 -1分
+            self.valid_count -= 1
+            if self.valid_count < 0:
+                self.valid_count = 0
+        else:
+            self.main_valid = False
+
 

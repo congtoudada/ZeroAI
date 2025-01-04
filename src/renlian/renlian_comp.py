@@ -38,7 +38,7 @@ class RenlianComponent(CountComponent):
             # 人脸识别请求
             for key, value in self.item_dict.items():
                 diff = self.frame_id_cache[0] - value.last_send_req
-                if self.face_helper.try_send(self.frames[0], value.ltrb, key, diff, value.base_y, value.retry):
+                if self.face_helper.try_send(self.frame_id_cache[0], self.frames[0], value.ltrb, key, diff, value.base_y, value.retry):
                     self.item_dict[key].last_send_req = self.frame_id_cache[0]
                     # break  # 每帧最多发送一个请求（待定）
         # 人脸识别帮助tick，用于接受响应

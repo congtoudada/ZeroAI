@@ -7,8 +7,8 @@ service_list:
     conf: conf/dev/service/http/http.yaml
 #  - path: lib/facr/insight/zero/component/insight_comp.py  # 人脸识别服务
 #    conf: conf/dev/service/facr/insight/insight.yaml
-#  - path: lib/reid/reid_core/reid_comp.py  # reid服务
-#    conf: conf/dev/service/reid/clip_reid.yaml
+  - path: lib/reid/reid_core/reid_comp.py  # reid服务
+    conf: conf/dev/service/reid/clip_reid.yaml
 #  - path: lib/reid/reid_core/reid_search_person_comp.py  # 找人服务
 #    conf: conf/dev/service/reid/search_person.yaml
 
