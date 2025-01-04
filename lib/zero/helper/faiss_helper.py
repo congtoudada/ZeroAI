@@ -87,7 +87,7 @@ class FaissHelper:
     def get_total(self):
         return self.activate_database.ntotal
 
-    def search(self, query, top_k=4):
+    def search(self, query, top_k=4, conf=0):
         assert query.shape == (1, self.dimension), \
             f"Expected feat to have shape (1, {self.dimension}), but got {query.shape}"
         faiss.normalize_L2(query)
@@ -100,6 +100,7 @@ class FaissHelper:
         values_with_scores = [
             {**self.activate_dict[key], 'score': float(D[0][i])}  # 合并字典并添加 score 键
             for i, key in enumerate(I.flatten().tolist())
+            if float(D[0][i]) > conf
         ]
         if self.enable_log:
             logger.info(f"{self.pname} 查询结果: \nI: {I} \nD: {D} \nExtra: {values_with_scores}")
