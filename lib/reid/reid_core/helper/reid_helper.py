@@ -74,13 +74,23 @@ class ReidHelper:
         """
         存图请求
         """
-        req_package = ReidHelper.make_package(cam_id, pid, obj_id, image, 1)
-        ReidHelper.reid_shared_memory[ReidKey.REID_REQ.name].put(req_package)
+        if ReidHelper.reid_shared_memory.__contains__(ReidKey.REID_REQ.name):
+            req_package = ReidHelper.make_package(cam_id, pid, obj_id, image, 1)
+            ReidHelper.reid_shared_memory[ReidKey.REID_REQ.name].put(req_package)
 
     def send_reid(self, now, cam_id, pid, obj_id, image) -> bool:
         """
         Reid请求: 在face shot中匹配
         """
+        # 清除长期未使用对象
+        clear_keys = []
+        for key, item in self.reid_dict.items():
+            if now - item["last_time"] > self.config.reid_lost_frames:
+                clear_keys.append(key)
+        clear_keys.reverse()
+        for key in clear_keys:
+            self.reid_dict.pop(key)  # 从字典中移除item
+
         # 如果正在请求队列，不发送
         if self.req_lock.__contains__(obj_id):
             return False
@@ -157,7 +167,7 @@ class ReidHelper:
             self.reid_dict.pop(obj_id)
 
     def reid_callback(self, obj_id, per_id, score):
-        logger.info(f"{self.pname} 收到人脸响应: {obj_id} {per_id} {score}")
+        logger.info(f"{self.pname} 收到reid响应: {obj_id} {per_id} {score}")
         # 添加到结果集缓存
         rsp = {
             "per_id": per_id,
