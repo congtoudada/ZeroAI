@@ -35,7 +35,6 @@ class ReidHelper:
         # value: { "per_id": 1, "score": 0, "retry": 1, "last_time": 10 }
         self.reid_dict: Dict[int, dict] = {}  # Reid结果集
         self.reid_callback = reid_callback
-        self.lost_frames = 30 * 30  # 超过一定时间未销毁的对象自动销毁
 
         # Search Person
         self.rsp_sp_queue = None
@@ -86,7 +85,7 @@ class ReidHelper:
         # 清除长期未使用对象
         clear_keys = []
         for key, item in self.reid_dict.items():
-            if now - item["last_time"] > self.lost_frames:
+            if now - item["last_time"] > self.config.reid_lost_frames:
                 clear_keys.append(key)
         clear_keys.reverse()
         for key in clear_keys:
