@@ -20,7 +20,7 @@ class ReidHelper:
     """
     reid_shared_memory = UltraDict(name=ReidComponent.SHARED_MEMORY_NAME, shared_lock=GlobalConstant.LOCK_MODE)
 
-    def __init__(self, config, reid_callback, search_person_callback):
+    def __init__(self, config, reid_callback=None, search_person_callback=None):
         if isinstance(config, str):
             self.config: ReidHelperInfo = ReidHelperInfo(ConfigKit.load(config))
         else:
