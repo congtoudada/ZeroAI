@@ -10,6 +10,7 @@ class ReidInfo(BaseInfo):
         self.reid_config_file = "lib/reid/clip_reid/configs/person/vit_clipreid.yml"  # 模型配置文件
         self.reid_face_gallery_dir = "output/service/clip_reid/face_gallery"  # 由人脸识别捕捉的带id的人像gallery
         self.reid_camera_gallery_dir = "output/service/clip_reid/camera_gallery"  # 由摄像头定期截图的gallery
+        self.reid_anomaly_gallery_dir = "output/service/clip_reid/anomaly_gallery"  # 由异常报警构成的gallery
         self.reid_refresh_mode = 0  # 刷新模式 0:基于时间刷新 1:基于特征数量刷新 2:综合刷新(满足其中一项就刷新)
         self.reid_refresh_interval = 54000  # 经过n帧刷新一次特征库（30fps * 60s * 30min = 54000 frame）
         self.reid_refresh_count = 10000  # 达到n条数据刷新一次特征库
