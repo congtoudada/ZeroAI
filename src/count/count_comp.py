@@ -65,10 +65,9 @@ class CountComponent(BasedStreamComponent):
                                  0])
                 self.green_vecs.append(green / np.linalg.norm(green))
 
-    def on_update(self) -> bool:
+    def on_update(self):
         self.release_unused()  # 清理无用资源（一定要在最前面调用）
         super().on_update()
-        return True
 
     def on_get_stream(self, read_idx):
         frame, _ = super().on_get_stream(read_idx)  # 解析视频帧id+视频帧

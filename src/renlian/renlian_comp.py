@@ -33,21 +33,22 @@ class RenlianComponent(CountComponent):
         super().on_start()
         self.face_helper = FaceHelper(self.config.count_face_config, self.cam_id, self._face_callback)
 
-    def on_update(self) -> bool:
-        if super().on_update():
-            # 人脸识别请求
-            for key, value in self.item_dict.items():
-                diff = self.frame_id_cache[0] - value.last_send_req
-                if self.face_helper.try_send(self.frame_id_cache[0], self.frames[0], value.ltrb, key, diff, value.base_y, value.retry):
-                    self.item_dict[key].last_send_req = self.frame_id_cache[0]
-                    # break  # 每帧最多发送一个请求（待定）
+    def on_update(self):
+        super().on_update()
+        current_id = self.frame_id_cache[0]
+        # 人脸识别请求
+        for key, value in self.item_dict.items():
+            diff = current_id - value.last_send_req
+            if self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, diff, value.base_y, value.retry):
+                self.item_dict[key].last_send_req = self.frame_id_cache[0]
+                # break  # 每帧最多发送一个请求（待定）
         # 人脸识别帮助tick，用于接受响应
-        self.face_helper.tick()
-        return True
+        self.face_helper.tick(current_id)
 
     def send_result(self, frame, status: int, item: RenlianItem):
         """
         结果通知
+        :param frame:
         :param status: 1进2出
         :param item:
         :return:
@@ -87,7 +88,6 @@ class RenlianComponent(CountComponent):
 
     def on_draw_vis(self, idx, frame, input_mot):
         frame = super().on_draw_vis(idx, frame, input_mot)
-        face_dict = self.face_helper.face_dict
         # 参考线
         point1 = (0, int(self.face_helper.config.face_cull_up_y * self.stream_height))
         point2 = (self.stream_width, int(self.face_helper.config.face_cull_up_y * self.stream_height))
@@ -96,9 +96,10 @@ class RenlianComponent(CountComponent):
         cv2.line(frame, point1, point2, (127, 127, 127), 1)  # 绘制线条
         cv2.line(frame, point3, point4, (127, 127, 127), 1)  # 绘制线条
         # 人脸识别结果
-        for key, value in face_dict.items():
-            ltrb = self.item_dict[key].ltrb
-            cv2.putText(frame, f"{face_dict[key]['per_id']}",
+        for key, value in self.item_dict.items():
+            ltrb = value.ltrb
+            per_id = value.per_id
+            cv2.putText(frame, f"{per_id}",
                         (int((ltrb[0] + ltrb[2]) / 2), int(self.item_dict[key].ltrb[1])),
                         cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
         # 可视化并返回

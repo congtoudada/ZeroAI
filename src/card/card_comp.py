@@ -70,10 +70,9 @@ class CardComponent(BasedStreamComponent):
                                   0])
                 self.green_vecs.append(green / np.linalg.norm(green))
 
-    def on_update(self) -> bool:
+    def on_update(self):
         self.release_unused()  # 清理无用资源（一定要在最前面调用）
         super().on_update()
-        return True
 
     def release_unused(self):
         # 清空长期未更新点
@@ -242,8 +241,8 @@ class CardComponent(BasedStreamComponent):
 
     #  用于在图像上进行可视化操
     def on_draw_vis(self, idx, frame, input_mot):
-        text_scale = 1
-        text_thickness = 2
+        text_scale = 1.25
+        text_thickness = 1
         line_thickness = 2
         # 标题线
         num = 0 if input_mot is None else input_mot.shape[0]

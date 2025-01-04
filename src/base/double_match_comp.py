@@ -69,7 +69,8 @@ class DoubleMatchComponent(BasedStreamComponent):
             for record in self.main_records:
                 self.det_pool.push(record)
             self.main_records.clear()
-        self.reid_helper.update()
+        if self.reid_helper is not None:
+            self.reid_helper.update(self.frame_id_cache[1])
 
     def reid_callback(self, obj_id, per_id, score):
         if self.reid_info_dict.__contains__(obj_id):
@@ -78,7 +79,8 @@ class DoubleMatchComponent(BasedStreamComponent):
                            per_id, self.reid_info_dict[obj_id], score, self.config.stream_export_img_enable,
                            self.config.stream_web_enable)
             self.reid_info_dict.pop(obj_id)
-            self.reid_helper.destroy_obj(obj_id)  # 主动销毁对象数据缓存(可选)
+            if self.reid_helper is not None:
+                self.reid_helper.destroy_obj(obj_id)  # 主动销毁对象数据缓存(可选)
             if self.item_dict.__contains__(obj_id):
                 self.item_dict[obj_id].sub_per_id = per_id
                 self.item_dict[obj_id].sub_score = score
@@ -165,13 +167,13 @@ class DoubleMatchComponent(BasedStreamComponent):
             score = obj[4]
             cls = obj[5]
             obj_id = int(obj[6])
+            # 保温
+            if self.item_dict.__contains__(obj_id):
+                self.item_dict[obj_id].common_update(current_frame_id, ltrb)
             # 只有次体在合法区域内才匹配
             if not self._is_in_zone(ltrb, self.config.dm_zone):
                 continue
-            # 更新帧id，避免被回收
-            if self.item_dict.__contains__(obj_id):
-                self.item_dict[obj_id].common_update(current_frame_id, ltrb)
-            else:
+            if not self.item_dict.__contains__(obj_id):
                 item = self.item_pool.pop()
                 item.init(obj_id, current_frame_id, ltrb)
                 self.item_dict[obj_id] = item
@@ -225,11 +227,12 @@ class DoubleMatchComponent(BasedStreamComponent):
                     if shot_img is not None:
                         self.reid_info_dict[item.sub_obj_id] = shot_img
                         # 发送reid
-                        ret = self.reid_helper.send_reid(self.frame_id_cache[1], self.cam_id, os.getpid(),
-                                                         item.sub_obj_id, self.reid_info_dict[item.sub_obj_id])
-                        if ret:
-                            img = ImgKit.draw_img_box(frame, item.main_ltrb).copy()
-                            self.reid_info_dict[item.sub_obj_id] = img
+                        if self.reid_helper is not None:
+                            ret = self.reid_helper.send_reid(self.frame_id_cache[1], self.cam_id, os.getpid(),
+                                                             item.sub_obj_id, self.reid_info_dict[item.sub_obj_id])
+                            if ret:
+                                img = ImgKit.draw_img_box(frame, item.main_ltrb).copy()
+                                self.reid_info_dict[item.sub_obj_id] = img
                     else:
                         logger.error(f"{self.pname} Fatal Error! Sub ltrb is invalid: {item.sub_ltrb}")
 

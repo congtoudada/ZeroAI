@@ -62,21 +62,21 @@ class IntrudeComponent(BasedStreamComponent):
                    0)
             self.zone_vec.append(vec / np.linalg.norm(vec))
 
-    def on_update(self) -> bool:
+    def on_update(self):
         self.release_unused()  # 清理无用资源（一定要在最前面调用）
         super().on_update()
         if self.config.intrude_face_enable:
             # 人脸识别请求
+            current_id = self.frame_id_cache[0]
             for key, value in self.data_dict.items():
-                diff = self.frame_id_cache[0] - value.last_send_req
+                diff = current_id - value.last_send_req
                 # 没有进入报警区域，就直接返回
                 if value.valid_count == 0:
                     continue
-                if self.face_helper.try_send(self.frame_id_cache[0], self.frames[0], value.ltrb, key, diff, value.base_y, value.retry):
-                    self.data_dict[key].last_send_req = self.frame_id_cache[0]
+                if self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, diff, value.base_y, value.retry):
+                    self.data_dict[key].last_send_req = current_id
             # 人脸识别帮助tick，用于接受响应
-            self.face_helper.tick()
-        return True
+            self.face_helper.tick(current_id)
 
     def _face_callback(self, obj_id, per_id, score):
         if self.data_dict.__contains__(obj_id):
