@@ -45,6 +45,7 @@ class ReidComponent(Component):
         self.reid_model: IReidWrapper = ClipReidWrapper(self.config)  # clip_reid模型（这里理论上使用工厂模式更解耦，但我懒）
         # self.faiss_dict: Dict[int, FaissReidHelper] = {}  # 根据cam id分类的faiss字典(根据不同摄像头找人，暂不实现)
         self.camera_gallery: FaissHelper = None  # 根据cam id分类的faiss字典
+        self.anomaly_gallery: FaissHelper = None  # 根据cam id分类的额外faiss字典，只存异常图
         self.time_flag = 0  # 时间标识，用于检查是否刷新特征半区
         self.last_modify_time = {}  # 各文件上次修改时间，用于检查是否需要重建由人脸生成的身份识别特征库
         self.face_gallery: FaissHelper = None  # face_shot 特征库
@@ -60,24 +61,33 @@ class ReidComponent(Component):
                 os.makedirs(self.config.reid_debug_output, exist_ok=True)
         if not os.path.exists(self.config.reid_face_gallery_dir):
             os.makedirs(self.config.reid_face_gallery_dir, exist_ok=True)
-        if not os.path.exists(self.config.reid_camera_gallery_dir):
-            os.makedirs(self.config.reid_camera_gallery_dir, exist_ok=True)
-        else:  # 存在则清空
+        if os.path.exists(self.config.reid_camera_gallery_dir):
             shutil.rmtree(self.config.reid_camera_gallery_dir)
-            os.makedirs(self.config.reid_camera_gallery_dir, exist_ok=True)
+        os.makedirs(self.config.reid_camera_gallery_dir, exist_ok=True)
+        if os.path.exists(self.config.reid_anomaly_gallery_dir):
+            shutil.rmtree(self.config.reid_anomaly_gallery_dir)
+        os.makedirs(self.config.reid_anomaly_gallery_dir, exist_ok=True)
+
         self.camera_gallery = FaissHelper(self.config.reid_dimension,
                                           self.config.reid_refresh_mode,
                                           self.config.reid_refresh_interval,
                                           self.config.reid_refresh_count,
                                           ReidComponent.remove_feat,
-                                          self.config.log_enable,
+                                          self.config.reid_debug_enable,
                                           self.config.log_analysis)
+        self.anomaly_gallery = FaissHelper(self.config.reid_dimension,
+                                           1,   # 异常库基于特征数量刷新
+                                           self.config.reid_refresh_interval,
+                                           self.config.reid_refresh_count,
+                                           ReidComponent.remove_feat,
+                                           self.config.reid_debug_enable,
+                                           self.config.log_analysis)
         self.face_gallery = FaissHelper(self.config.reid_dimension,
                                         self.config.reid_refresh_mode,
                                         self.config.reid_refresh_interval,
                                         self.config.reid_refresh_count,
                                         ReidComponent.remove_feat,
-                                        self.config.log_enable,
+                                        self.config.reid_debug_enable,
                                         self.config.log_analysis)
 
     def on_update(self):
@@ -93,6 +103,7 @@ class ReidComponent(Component):
         # tick faiss
         self.time_flag = (self.time_flag + 1) % sys.maxsize
         self.camera_gallery.tick(self.time_flag)
+        self.anomaly_gallery.tick(self.time_flag)
 
     def process_request(self, req_package):
         cam_id = req_package[ReidKey.REID_REQ_CAM_ID.name]  # 请求的摄像头id
@@ -175,22 +186,26 @@ class ReidComponent(Component):
                 })
                 logger.info(
                     f"{self.pname} 响应Reid请求成功: pid:{pid} cam_id:{cam_id} obj_id:{obj_id} per_id:{per_id} score:{score:.2f}")
+            # 额外存图(通常是异常检测到的对象)
+            time_str = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())
+            img_path = os.path.join(self.config.reid_anomaly_gallery_dir, f"{obj_id}_{time_str}_{cam_id}.jpg")
+            cv2.imwrite(img_path, reid_img)
+            extra_info = {"cam_id": cam_id, "time": time_str, "img_path": img_path}
+            self.anomaly_gallery.add(feat, extra_info)  # 将特征加入特征库
+            if self.config.reid_debug_enable:
+                logger.info(f"{self.pname} 当前anomaly gallery有效特征数: {self.anomaly_gallery.get_total()}")
         elif reid_method == 3:  # 找人
             k = 3  # topK的K值
-            extra_info = self.camera_gallery.search(feat, k)
+            # 优先从异常库找
+            extra_info = self.anomaly_gallery.search(feat, k, self.config.reid_search_person_threshold)
+            k = k - len(extra_info)
+            # 剩余的从普通库找
+            if k > 0:
+                extra_info = extra_info + self.camera_gallery.search(feat, k)
             if len(extra_info) == 0:
                 # method3中 obj_id是per_id
                 logger.info(
                     f"{self.pname} Reid failed to search person: pid:{pid} cam_id:{cam_id} per_id:{obj_id}")
-            invalid_indices = []
-            for i, info in enumerate(extra_info):  # extra_info是一个List[Dict]
-                score = info['score']
-                # topK分数不够的会剔除
-                if score < self.config.reid_search_person_threshold:
-                    invalid_indices.append(i)
-            invalid_indices.reverse()
-            for i, idx in enumerate(invalid_indices):
-                extra_info.pop(idx)
             rsp_key = ReidKey.REID_RSP_SP.name + str(pid)  # KEY: REID_RSP_SP
             if self.reid_shared_memory.__contains__(rsp_key):
                 for item in extra_info:
