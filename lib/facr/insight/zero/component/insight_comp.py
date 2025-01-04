@@ -68,7 +68,7 @@ class InsightComponent(Component):
             cam_id = req_package[FaceKey.FACE_REQ_CAM_ID.name]  # 请求的摄像头id
             pid = req_package[FaceKey.FACE_REQ_PID.name]  # 请求的进程
             obj_id = req_package[FaceKey.FACE_REQ_OBJ_ID.name]  # 请求的对象id
-            face_image = req_package[FaceKey.FACE_REQ_IMAGE.name].copy()  # 请求的图片
+            face_image = req_package[FaceKey.FACE_REQ_IMAGE.name]  # 请求的图片
             # 人脸识别处理
             per_id, score = self.face_model.search_face_image(face_image, self.config.insight_vis)
             # if per_id != 1:
