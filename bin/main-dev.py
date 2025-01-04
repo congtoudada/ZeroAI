@@ -1,4 +1,5 @@
 import argparse
+import traceback
 
 from zero.core.launch_comp import LaunchComponent
 
@@ -20,7 +21,8 @@ if __name__ == '__main__':
         comp.esc_event.set()
         comp.on_destroy()
     except Exception as e:
-        print("An error occurred: {}".format(e))
+        print(f"LaunchComponent: {e}")
+        print(traceback.format_exc())  # 打印完整的堆栈信息
         exit(1)
     exit(0)
 

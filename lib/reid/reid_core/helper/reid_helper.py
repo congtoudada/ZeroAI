@@ -52,7 +52,7 @@ class ReidHelper:
             self.rsp_sp_queue = multiprocessing.Manager().Queue()  # 找人接收队列
             ReidHelper.reid_shared_memory[self.rsp_sp_key] = self.rsp_sp_queue
 
-    def update(self):
+    def update(self, now=0):
         # 处理响应队列 FastReid
         if self.rsp_queue is not None:
             while not self.rsp_queue.empty():
@@ -68,6 +68,14 @@ class ReidHelper:
                 package = data[ReidKey.REID_RSP_SP_PACKAGE.name]
                 self.search_person_callback(package)  # 触发回调事件
                 self.req_lock.remove(self.search_per_id)  # 解锁对象，使其可以再次发送请求
+        # 清除长期未使用对象
+        clear_keys = []
+        for key, item in self.reid_dict.items():
+            if now - item["last_time"] > self.config.reid_lost_frames:
+                clear_keys.append(key)
+        clear_keys.reverse()
+        for key in clear_keys:
+            self.reid_dict.pop(key)  # 从字典中移除item
 
     @staticmethod
     def send_save_timing(cam_id, pid, obj_id, image):
@@ -82,14 +90,11 @@ class ReidHelper:
         """
         Reid请求: 在face shot中匹配
         """
-        # 清除长期未使用对象
-        clear_keys = []
-        for key, item in self.reid_dict.items():
-            if now - item["last_time"] > self.config.reid_lost_frames:
-                clear_keys.append(key)
-        clear_keys.reverse()
-        for key in clear_keys:
-            self.reid_dict.pop(key)  # 从字典中移除item
+        # 保温
+        if self.reid_dict.__contains__(obj_id):
+            self.reid_dict[obj_id].update({
+                "last_time": now
+            })
 
         # 如果正在请求队列，不发送
         if self.req_lock.__contains__(obj_id):

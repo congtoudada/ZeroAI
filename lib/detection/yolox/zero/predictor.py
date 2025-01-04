@@ -1,15 +1,18 @@
 import os.path as osp
 import cv2
+import numpy as np
 import torch
-
 from loguru import logger
+
+from detection_core.i_detection_wrapper import IDetectionWrapper
 from yolox.data.data_augment import preproc
 from yolox.models import YOLOX
 from yolox.utils import fuse_model, get_model_info, postprocess
 from yolox.zero.yolox_info import YoloxInfo
 
 
-class Predictor(object):
+class Predictor(IDetectionWrapper):
+
     def __init__(
             self,
             model,
@@ -39,7 +42,44 @@ class Predictor(object):
         self.rgb_means = (0.485, 0.456, 0.406)
         self.std = (0.229, 0.224, 0.225)
 
-    def inference(self, img, timer):
+    def inference(self, frame):
+        """
+        # yolox inference shape: [n,7]
+        # [0,1,2,3]: ltrb bboxes (tsize分辨率下)
+        #   [0]: x1
+        #   [1]: y1
+        #   [2]: x2
+        #   [3]: y2
+        # [4] * [5]: 置信度 (eg. 0.8630*0.7807)
+        # [6]: 类别 (下标从0开始 eg. 0为人)
+        # output shape: [n, 6]
+        # n: n个对象
+        # [0,1,2,3]: ltrb bboxes (基于视频流分辨率)
+        #   [0]: x1
+        #   [1]: y1
+        #   [2]: x2
+        #   [3]: y2
+        # [4]: 置信度
+        # [5]: 类别 (下标从0开始)
+        :param frame:
+        :return:
+        """
+        outputs, img_info = self.__inference(frame)  # List[tensor(n, 7)] -> tensor(n, 7)
+        result = outputs[0]  # List[tensor(n, 7)] -> tensor(n, 7)
+        if result is None:
+            return None
+        outputs_cpu = result.cpu().numpy()
+        scale = min(self.test_size[0] / float(img_info['height']),
+                    self.test_size[1] / float(img_info['width']))
+        bboxes = outputs_cpu[:, :4] / scale
+        scores = outputs_cpu[:, 4] * outputs_cpu[:, 5]
+        classes = outputs_cpu[:, 6]
+        if scores.ndim == 1:
+            scores = np.expand_dims(scores, axis=1)
+            classes = np.expand_dims(classes, axis=1)
+        return np.concatenate((bboxes, scores, classes), axis=1)
+
+    def __inference(self, img):
         img_info = {"id": 0}
         if isinstance(img, str):
             img_info["file_name"] = osp.basename(img)
@@ -59,8 +99,6 @@ class Predictor(object):
             img = img.half()  # to FP16
 
         with torch.no_grad():
-            if timer is not None:
-                timer.tic()
             outputs = self.model(img)
             if self.decoder is not None:
                 outputs = self.decoder(outputs, dtype=outputs.type())

@@ -36,6 +36,8 @@ class LaunchComponent(Component):
         初始化时调用一次
         :return:
         """
+        if os.path.exists(self.config.app_running_file):
+            os.remove(self.config.app_running_file)
         # -------------------------------- 1.初始化变量 --------------------------------
         # 设置子进程开启方式
         if sys.platform.startswith('linux'):  # linux默认fork，但fork可能不支持cuda
@@ -88,9 +90,8 @@ class LaunchComponent(Component):
         # 如果目录不存在，则创建它
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
-        if not os.path.exists(self.config.app_running_file):
-            write_data = {"main": "running"}
-            pickle.dump(write_data, open(self.config.app_running_file, 'wb'))
+        write_data = {"main": "running"}
+        pickle.dump(write_data, open(self.config.app_running_file, 'wb'))
         # ########################## 主进程相关 End ############################
 
     def on_update(self):
