@@ -28,29 +28,12 @@ class FaceHelper:
         self.face_dict: Dict[int, dict] = {}  # 人脸识别结果集
         self.callback = callback
 
-    def tick(self):
+    def tick(self, now):
         """
         tick: 用于轮询响应队列
         :return:
         """
         self.handler.tick()
-
-    def try_send(self, now, frame, ltrb, obj_id, diff, per_y, retry) -> bool:
-        """
-        尝试发送识别请求
-        :return:
-        """
-        if self.face_dict.__contains__(obj_id):
-            self.face_dict[obj_id].update({
-                "last_time": now
-            })
-        else:
-            self.face_dict[obj_id] = {
-                "last_time": now,
-                "per_id": 1,
-                "score": 0
-            }
-
         # 清除长期未使用对象
         clear_keys = []
         for key, item in self.face_dict.items():
@@ -59,6 +42,17 @@ class FaceHelper:
         clear_keys.reverse()
         for key in clear_keys:
             self.face_dict.pop(key)  # 从字典中移除item
+
+    def try_send(self, now, frame, ltrb, obj_id, diff, per_y, retry) -> bool:
+        """
+        尝试发送识别请求
+        :return:
+        """
+        # 保温
+        if self.face_dict.__contains__(obj_id):
+            self.face_dict[obj_id].update({
+                "last_time": now
+            })
 
         if retry > self.config.face_max_retry:  # 大于重试次数，不发送
             return False
@@ -72,7 +66,14 @@ class FaceHelper:
         if frame is not None:
             image = ImgKit.crop_img(frame, ltrb)
             if image is not None:
-                return self.handler.send(obj_id, image)
+                ret = self.handler.send(obj_id, image)
+                if ret:
+                    self.face_dict[obj_id] = {
+                        "last_time": now,
+                        "per_id": 1,
+                        "score": 0
+                    }
+                    return True
         return False
 
     def destroy_obj(self, obj_id):
