@@ -12,7 +12,7 @@ from utility.config_kit import ConfigKit
 
 class YoloxComponent(DetectionComponent):
     def __init__(self, shared_memory, config_path: str):
-        super().__init__(shared_memory)
+        super().__init__(shared_memory, config_path)
         self.config: YoloxInfo = YoloxInfo(ConfigKit.load(config_path))
         self.pname = f"[ {self.pid}:yolox for {self.config.yolox_args_expn}]"
 

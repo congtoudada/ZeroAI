@@ -2,7 +2,6 @@ import os.path as osp
 import cv2
 import numpy as np
 import torch
-
 from loguru import logger
 
 from detection_core.i_detection_wrapper import IDetectionWrapper
@@ -65,7 +64,7 @@ class Predictor(IDetectionWrapper):
         :param frame:
         :return:
         """
-        outputs, img_info = self.__inference(frame, None)  # List[tensor(n, 7)] -> tensor(n, 7)
+        outputs, img_info = self.__inference(frame)  # List[tensor(n, 7)] -> tensor(n, 7)
         result = outputs[0]  # List[tensor(n, 7)] -> tensor(n, 7)
         if result is None:
             return None
