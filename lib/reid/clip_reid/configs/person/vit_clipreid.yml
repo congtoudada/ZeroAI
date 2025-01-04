@@ -87,7 +87,7 @@ TEST:
 
 DATASETS:
    NAMES: ('cong2025')
-   ROOT_DIR: ('H:/BaiduNetdiskDownload/dataset/ReID/Custom')
+   ROOT_DIR: ('res/images/reid/CustomDataset')
 OUTPUT_DIR: 'output/service/clip_reid'
 
 # CUDA_VISIBLE_DEVICES=3 python train_clipreid.py --config_file configs/VehicleID/vit_clipreid.yml
