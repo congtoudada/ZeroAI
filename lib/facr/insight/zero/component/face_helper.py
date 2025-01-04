@@ -40,6 +40,17 @@ class FaceHelper:
         尝试发送识别请求
         :return:
         """
+        if self.face_dict.__contains__(obj_id):
+            self.face_dict[obj_id].update({
+                "last_time": now
+            })
+        else:
+            self.face_dict[obj_id] = {
+                "last_time": now,
+                "per_id": 1,
+                "score": 0
+            }
+
         # 清除长期未使用对象
         clear_keys = []
         for key, item in self.face_dict.items():
@@ -60,13 +71,9 @@ class FaceHelper:
         # 尝试发送人脸识别请求（内部可能还会判断）
         if frame is not None:
             image = ImgKit.crop_img(frame, ltrb)
-            ret = self.handler.send(obj_id, image)
-            if ret:
-                self.face_shared_memory[obj_id] = {
-                    "last_time": now
-                }
-        else:
-            return False
+            if image is not None:
+                return self.handler.send(obj_id, image)
+        return False
 
     def destroy_obj(self, obj_id):
         """
