@@ -75,7 +75,7 @@ def create_process(shared_memory, config_path: str):
     except KeyboardInterrupt:
         comp.on_destroy()
     except Exception as e:
-        logger.error(f"ClipReidComponent: {e}")
+        logger.error(f"ReidSearchPersonComponent: {e}")
         logger.error(traceback.format_exc())  # 打印完整的堆栈信息
         comp.on_destroy()
 

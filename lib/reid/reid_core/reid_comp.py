@@ -147,7 +147,7 @@ class ReidComponent(Component):
             time_str = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())
             img_path = os.path.join(self.config.reid_camera_gallery_dir, f"{obj_id}_{time_str}_{cam_id}.jpg")
             cv2.imwrite(img_path, reid_img)
-            extra_info = {"cam_id": cam_id, "time": time_str, "img_path": img_path}
+            extra_info = {"img_path": img_path}
             self.camera_gallery.add(feat, extra_info)  # 将特征加入特征库
             n = self.camera_gallery.get_total()
             if self.config.reid_debug_enable and n % 50 == 0:
@@ -156,17 +156,15 @@ class ReidComponent(Component):
             # 更新本地face shot特征库
             self.update_face_shot()
             k = 1  # topK的K值
-            extra_info = self.face_gallery.search(feat, k)
+            extra_info = self.face_gallery.search(feat, k, self.config.reid_threshold)
             per_id = 1
             score = 0
             if len(extra_info) == 0:
                 logger.info(
                     f"{self.pname} Reid failed to fast reid: pid:{pid} cam_id:{cam_id} obj_id:{obj_id}")
             else:
-                per_id = extra_info[0]['per_id']
+                per_id = extra_info[0]['per_id']  # 从人脸gallery构建会添加per_id
                 score = extra_info[0]['score']
-                if score < self.config.reid_threshold:
-                    per_id = 1  # 分数低视为陌生人
             # debug输出
             if self.config.reid_debug_enable:
                 if per_id != 1:
@@ -190,7 +188,7 @@ class ReidComponent(Component):
             time_str = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())
             img_path = os.path.join(self.config.reid_anomaly_gallery_dir, f"{obj_id}_{time_str}_{cam_id}.jpg")
             cv2.imwrite(img_path, reid_img)
-            extra_info = {"cam_id": cam_id, "time": time_str, "img_path": img_path}
+            extra_info = {"img_path": img_path}
             self.anomaly_gallery.add(feat, extra_info)  # 将特征加入特征库
             if self.config.reid_debug_enable:
                 logger.info(f"{self.pname} 当前anomaly gallery有效特征数: {self.anomaly_gallery.get_total()}")
