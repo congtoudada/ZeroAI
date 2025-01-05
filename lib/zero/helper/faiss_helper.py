@@ -102,6 +102,16 @@ class FaissHelper:
             for i, key in enumerate(I.flatten().tolist())
             if float(D[0][i]) > conf
         ]
+        # 额外补充时间和cam_id key-value
+        for item in values_with_scores:
+            if item.__contains__('img_path'):
+                img_path = item["img_path"]
+                cam_id = img_path.split('_')[-1].split('.')[0]
+                time_str = img_path.split('_')[-2]
+                item['cam_id'] = cam_id
+                item['time'] = time_str
+            else:
+                logger.error(f"{self.pname} 搜索结果集找不到key: img_path")
         if self.enable_log:
             logger.info(f"{self.pname} 查询结果: \nI: {I} \nD: {D} \nExtra: {values_with_scores}")
         if self.enable_analysis:
