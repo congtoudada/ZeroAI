@@ -32,6 +32,7 @@ class BasedStreamComponent(Component, ABC):
         self.video_writers: List[SaveVideoHelper] = []  # 存储视频帮助类
         self.rtsp_writers: List[RtspKit] = []  # rtsp推流工具
         self.write_dict = []  # 输出字典
+        self.is_draw = []  # 是否需要绘图
 
     def on_start(self):
         for i, input_port in enumerate(self.config.input_ports):
@@ -79,37 +80,46 @@ class BasedStreamComponent(Component, ABC):
                 self.write_dict[i][StreamKey.STREAM_WIDTH.name] = width
                 self.write_dict[i][StreamKey.STREAM_HEIGHT.name] = height
                 self.write_dict[i][StreamKey.STREAM_FPS.name] = fps
-            # 初始化http请求帮助类
+            # 初始化是否绘图
+            self.is_draw.append(self.config.stream_draw_vis_enable or self.config.stream_save_video_enable or
+                                self.config.stream_rtsp_enable)
 
     def on_update(self):
+        # 记录算法耗时
+        if self.config.log_analysis:
+            self.update_timer.tic()
+
         # 处理每一个输入端口
         for i, input_port in enumerate(self.config.input_ports):
             frame, user_data = self.on_get_stream(i)  # 解析流
-            if frame is None:  # 跳过重复帧
+            if frame is None:  # 跳过无效帧
                 continue
             self.frames[i] = frame
-            if self.config.log_analysis:  # 记录算法耗时
-                self.update_timer.tic()
             user_data = self.on_handle_stream(i, frame, user_data)  # 处理流
-            if (self.config.stream_draw_vis_enable or self.config.stream_save_video_enable or
-                    self.config.stream_rtsp_enable):  # 满足任意一项就需要绘图
-                frame = self.on_draw_vis(i, frame, user_data)  # 在多输入端口时，通常只有一个端口返回frame
-                if frame is not None and self.config.stream_draw_vis_enable:
-                    if self.config.stream_draw_vis_resize:
-                        # resize会涉及图像拷贝
-                        cv2.imshow(self.window_name[i],
-                                   cv2.resize(frame,
-                                              (self.config.stream_draw_vis_width, self.config.stream_draw_vis_height)))
-                    else:
-                        cv2.imshow(self.window_name[i], frame)
-            if frame is not None:
-                if self.config.stream_save_video_enable:
-                    self.video_writers[i].write(frame)
-                if self.config.stream_rtsp_enable:
-                    self.rtsp_writers[i].push(frame)
-                if self.config.log_analysis:  # 记录算法耗时
-                    self.update_timer.toc()
+            # 是否需要绘图
+            if self.is_draw[i]:
+                draw_frame = self.on_draw_vis(i, frame, user_data)  # 在多输入端口时，通常只有一个端口返回frame
+                if draw_frame is not None:
+                    frame = draw_frame
+            # 是否需要可视化
+            if self.config.stream_draw_vis_enable:
+                if self.config.stream_draw_vis_resize:
+                    # resize会涉及图像拷贝
+                    cv2.imshow(self.window_name[i],
+                               cv2.resize(frame,
+                                          (self.config.stream_draw_vis_width, self.config.stream_draw_vis_height)))
+                else:
+                    cv2.imshow(self.window_name[i], frame)
+            # 是否需要录制
+            if self.config.stream_save_video_enable:
+                self.video_writers[i].write(frame)
+            # 是否需要推流
+            if self.config.stream_rtsp_enable:
+                self.rtsp_writers[i].push(frame)
 
+        # 记录算法耗时
+        if self.config.log_analysis:
+            self.update_timer.toc()
         self.update_delay = max(self.default_update_delay - self.update_timer.recent_time, 0)  # 根据当前推理耗时反推延迟
         # 记录性能日志
         if self.config.log_analysis:
