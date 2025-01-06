@@ -58,3 +58,4 @@ yacs
 timm
 ftfy
 regex
+faiss-cpu
