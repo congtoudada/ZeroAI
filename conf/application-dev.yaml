@@ -11,12 +11,18 @@ stream_list:
 
 # 算法
 algorithm_list:
+  # --------- 算法 ---------
+  - path: lib/detection/yolox/zero/yolox_comp.py
+    conf: conf/dev/algorithm/yolox/yolox_person.yaml
+  # --------- 业务 ---------
 #  - path: src/p3_hello_world_comp.py
 #    conf: ""
 #  - path: src/p4_hello_comp.py
 #    conf: conf/dev/feature/p4_hello.yaml
-  - path: src/p5_get_stream_comp.py
-    conf: conf/dev/feature/p5_get_stream.yaml
+#  - path: src/p5_get_stream_comp.py
+#    conf: conf/dev/feature/p5_get_stream.yaml
+  - path: src/p6_det_test_comp.py
+    conf: conf/dev/feature/p6_det_test.yaml
 
 
 app:

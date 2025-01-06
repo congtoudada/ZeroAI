@@ -3,7 +3,7 @@ INCLUDE:
     - conf/dev/global/based_stream.yaml
 
 input_ports:
-    - camera1
+  - camera1
 stream:
   draw_vis:
     enable: True  # 是否可视化
