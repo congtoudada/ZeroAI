@@ -5,14 +5,18 @@ INCLUDE:
 service_list: []
 
 # 视频流
-stream_list: []
+stream_list:
+  - path: lib/zero/core/stream_comp.py
+    conf: conf/dev/stream/stream1.yaml
 
 # 算法
 algorithm_list:
 #  - path: src/p3_hello_world_comp.py
 #    conf: ""
-  - path: src/p4_hello_comp.py
-    conf: conf/dev/feature/p4_hello.yaml
+#  - path: src/p4_hello_comp.py
+#    conf: conf/dev/feature/p4_hello.yaml
+  - path: src/p5_get_stream_comp.py
+    conf: conf/dev/feature/p5_get_stream.yaml
 
 
 app:
