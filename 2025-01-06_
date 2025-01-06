@@ -1,0 +1,91 @@
+2025-01-06 23:09:42.864 | INFO     | zero.core.component:__on_start:37 - [ 10276:component ] <class 'p4_hello_comp.P4HelloComponent'> 配置文件参数: 
+{
+    "val_int": 100,
+    "val_float": 3.14,
+    "val_str": "haha",
+    "val_bool": true,
+    "val_list": [
+        1,
+        2,
+        3
+    ],
+    "log_enable": true,
+    "log_level": 1,
+    "log_clean": true,
+    "log_output_path": "",
+    "log_analysis": true,
+    "update_fps": 60
+}
+2025-01-06 23:09:42.864 | INFO     | p4_hello_comp:on_start:19 - Hello World!
+2025-01-06 23:09:42.864 | INFO     | p4_hello_comp:on_start:20 - {'val_int': 100, 'val_float': 3.14, 'val_str': 'haha', 'val_bool': True, 'val_list': [1, 2, 3], 'log_enable': True, 'log_level': 1, 'log_clean': True, 'log_output_path': '', 'log_analysis': True, 'update_fps': 60}
+2025-01-06 23:10:08.769 | INFO     | zero.core.component:__on_start:37 - [ 10600:component ] <class 'p4_hello_comp.P4HelloComponent'> 配置文件参数: 
+{
+    "val_int": 100,
+    "val_float": 3.14,
+    "val_str": "haha",
+    "val_bool": true,
+    "val_list": [
+        1,
+        2,
+        3
+    ],
+    "log_enable": true,
+    "log_level": 1,
+    "log_clean": true,
+    "log_output_path": "",
+    "log_analysis": true,
+    "update_fps": 60
+}
+2025-01-06 23:10:08.769 | INFO     | p4_hello_comp:on_start:19 - Hello World!
+2025-01-06 23:10:08.769 | INFO     | p4_hello_comp:on_start:20 - {'val_int': 100, 'val_float': 3.14, 'val_str': 'haha', 'val_bool': True, 'val_list': [1, 2, 3], 'log_enable': True, 'log_level': 1, 'log_clean': True, 'log_output_path': '', 'log_analysis': True, 'update_fps': 60}
+2025-01-06 23:10:08.769 | INFO     | p4_hello_comp:on_start:21 - 100
+2025-01-06 23:11:28.448 | INFO     | zero.core.component:__on_start:37 - [ 26788:component ] <class 'p4_hello_comp.P4HelloComponent'> 配置文件参数: 
+{
+    "val_int": 999,
+    "val_float": 3.14,
+    "val_str": "haha",
+    "val_bool": true,
+    "val_list": [
+        1,
+        2,
+        3
+    ],
+    "log_enable": true,
+    "log_level": 1,
+    "log_clean": true,
+    "log_output_path": "",
+    "log_analysis": true,
+    "update_fps": 60
+}
+2025-01-06 23:11:28.448 | INFO     | p4_hello_comp:on_start:19 - Hello World!
+2025-01-06 23:11:28.448 | INFO     | p4_hello_comp:on_start:20 - {'val_int': 999, 'val_float': 3.14, 'val_str': 'haha', 'val_bool': True, 'val_list': [1, 2, 3], 'log_enable': True, 'log_level': 1, 'log_clean': True, 'log_output_path': '', 'log_analysis': True, 'update_fps': 60}
+2025-01-06 23:11:28.448 | INFO     | p4_hello_comp:on_start:21 - 999
+2025-01-06 23:59:24.260 | INFO     | zero.core.component:__on_start:37 - [ 7292:EmptyStream ] <class 'p5_get_stream_comp.P5GetStreamComponent'> 配置文件参数: 
+{
+    "input_ports": [],
+    "output_ports": [],
+    "stream_output_dir": "output/stream",
+    "stream_output_absolute": false,
+    "stream_save_video_enable": false,
+    "stream_save_video_resize": true,
+    "stream_save_video_width": 1920,
+    "stream_save_video_height": 1080,
+    "stream_save_video_fps": 12,
+    "stream_save_video_filename": "exp",
+    "stream_draw_vis_enable": false,
+    "stream_draw_vis_resize": false,
+    "stream_draw_vis_width": 960,
+    "stream_draw_vis_height": 540,
+    "stream_export_img_enable": true,
+    "stream_web_enable": true,
+    "stream_rtsp_enable": false,
+    "stream_rtsp_url": "rtsp://127.0.0.1:554/video",
+    "stream_mot_config": "",
+    "stream_http_config": "",
+    "log_enable": true,
+    "log_level": 1,
+    "log_clean": true,
+    "log_output_path": "",
+    "log_analysis": true,
+    "update_fps": 30
+}

@@ -1,0 +1,6 @@
+INCLUDE:
+  - conf/dev/global/config.yaml
+
+val:
+  int: 1024
+  float: 6.18
