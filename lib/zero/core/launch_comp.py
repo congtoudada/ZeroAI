@@ -105,7 +105,8 @@ class LaunchComponent(Component):
 
     def on_destroy(self):
         self.shared_memory[GlobalKey.ALL_READY.name] = True
-        requests.get(f'http://localhost:{BaseWebComponent.port}/shutdown')
+        if BaseWebComponent.is_running:
+            requests.get(f'http://localhost:{BaseWebComponent.port}/shutdown')
         logger.info("程序将在3s后退出！")
         for i in [3, 2, 1]:
             logger.info(f"倒计时: {i}")
