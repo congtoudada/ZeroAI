@@ -85,12 +85,14 @@ class BasedStreamComponent(Component, ABC):
         # 处理每一个输入端口
         for i, input_port in enumerate(self.config.input_ports):
             frame, user_data = self.on_get_stream(i)  # 解析流
+            if frame is None:  # 跳过重复帧
+                continue
             self.frames[i] = frame
-            if frame is not None and self.config.log_analysis:  # 记录算法耗时
+            if self.config.log_analysis:  # 记录算法耗时
                 self.update_timer.tic()
             user_data = self.on_handle_stream(i, frame, user_data)  # 处理流
-            if ((self.config.stream_draw_vis_enable or self.config.stream_save_video_enable or self.config.stream_rtsp_enable)
-                    and frame is not None):
+            if (self.config.stream_draw_vis_enable or self.config.stream_save_video_enable or
+                    self.config.stream_rtsp_enable):
                 frame = self.on_draw_vis(i, frame, user_data)  # 在多输入端口时，通常只有一个端口返回frame
                 if frame is not None and self.config.stream_draw_vis_enable:
                     if self.config.stream_draw_vis_resize:
