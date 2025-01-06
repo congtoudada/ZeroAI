@@ -267,7 +267,6 @@ class DoubleMatchComponent(BasedStreamComponent):
                           pt2=(int(valid_zone_zone[2] * self.stream_width),
                                int(valid_zone_zone[3] * self.stream_height)),
                           color=(0, 255, 0), thickness=line_thickness)
-        # 对象基准点、包围盒
         if len(self.config.detection_labels) == 0:
             logger.warning(f"{self.pname} detection_labels的长度为0，请在配置文件中配置detection_labels!")
             return frame
@@ -276,9 +275,9 @@ class DoubleMatchComponent(BasedStreamComponent):
             for obj in input_mot:
                 ltrb = obj[:4]
                 obj_id = int(obj[6])
-                # screen_x = int((ltrb[0] + ltrb[2]) / 2)
-                # screen_y = int((ltrb[1] + ltrb[3]) / 2)
-                cv2.circle(frame, (int(ltrb[0]), int(ltrb[1])), 4, (118, 154, 242), line_thickness)
+                screen_x = int((ltrb[0] + ltrb[2]) / 2)
+                screen_y = int((ltrb[1] + ltrb[3]) / 2)
+                cv2.circle(frame, (screen_x, screen_y), 4, (118, 154, 242), line_thickness)
                 cv2.rectangle(frame, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
                               color=self._get_color(obj_id), thickness=line_thickness)
                 if self.item_dict.__contains__(obj_id):
