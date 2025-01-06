@@ -31,10 +31,14 @@ class Component(ABC):
         # 初始化日志模块，只有root组件才需要配置
         if not LogKit.load_info(self.config):
             logger.info(f"{self.pname} 日志模块被关闭!")
-        # 转换为带缩进的JSON字符串并输出
-        json_string = json.dumps(self.config.__dict__, indent=4)
-        logger.info(f"{self.pname} {type(self)} 配置文件参数: \n{json_string}")
-        self.default_update_delay = 1.0 / self.config.update_fps
+        if self.config is not None:
+            # 转换为带缩进的JSON字符串并输出
+            json_string = json.dumps(self.config.__dict__, indent=4)
+            logger.info(f"{self.pname} {type(self)} 配置文件参数: \n{json_string}")
+            self.default_update_delay = 1.0 / self.config.update_fps
+        else:
+            logger.info(f"{self.pname} {type(self)} 配置文件加载失败")
+            self.default_update_delay = 1.0 / 30
         self.update_delay = self.default_update_delay
         self.on_start()
 
