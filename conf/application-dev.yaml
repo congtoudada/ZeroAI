@@ -21,8 +21,10 @@ algorithm_list:
 #    conf: conf/dev/feature/p4_hello.yaml
 #  - path: src/p5_get_stream_comp.py
 #    conf: conf/dev/feature/p5_get_stream.yaml
-  - path: src/p6_det_test_comp.py
-    conf: conf/dev/feature/p6_det_test.yaml
+#  - path: src/p6_det_test_comp.py
+#    conf: conf/dev/feature/p6_det_test.yaml
+  - path: src/p7_mot_test_comp.py
+    conf: conf/dev/feature/p7_mot_test.yaml
 
 
 app:
