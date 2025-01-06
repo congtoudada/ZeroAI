@@ -92,7 +92,7 @@ class BasedStreamComponent(Component, ABC):
                 self.update_timer.tic()
             user_data = self.on_handle_stream(i, frame, user_data)  # 处理流
             if (self.config.stream_draw_vis_enable or self.config.stream_save_video_enable or
-                    self.config.stream_rtsp_enable):
+                    self.config.stream_rtsp_enable):  # 满足任意一项就需要绘图
                 frame = self.on_draw_vis(i, frame, user_data)  # 在多输入端口时，通常只有一个端口返回frame
                 if frame is not None and self.config.stream_draw_vis_enable:
                     if self.config.stream_draw_vis_resize:
@@ -102,13 +102,15 @@ class BasedStreamComponent(Component, ABC):
                                               (self.config.stream_draw_vis_width, self.config.stream_draw_vis_height)))
                     else:
                         cv2.imshow(self.window_name[i], frame)
-            if frame is not None and self.config.stream_save_video_enable:
-                self.video_writers[i].write(frame)
-            if frame is not None and self.config.stream_rtsp_enable:
-                self.rtsp_writers[i].push(frame)
-            if frame is not None and self.config.log_analysis:  # 记录算法耗时
-                self.update_timer.toc()
-                self.update_delay = max(self.default_update_delay - self.update_timer.recent_time, 0)  # 根据当前推理耗时反推延迟
+            if frame is not None:
+                if self.config.stream_save_video_enable:
+                    self.video_writers[i].write(frame)
+                if self.config.stream_rtsp_enable:
+                    self.rtsp_writers[i].push(frame)
+                if self.config.log_analysis:  # 记录算法耗时
+                    self.update_timer.toc()
+
+        self.update_delay = max(self.default_update_delay - self.update_timer.recent_time, 0)  # 根据当前推理耗时反推延迟
         # 记录性能日志
         if self.config.log_analysis:
             AnalysisHelper.refresh(f"{self.pname} max time", self.update_timer.max_time * 1000, 100)
