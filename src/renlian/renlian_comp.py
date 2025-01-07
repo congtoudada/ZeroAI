@@ -31,17 +31,14 @@ class RenlianComponent(CountComponent):
 
     def on_start(self):
         super().on_start()
-        self.face_helper = FaceHelper(self.config.count_face_config, self.cam_id, self._face_callback)
+        self.face_helper = FaceHelper(self.config.count_face_config, self._face_callback)
 
     def on_update(self):
         super().on_update()
         current_id = self.frame_id_cache[0]
         # 人脸识别请求
         for key, value in self.item_dict.items():
-            diff = current_id - value.last_send_req
-            if self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, diff, value.base_y, value.retry):
-                self.item_dict[key].last_send_req = self.frame_id_cache[0]
-                # break  # 每帧最多发送一个请求（待定）
+            self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, value.base_y, self.cam_id)
         # 人脸识别帮助tick，用于接受响应
         self.face_helper.tick(current_id)
 
@@ -83,9 +80,6 @@ class RenlianComponent(CountComponent):
     def on_destroy_obj(self, obj_id):
         self.face_helper.destroy_obj(obj_id)
 
-    def on_create_obj(self, obj: RenlianItem):
-        obj.last_face_req = self.frame_id_cache[0]
-
     def on_draw_vis(self, idx, frame, input_mot):
         frame = super().on_draw_vis(idx, frame, input_mot)
         # 参考线
@@ -107,8 +101,6 @@ class RenlianComponent(CountComponent):
 
     def _face_callback(self, obj_id, per_id, score):
         if self.item_dict.__contains__(obj_id):
-            if per_id == 1:
-                self.item_dict[obj_id].retry += 1
             self.item_dict[obj_id].per_id = per_id
             self.item_dict[obj_id].score = score
 

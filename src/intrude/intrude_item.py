@@ -11,8 +11,6 @@ class IntrudeItem:
         self.base_y = 0  # base_y 百分比
         self.per_id = 1  # 默认为陌生人
         self.score = 0  # 置信度分数
-        self.retry = 0  # 识别重试次数
-        self.last_send_req = 0  # 上次发送请求的帧id
         self.ltrb = (0, 0, 0, 0)  # 包围盒（实际像素位置）
 
     def init(self, obj_id, last_update_id):
@@ -25,8 +23,6 @@ class IntrudeItem:
         self.base_y = 0  # base_y 百分比
         self.per_id = 1  # 默认为陌生人
         self.score = 0  # 置信度分数
-        self.retry = 0  # 识别重试次数
-        self.last_send_req = 0  # 上次发送请求的帧id
         self.ltrb = (0, 0, 0, 0)  # 包围盒（实际像素位置）
 
     def update(self, last_update_id, in_warn, base_x, base_y, ltrb):
