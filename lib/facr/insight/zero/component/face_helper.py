@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import Dict
 from UltraDict import UltraDict
 from loguru import logger
@@ -66,7 +67,7 @@ class FaceHelper:
             face_item["per_id"] = 1
             face_item["score"] = 0
             self.face_dict[obj_id] = face_item
-            req_diff = now
+            req_diff = sys.maxsize
         else:  # 保温
             req_diff = now - self.face_dict[obj_id]["last_send_req"]
             self.face_dict[obj_id]["last_time"] = now
