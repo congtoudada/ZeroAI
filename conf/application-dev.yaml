@@ -27,8 +27,8 @@ algorithm_list:
 #    conf: conf/dev/feature/p6_det_test.yaml
 #  - path: src/p7_mot_test_comp.py
 #    conf: conf/dev/feature/p7_mot_test.yaml
-  - path: src/warm/p8_facr_comp.py
-    conf: conf/dev/feature/p8_facr.yaml
+  - path: src/p8_facr_test_comp.py
+    conf: conf/dev/feature/p8_facr_test.yaml
 
 
 app:
