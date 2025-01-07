@@ -96,26 +96,26 @@ class BasedStreamComponent(Component, ABC):
                 continue
             self.frames[i] = frame
             user_data = self.on_handle_stream(i, frame, user_data)  # 处理流
+
             # 是否需要绘图
             if self.is_draw[i]:
-                draw_frame = self.on_draw_vis(i, frame, user_data)  # 在多输入端口时，通常只有一个端口返回frame
-                if draw_frame is not None:
-                    frame = draw_frame
+                frame = self.on_draw_vis(i, frame, user_data)  # 在多输入端口时，通常只有一个端口返回frame
             # 是否需要可视化
-            if self.config.stream_draw_vis_enable:
-                if self.config.stream_draw_vis_resize:
-                    # resize会涉及图像拷贝
-                    cv2.imshow(self.window_name[i],
-                               cv2.resize(frame,
-                                          (self.config.stream_draw_vis_width, self.config.stream_draw_vis_height)))
-                else:
-                    cv2.imshow(self.window_name[i], frame)
-            # 是否需要录制
-            if self.config.stream_save_video_enable:
-                self.video_writers[i].write(frame)
-            # 是否需要推流
-            if self.config.stream_rtsp_enable:
-                self.rtsp_writers[i].push(frame)
+            if frame is not None:
+                if self.config.stream_draw_vis_enable:
+                    if self.config.stream_draw_vis_resize:
+                        # resize会涉及图像拷贝
+                        cv2.imshow(self.window_name[i],
+                                   cv2.resize(frame,
+                                              (self.config.stream_draw_vis_width, self.config.stream_draw_vis_height)))
+                    else:
+                        cv2.imshow(self.window_name[i], frame)
+                # 是否需要录制
+                if self.config.stream_save_video_enable:
+                    self.video_writers[i].write(frame)
+                # 是否需要推流
+                if self.config.stream_rtsp_enable:
+                    self.rtsp_writers[i].push(frame)
 
         # 记录算法耗时
         if self.config.log_analysis:
