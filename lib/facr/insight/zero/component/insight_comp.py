@@ -74,7 +74,7 @@ class InsightComponent(Component):
             # if per_id != 1:
             #     logger.info(f"{self.pname} 识别成功! cam_id: {cam_id}, obj_id: {obj_id}, per_id: {per_id}, score: {score}")
             # debug输出
-            if self.config.insight_debug_enable and face_image is not None:
+            if self.config.insight_debug_enable and face_image is not None and img.size != 0:
                 img_path = os.path.join(self.config.insight_debug_output,
                                         f"facr_cam{cam_id}_per{per_id}_score{score:.2f}.jpg")
                 cv2.imwrite(img_path, face_image)
