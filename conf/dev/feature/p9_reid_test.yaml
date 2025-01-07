@@ -1,0 +1,13 @@
+INCLUDE:
+    - conf/dev/global/config.yaml
+    - conf/dev/global/based_stream.yaml
+
+input_ports:
+  - yolox-person1
+
+reid_helper_config: conf/dev/service/reid/helper/fast_reid_helper.yaml
+
+stream:
+  mot_config: conf/dev/algorithm/bytetrack/config.yaml
+  draw_vis:
+    enable: True

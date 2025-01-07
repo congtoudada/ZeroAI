@@ -3,8 +3,10 @@ INCLUDE:
 
 # 全局服务
 service_list:
-  - path: lib/facr/insight/zero/component/insight_comp.py
-    conf: conf/dev/service/facr/insight/insight.yaml
+#  - path: lib/facr/insight/zero/component/insight_comp.py
+#    conf: conf/dev/service/facr/insight/insight.yaml
+  - path: lib/reid/reid_core/reid_comp.py
+    conf: conf/dev/service/reid/clip_reid.yaml
 
 # 视频流
 stream_list:
@@ -27,8 +29,10 @@ algorithm_list:
 #    conf: conf/dev/feature/p6_det_test.yaml
 #  - path: src/p7_mot_test_comp.py
 #    conf: conf/dev/feature/p7_mot_test.yaml
-  - path: src/p8_facr_test_comp.py
-    conf: conf/dev/feature/p8_facr_test.yaml
+#  - path: src/p8_facr_test_comp.py
+#    conf: conf/dev/feature/p8_facr_test.yaml
+  - path: src/p9_reid_test_comp.py
+    conf: conf/dev/feature/p9_reid_test.yaml
 
 
 app:
