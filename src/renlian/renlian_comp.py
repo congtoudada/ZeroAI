@@ -33,12 +33,17 @@ class RenlianComponent(CountComponent):
         super().on_start()
         self.face_helper = FaceHelper(self.config.count_face_config, self._face_callback)
 
+    def on_handle_stream(self, idx, frame, input_det):
+        ret = super().on_handle_stream(idx, frame, input_det)
+        # 人脸识别请求
+        current_id = self.frame_id_cache[0]
+        for key, value in self.item_dict.items():
+            self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, value.base_y, self.cam_id)
+        return ret
+
     def on_update(self):
         super().on_update()
         current_id = self.frame_id_cache[0]
-        # 人脸识别请求
-        for key, value in self.item_dict.items():
-            self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, value.base_y, self.cam_id)
         # 人脸识别帮助tick，用于接受响应
         self.face_helper.tick(current_id)
 

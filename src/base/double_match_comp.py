@@ -31,8 +31,8 @@ class DoubleMatchComponent(BasedStreamComponent):
     """
 
     Warn_Desc = {
-        1: "打电话异常",
-        2: "安全帽异常"
+        1: "打电话",
+        2: "安全帽"
     }
 
     def __init__(self, shared_memory, config_path: str):
@@ -212,24 +212,24 @@ class DoubleMatchComponent(BasedStreamComponent):
         # 没有报过警且异常状态保持一段时间才发送
         if not item.has_warn and item.valid_count > self.config.dm_valid_count:
             if item.main_cls in self.config.dm_anomaly_cls:
-                logger.info(f"{self.pname} {DoubleMatchComponent.Warn_Desc[self.config.dm_warn_type]}: "
+                logger.info(f"{self.pname} {DoubleMatchComponent.Warn_Desc[self.config.dm_warn_type]}异常: "
                             f"obj_id:{item.sub_obj_id} score:{item.main_score:.3f}")
                 item.has_warn = True  # 一旦视为异常，则一直为异常，避免一个人重复报警
 
                 if not self.config.dm_reid_enable:  # 不支持reid就直接发送后端
                     img = ImgKit.draw_img_box(frame, item.main_ltrb)  # 画框
                     # 发送报警信息给后端
-                    WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, self.config.dm_warn_type,
-                                   item.sub_per_id, img, item.main_score, self.config.stream_export_img_enable,
-                                   self.config.stream_web_enable)
+                    WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id,
+                                   self.config.dm_warn_type, item.sub_per_id, img, item.main_score,
+                                   self.config.stream_export_img_enable, self.config.stream_web_enable)
                 else:
                     shot_img = ImgKit.crop_img(frame, item.sub_ltrb)  # 扣出人的包围框
                     if shot_img is not None:
                         self.reid_info_dict[item.sub_obj_id] = shot_img
                         # 发送reid
                         if self.reid_helper is not None:
-                            ret = self.reid_helper.try_send_reid(self.frame_id_cache[1], self.cam_id, os.getpid(),
-                                                                 item.sub_obj_id, self.reid_info_dict[item.sub_obj_id])
+                            ret = self.reid_helper.try_send_reid(self.frame_id_cache[1], shot_img,
+                                                                 item.sub_obj_id, self.cam_id)
                             if ret:
                                 img = ImgKit.draw_img_box(frame, item.main_ltrb).copy()
                                 self.reid_info_dict[item.sub_obj_id] = img
