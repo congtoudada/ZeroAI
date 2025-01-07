@@ -78,7 +78,7 @@ class FaceHelper:
             return False
         if req_diff < self.config.face_min_send_interval:  # 小于发送间隔，不发送
             return False
-        if obj_y != -1 and self.config.face_cull_up_y < obj_y < 1.0 - self.config.face_cull_down_y:  # 在剔除区域，不发送
+        if obj_y != -1 and not self.config.face_cull_up_y < obj_y < 1.0 - self.config.face_cull_down_y:  # 不在检测区域，不发送
             return False
         # 尝试发送人脸识别请求（内部可能还会判断）
         if frame is not None:
