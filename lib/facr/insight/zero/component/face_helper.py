@@ -26,7 +26,7 @@ class FaceHelper:
         self.handler = FaceProcessHelper(self.face_shared_memory, self.config, self.face_callback)
         self.dict_pool = ObjectPool(20, dict)
         # key: obj_id
-        # value: { "last_time": 0, "retry": 0, "per_id": 1, "score": 0 }
+        # value: { "last_time": 0, "last_send_req": 0, "retry": 0, "per_id": 1, "score": 0 }
         self.face_dict: Dict[int, dict] = {}
         self.callback = callback
 
@@ -61,13 +61,14 @@ class FaceHelper:
             face_item: dict = self.dict_pool.pop()
             # face_item.clear()  # 手动赋值
             face_item["last_time"] = now
+            face_item["last_send_req"] = 0
             face_item["retry"] = 0
             face_item["per_id"] = 1
             face_item["score"] = 0
             self.face_dict[obj_id] = face_item
             req_diff = now
         else:  # 保温
-            req_diff = now - self.face_dict[obj_id]["last_time"]
+            req_diff = now - self.face_dict[obj_id]["last_send_req"]
             self.face_dict[obj_id]["last_time"] = now
 
         retry = self.face_dict[obj_id]["retry"]
@@ -84,7 +85,9 @@ class FaceHelper:
         if frame is not None:
             image = ImgKit.crop_img(frame, ltrb)
             if image is not None:
-                return self.handler.send(obj_id, image, cam_id)
+                if self.handler.send(obj_id, image, cam_id):
+                    self.face_dict[obj_id]["last_send_req"] = now
+                    return True
         return False
 
     def destroy_obj(self, obj_id):
