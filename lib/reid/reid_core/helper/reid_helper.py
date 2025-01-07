@@ -52,7 +52,7 @@ class ReidHelper:
             self.rsp_sp_queue = multiprocessing.Manager().Queue()  # 找人接收队列
             ReidHelper.reid_shared_memory[self.rsp_sp_key] = self.rsp_sp_queue
 
-    def update(self, now=0):
+    def tick(self, now=0):
         # 处理响应队列 FastReid
         if self.rsp_queue is not None:
             while not self.rsp_queue.empty():
@@ -86,7 +86,7 @@ class ReidHelper:
             req_package = ReidHelper.make_package(cam_id, pid, obj_id, image, 1)
             ReidHelper.reid_shared_memory[ReidKey.REID_REQ.name].put(req_package)
 
-    def send_reid(self, now, cam_id, pid, obj_id, image) -> bool:
+    def try_send_reid(self, now, cam_id, pid, obj_id, image) -> bool:
         """
         Reid请求: 在face shot中匹配
         """
@@ -126,7 +126,7 @@ class ReidHelper:
         }
         return True
 
-    def send_search_person(self, per_id):
+    def try_send_search_person(self, per_id):
         """
         找人
         """
