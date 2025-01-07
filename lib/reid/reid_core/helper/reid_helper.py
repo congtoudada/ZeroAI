@@ -170,6 +170,7 @@ class ReidHelper:
         :return:
         """
         if self.reid_dict.__contains__(obj_id):
+            self.dict_pool.push(self.reid_dict[obj_id])
             self.reid_dict.pop(obj_id)
 
     def reid_callback(self, obj_id, per_id, score):

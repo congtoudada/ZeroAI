@@ -97,6 +97,7 @@ class FaceHelper:
         :return:
         """
         if self.face_dict.__contains__(obj_id):
+            self.dict_pool.push(self.face_dict[obj_id])
             self.face_dict.pop(obj_id)
 
     def face_callback(self, obj_id, per_id, score):
