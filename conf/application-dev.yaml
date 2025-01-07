@@ -2,7 +2,9 @@ INCLUDE:
   - conf/dev/global/config.yaml
 
 # 全局服务
-service_list: []
+service_list:
+  - path: lib/facr/insight/zero/component/insight_comp.py
+    conf: conf/dev/service/facr/insight/insight.yaml
 
 # 视频流
 stream_list:
@@ -23,8 +25,10 @@ algorithm_list:
 #    conf: conf/dev/feature/p5_get_stream.yaml
 #  - path: src/p6_det_test_comp.py
 #    conf: conf/dev/feature/p6_det_test.yaml
-  - path: src/p7_mot_test_comp.py
-    conf: conf/dev/feature/p7_mot_test.yaml
+#  - path: src/p7_mot_test_comp.py
+#    conf: conf/dev/feature/p7_mot_test.yaml
+  - path: src/warm/p8_facr_comp.py
+    conf: conf/dev/feature/p8_facr.yaml
 
 
 app:
