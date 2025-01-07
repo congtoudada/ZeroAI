@@ -89,7 +89,7 @@ class ReidHelper:
             req_package = ReidHelper.make_package(cam_id, pid, obj_id, image, 1)
             ReidHelper.reid_shared_memory[ReidKey.REID_REQ.name].put(req_package)
 
-    def try_send_reid(self, now, frame, ltrb, obj_id, cam_id) -> bool:
+    def try_send_reid(self, now, image, obj_id, cam_id) -> bool:
         """
         Reid请求: 在face shot中匹配
         """
@@ -108,6 +108,9 @@ class ReidHelper:
             req_diff = now - self.reid_dict[obj_id]["last_send_req"]
             self.reid_dict[obj_id]["last_time"] = now
 
+        # 图像为None
+        if image is None:
+            return False
         # 如果正在请求队列，不发送
         if self.req_lock.__contains__(obj_id):
             return False
@@ -122,9 +125,6 @@ class ReidHelper:
         if retry > self.config.reid_max_retry:
             return False
         # 发送
-        image = ImgKit.crop_img(frame, ltrb)
-        if image is None:
-            return False
         self.reid_dict[obj_id]["last_send_req"] = now
         req_package = ReidHelper.make_package(cam_id, self.pid, obj_id, image, 2)
         logger.info(f"{self.pname} 发送Fast Reid请求: obj_id is {obj_id}")
