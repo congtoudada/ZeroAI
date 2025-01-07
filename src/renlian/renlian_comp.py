@@ -94,7 +94,7 @@ class RenlianComponent(CountComponent):
             ltrb = value.ltrb
             per_id = value.per_id
             cv2.putText(frame, f"{per_id}",
-                        (int((ltrb[0] + ltrb[2]) / 2), int(self.item_dict[key].ltrb[1])),
+                        (int((ltrb[0] + ltrb[2]) / 2), int(ltrb[1])),
                         cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
         # 可视化并返回
         return frame
