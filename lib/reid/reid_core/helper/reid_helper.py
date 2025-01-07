@@ -1,5 +1,6 @@
 import multiprocessing
 import os
+import sys
 from typing import Dict
 from UltraDict import UltraDict
 from loguru import logger
@@ -103,7 +104,7 @@ class ReidHelper:
             reid_item["per_id"] = 1
             reid_item["score"] = 0
             self.reid_dict[obj_id] = reid_item
-            req_diff = now
+            req_diff = sys.maxsize
         else:  # 保温
             req_diff = now - self.reid_dict[obj_id]["last_send_req"]
             self.reid_dict[obj_id]["last_time"] = now
