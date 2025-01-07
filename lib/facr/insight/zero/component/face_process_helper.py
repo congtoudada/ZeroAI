@@ -11,7 +11,7 @@ class FaceProcessHelper:
     """
     人脸识别进程级帮助类（主要负责进程间请求和响应）
     """
-    def __init__(self, face_shared_memory, config, cam_id, callback):
+    def __init__(self, face_shared_memory, config, callback):
         self.face_shared_memory = face_shared_memory
         if isinstance(config, str):
             self.config: FaceHelperInfo = FaceHelperInfo(ConfigKit.load(config))
@@ -23,7 +23,6 @@ class FaceProcessHelper:
         # self.ports = self.config.face_ports
         # 多个接收端口，收集来自不同人脸识别进程的响应（由自身维护）
         self.rsp_key = FaceKey.FACE_RSP.name + str(os.getpid())
-        self.cam_id = cam_id
         self.callback = callback
         self.start()
 
@@ -37,18 +36,19 @@ class FaceProcessHelper:
         else:
             return False
 
-    def send(self, obj_id, image):
+    def send(self, obj_id, image, cam_id=0):
         """
         发送人脸识别请求（进程级）
         :param obj_id: 对象id
         :param image: 对象截图
+        :param cam_id: 摄像头id (仅用于调试)
         :return:
         """
         if self.can_send(obj_id):
             logger.info(f"{self.pname} 发送人脸识别请求: {obj_id}")
             self.send_lock.add(obj_id)
             self.face_shared_memory[FaceKey.FACE_REQ.name].put({
-                FaceKey.FACE_REQ_CAM_ID.name: self.cam_id,
+                FaceKey.FACE_REQ_CAM_ID.name: cam_id,
                 FaceKey.FACE_REQ_PID.name: os.getpid(),
                 FaceKey.FACE_REQ_OBJ_ID.name: obj_id,
                 FaceKey.FACE_REQ_IMAGE.name: image
