@@ -15,14 +15,14 @@ class FaceHelper:
     """
     人脸识别帮助类，由用户持有
     """
-    def __init__(self, config, cam_id, callback):
+    def __init__(self, config, callback):
         if isinstance(config, str):
             self.config: FaceHelperInfo = FaceHelperInfo(ConfigKit.load(config))
         else:
             self.config: FaceHelperInfo = config
         self.pname = f"[ {os.getpid()}:face_helper ]"
         self.face_shared_memory = UltraDict(name=InsightComponent.SHARED_MEMORY_NAME, shared_lock=GlobalConstant.LOCK_MODE)
-        self.handler = FaceProcessHelper(self.face_shared_memory, self.config, cam_id, self.face_callback)
+        self.handler = FaceProcessHelper(self.face_shared_memory, self.config, self.face_callback)
         # key: obj_id
         # value: { "per_id": 1, "score": 0 }
         self.face_dict: Dict[int, dict] = {}  # 人脸识别结果集
