@@ -10,6 +10,7 @@ from reid_core.reid_comp import ReidComponent
 from reid_core.helper.reid_helper_info import ReidHelperInfo
 from reid_core.reid_key import ReidKey
 from utility.config_kit import ConfigKit
+from utility.img_kit import ImgKit
 from utility.object_pool import ObjectPool
 from zero.core.global_constant import GlobalConstant
 from zero.core.launch_comp import LaunchComponent
@@ -34,7 +35,7 @@ class ReidHelper:
         self.rsp_key = ReidKey.REID_RSP.name + str(self.pid)
         self.dict_pool = ObjectPool(20, dict)
         # key: obj_id
-        # value: { "per_id": 1, "score": 0, "retry": 1, "last_time": 0 }
+        # value: { "per_id": 1, "score": 0, "retry": 1, "last_time": 0, "last_send_req": 0 }
         self.reid_dict: Dict[int, dict] = {}  # Reid结果集
         self.reid_callback = reid_callback
 
@@ -88,23 +89,23 @@ class ReidHelper:
             req_package = ReidHelper.make_package(cam_id, pid, obj_id, image, 1)
             ReidHelper.reid_shared_memory[ReidKey.REID_REQ.name].put(req_package)
 
-    def try_send_reid(self, now, image, obj_id, cam_id) -> bool:
+    def try_send_reid(self, now, frame, ltrb, obj_id, cam_id) -> bool:
         """
         Reid请求: 在face shot中匹配
         """
-        # 保温
         # 新建
         if not self.reid_dict.__contains__(obj_id):
             reid_item: dict = self.dict_pool.pop()
             # face_item.clear()  # 手动赋值
             reid_item["last_time"] = now
+            reid_item["last_send_req"] = 0
             reid_item["retry"] = 0
             reid_item["per_id"] = 1
             reid_item["score"] = 0
             self.reid_dict[obj_id] = reid_item
             req_diff = now
         else:  # 保温
-            req_diff = now - self.reid_dict[obj_id]["last_time"]
+            req_diff = now - self.reid_dict[obj_id]["last_send_req"]
             self.reid_dict[obj_id]["last_time"] = now
 
         # 如果正在请求队列，不发送
@@ -121,6 +122,10 @@ class ReidHelper:
         if retry > self.config.reid_max_retry:
             return False
         # 发送
+        image = ImgKit.crop_img(frame, ltrb)
+        if image is None:
+            return False
+        self.reid_dict[obj_id]["last_send_req"] = now
         req_package = ReidHelper.make_package(cam_id, self.pid, obj_id, image, 2)
         logger.info(f"{self.pname} 发送Fast Reid请求: obj_id is {obj_id}")
         self.req_lock.add(obj_id)
