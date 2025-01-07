@@ -107,6 +107,8 @@ class LaunchComponent(Component):
         self.shared_memory[GlobalKey.ALL_READY.name] = True
         if BaseWebComponent.is_running:
             requests.get(f'http://localhost:{BaseWebComponent.port}/shutdown')
+        if os.path.exists(self.config.app_running_file):
+           os.remove(self.config.app_running_file)
         logger.info("程序将在3s后退出！")
         for i in [3, 2, 1]:
             logger.info(f"倒计时: {i}")
@@ -114,8 +116,6 @@ class LaunchComponent(Component):
         if self.config.log_analysis:
             AnalysisHelper.destroy()
         self.shared_memory.unlink()  # 释放共享内存
-        if os.path.exists(self.config.app_running_file):
-           os.remove(self.config.app_running_file)
         logger.info("程序终止！")
         sys.exit(0)
 
