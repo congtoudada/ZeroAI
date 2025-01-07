@@ -70,7 +70,7 @@ class DoubleMatchComponent(BasedStreamComponent):
                 self.det_pool.push(record)
             self.main_records.clear()
         if self.reid_helper is not None:
-            self.reid_helper.update(self.frame_id_cache[1])
+            self.reid_helper.tick(self.frame_id_cache[1])
 
     def reid_callback(self, obj_id, per_id, score):
         if self.reid_info_dict.__contains__(obj_id):
@@ -228,8 +228,8 @@ class DoubleMatchComponent(BasedStreamComponent):
                         self.reid_info_dict[item.sub_obj_id] = shot_img
                         # 发送reid
                         if self.reid_helper is not None:
-                            ret = self.reid_helper.send_reid(self.frame_id_cache[1], self.cam_id, os.getpid(),
-                                                             item.sub_obj_id, self.reid_info_dict[item.sub_obj_id])
+                            ret = self.reid_helper.try_send_reid(self.frame_id_cache[1], self.cam_id, os.getpid(),
+                                                                 item.sub_obj_id, self.reid_info_dict[item.sub_obj_id])
                             if ret:
                                 img = ImgKit.draw_img_box(frame, item.main_ltrb).copy()
                                 self.reid_info_dict[item.sub_obj_id] = img
