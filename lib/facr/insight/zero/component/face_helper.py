@@ -102,6 +102,7 @@ class FaceHelper:
             # 添加到结果集缓存
             self.face_dict[obj_id]["per_id"] = per_id
             self.face_dict[obj_id]["score"] = score
+            self.face_dict[obj_id]["retry"] += 1
             # 触发外界回调函数
             if self.callback is not None:
                 self.callback(obj_id, per_id, score)
