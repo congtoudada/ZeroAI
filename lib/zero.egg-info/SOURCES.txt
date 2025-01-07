@@ -1,5 +1,9 @@
 setup.py
 detection/setup.py
+detection/detection_core/__init__.py
+detection/detection_core/detection_comp.py
+detection/detection_core/detection_info.py
+detection/detection_core/i_detection_wrapper.py
 detection/yolox/__init__.py
 detection/yolox/core/__init__.py
 detection/yolox/core/launch.py
@@ -125,6 +129,7 @@ facr/insight/core/feature/net/model_resnet.py
 facr/insight/zero/__init__.py
 facr/insight/zero/component/__init__.py
 facr/insight/zero/component/face_helper.py
+facr/insight/zero/component/face_helper_item.py
 facr/insight/zero/component/face_process_helper.py
 facr/insight/zero/component/face_recognizer.py
 facr/insight/zero/component/insight_comp.py
@@ -228,9 +233,15 @@ reid/clip_reid/zero/clip_reid_wrapper.py
 reid/clip_reid/zero/test/__init__.py
 reid/clip_reid/zero/test/search_person.py
 reid/reid_core/__init__.py
+reid/reid_core/i_reid_wrapper.py
 reid/reid_core/reid_comp.py
 reid/reid_core/reid_info.py
 reid/reid_core/reid_key.py
+reid/reid_core/reid_search_person_comp.py
+reid/reid_core/reid_search_person_info.py
+reid/reid_core/helper/__init__.py
+reid/reid_core/helper/reid_helper.py
+reid/reid_core/helper/reid_helper_info.py
 utility/__init__.py
 utility/config_kit.py
 utility/file_modify_kit.py
@@ -246,8 +257,10 @@ zero.egg-info/SOURCES.txt
 zero.egg-info/dependency_links.txt
 zero.egg-info/top_level.txt
 zero/core/__init__.py
+zero/core/base_web_comp.py
 zero/core/based_stream_comp.py
 zero/core/component.py
+zero/core/global_constant.py
 zero/core/launch_comp.py
 zero/core/stream_comp.py
 zero/helper/__init__.py
