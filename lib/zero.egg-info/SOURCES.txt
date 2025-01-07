@@ -129,6 +129,7 @@ facr/insight/core/feature/net/model_resnet.py
 facr/insight/zero/__init__.py
 facr/insight/zero/component/__init__.py
 facr/insight/zero/component/face_helper.py
+facr/insight/zero/component/face_helper_item.py
 facr/insight/zero/component/face_process_helper.py
 facr/insight/zero/component/face_recognizer.py
 facr/insight/zero/component/insight_comp.py
