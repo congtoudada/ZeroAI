@@ -10,6 +10,7 @@ from reid_core.reid_comp import ReidComponent
 from reid_core.helper.reid_helper_info import ReidHelperInfo
 from reid_core.reid_key import ReidKey
 from utility.config_kit import ConfigKit
+from utility.object_pool import ObjectPool
 from zero.core.global_constant import GlobalConstant
 from zero.core.launch_comp import LaunchComponent
 
@@ -31,8 +32,9 @@ class ReidHelper:
         # FastReid
         self.rsp_queue = None
         self.rsp_key = ReidKey.REID_RSP.name + str(self.pid)
+        self.dict_pool = ObjectPool(20, dict)
         # key: obj_id
-        # value: { "per_id": 1, "score": 0, "retry": 1, "last_time": 10 }
+        # value: { "per_id": 1, "score": 0, "retry": 1, "last_time": 0 }
         self.reid_dict: Dict[int, dict] = {}  # Reid结果集
         self.reid_callback = reid_callback
 
@@ -86,44 +88,43 @@ class ReidHelper:
             req_package = ReidHelper.make_package(cam_id, pid, obj_id, image, 1)
             ReidHelper.reid_shared_memory[ReidKey.REID_REQ.name].put(req_package)
 
-    def try_send_reid(self, now, cam_id, pid, obj_id, image) -> bool:
+    def try_send_reid(self, now, image, obj_id, cam_id) -> bool:
         """
         Reid请求: 在face shot中匹配
         """
         # 保温
-        if self.reid_dict.__contains__(obj_id):
-            self.reid_dict[obj_id].update({
-                "last_time": now
-            })
+        # 新建
+        if not self.reid_dict.__contains__(obj_id):
+            reid_item: dict = self.dict_pool.pop()
+            # face_item.clear()  # 手动赋值
+            reid_item["last_time"] = now
+            reid_item["retry"] = 0
+            reid_item["per_id"] = 1
+            reid_item["score"] = 0
+            self.reid_dict[obj_id] = reid_item
+            req_diff = now
+        else:  # 保温
+            req_diff = now - self.reid_dict[obj_id]["last_time"]
+            self.reid_dict[obj_id]["last_time"] = now
 
         # 如果正在请求队列，不发送
         if self.req_lock.__contains__(obj_id):
             return False
-        retry = 0
-        if self.reid_dict.__contains__(obj_id):
-            # 如果已经识别出非陌生人，不发送
-            if self.reid_dict[obj_id]["per_id"] != 1:
-                return False
-            # 不满足发送间隔
-            last_time = self.reid_dict[obj_id]["last_time"]
-            if now - last_time < self.config.reid_min_send_interval:
-                return False
-            # 超出重试次数
-            retry = self.reid_dict[obj_id]["retry"]
-            if retry > self.config.reid_max_retry:
-                return False
+        # 如果已经识别出非陌生人，不发送
+        if self.reid_dict[obj_id]["per_id"] != 1:
+            return False
+        # 不满足发送间隔
+        if req_diff < self.config.reid_min_send_interval:
+            return False
+        # 超出重试次数
+        retry = self.reid_dict[obj_id]["retry"]
+        if retry > self.config.reid_max_retry:
+            return False
         # 发送
-        req_package = ReidHelper.make_package(cam_id, pid, obj_id, image, 2)
+        req_package = ReidHelper.make_package(cam_id, self.pid, obj_id, image, 2)
         logger.info(f"{self.pname} 发送Fast Reid请求: obj_id is {obj_id}")
         self.req_lock.add(obj_id)
         ReidHelper.reid_shared_memory[ReidKey.REID_REQ.name].put(req_package)
-        # 添加到结果集缓存
-        self.reid_dict[obj_id] = {
-            "per_id": 1,
-            "score": 0,
-            "retry": retry + 1,
-            "last_time": now
-        }
         return True
 
     def try_send_search_person(self, per_id):
@@ -174,12 +175,10 @@ class ReidHelper:
     def reid_callback(self, obj_id, per_id, score):
         logger.info(f"{self.pname} 收到reid响应: {obj_id} {per_id} {score}")
         # 添加到结果集缓存
-        rsp = {
-            "per_id": per_id,
-            "score": score
-        }
         if self.reid_dict.__contains__(obj_id):
-            self.reid_dict[obj_id].update(rsp)
+            self.reid_dict[obj_id]["per_id"] = per_id
+            self.reid_dict[obj_id]["score"] = score
+            self.reid_dict[obj_id]["retry"] += 1
             # 触发外界回调函数
             if self.reid_callback is not None:
                 self.reid_callback(obj_id, per_id, score)
