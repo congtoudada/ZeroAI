@@ -2,7 +2,7 @@ INCLUDE:
   - conf/dev/feature/phone/phone_root.yaml
 
 
-input_ports:  # 输入端口 (先安全帽再人)
+input_ports:  # 输入端口 (先手机再人)
   - yolox-phone1
   - yolox-person1
 output_port: []  # 输出端口

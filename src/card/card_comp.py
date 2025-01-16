@@ -1,3 +1,4 @@
+import os
 import time
 import traceback
 import cv2
@@ -23,6 +24,7 @@ class CardComponent(BasedStreamComponent):
     def __init__(self, shared_memory, config_path: str):
         super().__init__(shared_memory)
         self.config: CardInfo = CardInfo(ConfigKit.load(config_path))
+        self.pname = f"[ {os.getpid()}:card for {self.config.input_ports[0]} ]"
         self.cam_id = 0
         self.stream_width = 0
         self.stream_height = 0

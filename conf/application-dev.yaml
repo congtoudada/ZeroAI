@@ -9,8 +9,8 @@ service_list:
 #    conf: conf/dev/service/facr/insight/insight.yaml
   - path: lib/reid/reid_core/reid_comp.py  # reid服务
     conf: conf/dev/service/reid/clip_reid.yaml
-  - path: lib/reid/reid_core/reid_search_person_comp.py  # 找人服务
-    conf: conf/dev/service/reid/search_person.yaml
+#  - path: lib/reid/reid_core/reid_search_person_comp.py  # 找人服务
+#    conf: conf/dev/service/reid/search_person.yaml
 
 # 视频流
 stream_list:
@@ -40,7 +40,7 @@ algorithm_list:
 #    conf: conf/dev/feature/helmet/helmet1.yaml
 #  - path: src/card/card_comp.py # 代刷卡 (人)
 #    conf: conf/dev/feature/card/card1.yaml
-  - path: src/phone/phone_comp.py  # 手机 (人+reid)
+  - path: src/phone/phone_comp.py  # 手机 (人+手机+reid服务)
     conf: conf/dev/feature/phone/phone1.yaml
 
 app:
