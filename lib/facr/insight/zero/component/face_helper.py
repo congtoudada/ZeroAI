@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import Dict
 from UltraDict import UltraDict
 from loguru import logger
@@ -66,7 +67,7 @@ class FaceHelper:
             face_item["per_id"] = 1
             face_item["score"] = 0
             self.face_dict[obj_id] = face_item
-            req_diff = now
+            req_diff = sys.maxsize
         else:  # 保温
             req_diff = now - self.face_dict[obj_id]["last_send_req"]
             self.face_dict[obj_id]["last_time"] = now
@@ -97,6 +98,7 @@ class FaceHelper:
         :return:
         """
         if self.face_dict.__contains__(obj_id):
+            self.dict_pool.push(self.face_dict[obj_id])
             self.face_dict.pop(obj_id)
 
     def face_callback(self, obj_id, per_id, score):

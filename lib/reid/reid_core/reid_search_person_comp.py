@@ -38,7 +38,7 @@ class ReidSearchPersonComp(BaseWebComponent):
                 self.rsp_package.clear()
                 self.is_searching = True
                 self.tick_flag = 0
-                is_valid, img_path = self.reid_helper.send_search_person(per_id)
+                is_valid, img_path = self.reid_helper.try_send_search_person(per_id)
                 if not is_valid:  # per_id没有对应的本地特征
                     return []
                 # 添加第一张图
@@ -51,7 +51,7 @@ class ReidSearchPersonComp(BaseWebComponent):
                 })
                 # 轮询
                 while self.is_searching and self.tick_flag < self.tick_max_cnt:
-                    self.reid_helper.update()
+                    self.reid_helper.tick()
                     self.tick_flag += 1
                     time.sleep(1.0 / self.tick_fps)
                 # 响应
