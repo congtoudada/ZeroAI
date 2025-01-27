@@ -14,4 +14,4 @@ stream:
     enable: True  # 是否可视化
 
 # 更新帧率（-1表示无上限）
-update_fps: 30
+update_fps: 300

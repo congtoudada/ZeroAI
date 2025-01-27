@@ -166,3 +166,6 @@ cython_debug/
 /res
 /pretrained
 /output
+
+*.npy
+*.pkl

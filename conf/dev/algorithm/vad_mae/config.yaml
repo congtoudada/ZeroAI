@@ -1,0 +1,32 @@
+INCLUDE:
+  - conf/dev/global/based_stream.yaml
+  - conf/dev/global/config.yaml
+
+input_ports:
+  - yolox-person1
+
+stream:
+  draw_vis:
+    enable: True
+
+vad:
+  frame:  # 帧级别异常
+    enable: False  # 是否支持帧级异常
+    batch_optimize: True  # 是否优化batch
+    config: ""  # 帧级别异常检测配置
+    resize:  # resize (h,w)
+      - 320
+      - 640
+    threshold: 0.33  # 帧级别异常阈值
+    times: 1  # 异常倍数
+    valid: 2  # 连续几帧检测到异常才视为异常 (受异常倍数影响)
+    nums: 5  # 帧级别异常单次执行至少需要的图片数
+    interval: 5  # 每隔n帧进行一次异常检测，如果检测到异常则n帧都视为异常
+  obj:  # 对象级异常
+    enable: True  # 是否支持对象级异常
+    config: ""  # 对象级异常检测配置
+    det_conf: 0.8  # 目标检测置信度
+    nums: 7  # 对象级别异常单次执行至少需要的图片数  (也是sample_nums)
+    interval: 3  # 每隔n帧进行一次异常检测，如果检测到异常则n帧都视为异常
+
+update_fps: 300
