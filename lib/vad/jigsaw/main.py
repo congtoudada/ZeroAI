@@ -146,8 +146,8 @@ def val(args, net=None):
     print("The running_date : {}".format(running_date))
 
     # Load Data
-    data_dir = f"/irip/wangguodong_2020/projects/datasets/vad/{args.dataset}/testing"
-    detect_pkl = f'detect/{args.dataset}_test_detect_result_yolov3.pkl'
+    data_dir = f"H:/AI/dataset/VAD/Featurize/{args.dataset.capitalize()}/test/frames"
+    detect_pkl = f'lib/vad/jigsaw/detect/{args.dataset}_test_detect_result_yolov3.pkl'
 
     testing_dataset = VideoAnomalyDataset_C3D(data_dir, 
                                               dataset=args.dataset,

@@ -29,6 +29,12 @@ def get_configs_avenue():
     config.input_3d = True
     config.device = "cuda"
 
+    # Jigsaw
+    config.sample_num = 7
+    config.dataset = "avenue"
+    config.filter_ratio = 0.8
+    config.checkpoint = "lib/vad/jigsaw/checkpoint/avenue_92.18.pth"
+
     config.start_epoch = 0
     config.print_freq = 10
     config.num_workers = 0
