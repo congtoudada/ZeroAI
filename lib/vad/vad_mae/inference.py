@@ -48,7 +48,6 @@ def inference(model: torch.nn.Module, data_loader: Iterable,
     videos = np.array(videos)
 
     if args.dataset == 'avenue':
-
         predictions_teacher = np.array(predictions_teacher)
         predictions_student_teacher = np.array(predictions_student_teacher)
         pred_anomalies = np.array(pred_anomalies)
