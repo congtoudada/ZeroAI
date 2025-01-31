@@ -12,7 +12,6 @@ setuptools.setup(
     packages=setuptools.find_namespace_packages(),
 )
 
-
 setuptools.setup(
     name="vad_mae",
     version="0.1.0",
