@@ -11,7 +11,7 @@ stream:
 
 vad:
   frame:  # 帧级别异常
-    enable: False  # 是否支持帧级异常
+    enable: True  # 是否支持帧级异常
     batch_optimize: True  # 是否优化batch
     config: ""  # 帧级别异常检测配置
     resize:  # resize (h,w)
@@ -23,7 +23,7 @@ vad:
     nums: 5  # 帧级别异常单次执行至少需要的图片数
     interval: 5  # 每隔n帧进行一次异常检测，如果检测到异常则n帧都视为异常
   obj:  # 对象级异常
-    enable: True  # 是否支持对象级异常
+    enable: False  # 是否支持对象级异常
     config: ""  # 对象级异常检测配置
     det_conf: 0.8  # 目标检测置信度
     nums: 7  # 对象级别异常单次执行至少需要的图片数  (也是sample_nums)
