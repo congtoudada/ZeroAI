@@ -3,7 +3,7 @@ import os
 import numpy as np
 from numpy.core.fromnumeric import nonzero
 from scipy.ndimage.measurements import label
-from tool import evaluate
+from jigsaw.tool import evaluate
 import argparse
 from scipy.ndimage import convolve
 import torch.nn.functional as F
@@ -13,7 +13,7 @@ import math
 
 def video_label_length(dataset='shanghaitech'):
     if dataset == 'shanghaitech':
-        label_path = "/irip/wangguodong_2020/projects/datasets/vad/shanghaitech/frame_masks/"
+        label_path = "lib/vad/jigsaw/"
         video_length = {}
         files = sorted(os.listdir(label_path))
         length = 0
@@ -22,7 +22,7 @@ def video_label_length(dataset='shanghaitech'):
             video_length[f.split(".")[0]] = label.shape[0]
             length += label.shape[0]
     elif dataset in ['ped1', 'ped2', 'avenue']:
-        test_frame_path = '/irip/wangguodong_2020/projects/datasets/vad/' + dataset + '/testing/'
+        test_frame_path = 'lib/vad/jigsaw/' + dataset + '/testing/'
         files = sorted(os.listdir(test_frame_path))
         video_length = {}
         for f in files:
@@ -49,12 +49,12 @@ def score_smoothing(score, ws=43, function='mean', sigma=10):
 
 
 def load_objects(dataset, frame_num=7):
-    root = '/irip/wangguodong_2020/projects/datasets/vad'
-    data_dir = os.path.join(root, dataset, 'testing') 
+    root = 'H:/AI/dataset/VAD/Featurize'
+    data_dir = os.path.join(root, dataset.capitalize(), 'test', 'frames')
 
     file_list = sorted(os.listdir(data_dir))
 
-    detect_dir = f'detect/{dataset}_test_detect_result_yolov3.pkl'
+    detect_dir = f'lib/vad/jigsaw/detect/{dataset}_test_detect_result_yolov3.pkl'
     with open(detect_dir, 'rb') as f:
         detect = pickle.load(f)
 
@@ -81,6 +81,7 @@ def load_objects(dataset, frame_num=7):
         total_frames += length
         for frame in range(start_ind, length - start_ind):
             if detect is not None:
+                print(f"video_file:{video_file} frame:{frame}")
                 detect_result = detect[video_file][frame]
                 detect_result = detect_result[detect_result[:, 4] > filter_ratio, :]
                 object_num = detect_result.shape[0]
