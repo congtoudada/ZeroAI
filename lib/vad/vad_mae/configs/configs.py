@@ -8,7 +8,7 @@ def get_configs_avenue():
     config.mask_ratio = 0.5
     config.start_TS_epoch = 100
     config.masking_method = "random_masking"
-    config.output_dir = "experiments/avenue"  # the checkpoints will be loaded from here
+    config.output_dir = "lib/vad/vad_mae/experiments/avenue"  # the checkpoints will be loaded from here
     config.abnormal_score_func = 'L2'
     config.grad_weighted_rec_loss = True
     config.model = "mae_cvt"
@@ -31,7 +31,7 @@ def get_configs_avenue():
 
     # Jigsaw
     config.sample_num = 7
-    config.dataset = "avenue"
+    # config.dataset = "avenue"
     config.filter_ratio = 0.8
     config.checkpoint = "lib/vad/jigsaw/checkpoint/avenue_92.18.pth"
 

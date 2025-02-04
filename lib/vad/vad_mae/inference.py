@@ -24,6 +24,7 @@ def inference(model: torch.nn.Module, data_loader: Iterable,
     pred_anomalies = []
     labels = []
     videos = []
+    # fids = []
     frames = []
     for data_iter_step, (samples, grads, targets, label, vid, frame_name) in enumerate(
             metric_logger.log_every(data_loader, args.print_freq, header)):

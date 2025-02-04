@@ -79,6 +79,8 @@ class AbnormalDatasetGradientsTest(torch.utils.data.Dataset):
         target = np.swapaxes(target, 0, -1).swapaxes(1, -1)
         gradient = np.swapaxes(gradient, 0, 1).swapaxes(0, -1)
         return img, gradient, target, self.labels[index], self.data[index].split('/')[-2], self.data[index]
+        # return (img, gradient, target, self.labels[index], self.data[index].split('/')[-2], self.data[index],
+        #         int(self.data[index].split('/')[-1].split('.')[0]))
 
 
     def extract_meta_info(self, data, index):

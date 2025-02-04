@@ -24,7 +24,8 @@ class VideoAnomalyDataset_C3D(Dataset):
 
         assert os.path.exists(data_dir), "{} does not exist.".format(data_dir)
         assert dataset in ['shanghaitech', 'ped2', 'avenue'], 'wrong type of dataset.'
-        
+
+        self.root_dir = "lib/vad/jigsaw"
         self.dataset = dataset
         self.data_dir = data_dir
         self.fliter_ratio = fliter_ratio
@@ -102,7 +103,7 @@ class VideoAnomalyDataset_C3D(Dataset):
                         contain += 1
 
         print("Load {} videos {} frames, {} objects, excluding {} inside objects and {} small objects in {} s."\
-            .format(self.videos, total_frames, len(self.objects_list), contain, total_small_, time.time() - t0))
+              .format(self.videos, total_frames, len(self.objects_list), contain, total_small_, time.time() - t0))
 
     def __len__(self):
         return len(self.objects_list)
@@ -143,12 +144,13 @@ class VideoAnomalyDataset_C3D(Dataset):
         obj = torch.clamp(obj, 0., 1.)
 
         ret = {"video": record["video_name"], "frame": record["frame"], "obj": obj, "label": perm, 
-            "trans_label": spatial_perm, "loc": record["loc"], "aspect_ratio": record["aspect_ratio"], "temporal": temproal_flag}
-        return  ret
+               "trans_label": spatial_perm, "loc": record["loc"], "aspect_ratio": record["aspect_ratio"],
+               "temporal": temproal_flag}
+        return ret
     
 
     def get_object(self, video_name, frame, obj_id):
-        video_dir = os.path.join(self.dataset, self.phase, video_name)
+        video_dir = os.path.join(self.root_dir, self.dataset, self.phase, video_name)
         obj = np.load(os.path.join(video_dir, str(frame) + '_' + str(obj_id) + '.npy'))   # (3, 7, 64, 64)
         if not self.test_stage:
             if random.random() < 0.5:

@@ -16,9 +16,12 @@ from data.train_dataset import AbnormalDatasetGradientsTrain
 from engine_train import train_one_epoch, test_one_epoch
 from inference import inference
 from jigsaw.dataset import VideoAnomalyDataset_C3D
+from jigsaw.models.model import WideBranchNet
 from model.model_factory import mae_cvt_patch16, mae_cvt_patch8
 from util import misc
 import torch
+
+from vad_mae.inference_hybird import inference_hybird
 
 
 def main(args):
@@ -72,11 +75,11 @@ def main(args):
         model.load_state_dict(teacher, strict=False)
 
         # jigsaw
-        net = model.WideBranchNet(time_length=args.sample_num, num_classes=[args.sample_num ** 2, 81])
+        net = WideBranchNet(time_length=args.sample_num, num_classes=[args.sample_num ** 2, 81])
         state = torch.load(args.checkpoint)
         print('load jigsaw: ' + args.checkpoint)
         net.load_state_dict(state, strict=True)
-        net.cuda()
+        net.to(device)
         data_dir = f"H:/AI/dataset/VAD/Featurize/{args.dataset.capitalize()}/test/frames"
         detect_pkl = f'lib/vad/jigsaw/detect/{args.dataset}_test_detect_result_yolov3.pkl'
         testing_dataset = VideoAnomalyDataset_C3D(data_dir,
@@ -84,11 +87,11 @@ def main(args):
                                                   detect_dir=detect_pkl,
                                                   fliter_ratio=args.filter_ratio,
                                                   frame_num=args.sample_num)
-        testing_data_loader = DataLoader(testing_dataset, batch_size=256, shuffle=False, num_workers=4, drop_last=False)
+        testing_data_loader = DataLoader(testing_dataset, batch_size=256, shuffle=False, num_workers=args.num_workers, drop_last=False)
 
         # inference
         with torch.no_grad():
-            inference(model, data_loader_test, device, args=args)
+            inference_hybird(model, data_loader_test, net, testing_data_loader, device, args=args)
 
 
 def do_training(args, data_loader_test, data_loader_train, device, log_writer, model):
