@@ -50,7 +50,7 @@ def score_smoothing(score, ws=43, function='mean', sigma=10):
 
 def load_objects(dataset, frame_num=7):
     root = 'H:/AI/dataset/VAD/Featurize'
-    data_dir = os.path.join(root, dataset.capitalize(), 'test', 'frames')
+    data_dir = os.path.join(root, dataset, 'test', 'frames')
 
     file_list = sorted(os.listdir(data_dir))
 

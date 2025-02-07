@@ -3,7 +3,7 @@ import ml_collections
 
 def get_configs_avenue():
     config = ml_collections.ConfigDict()
-    config.batch_size = 64
+    config.batch_size = 100
     config.epochs = 200
     config.mask_ratio = 0.5
     config.start_TS_epoch = 100
@@ -23,8 +23,8 @@ def get_configs_avenue():
 
     # Dataset parameters
     config.dataset = "avenue"
-    config.avenue_path = "H:/AI/dataset/VAD/Featurize/Avenue"
-    config.avenue_gt_path = "H:/AI/dataset/VAD/Featurize/Avenue/Avenue_gt"
+    config.avenue_path = "H:/AI/dataset/VAD/Featurize_png/avenue"
+    config.avenue_gt_path = "H:/AI/dataset/VAD/Featurize_png/avenue/avenue_gt"
     config.percent_abnormal = 0.25
     config.input_3d = True
     config.device = "cuda"
@@ -45,19 +45,19 @@ def get_configs_avenue():
 
 def get_configs_shanghai():
     config = ml_collections.ConfigDict()
-    config.batch_size = 100
+    config.batch_size = 32
     config.epochs = 50
     config.mask_ratio = 0.5
     config.start_TS_epoch = 100
     config.masking_method = "random_masking"
-    config.output_dir = "github_ckpt/shanghai" # the checkpoints will be loaded from here
+    config.output_dir = "experiments/shanghai"  # the checkpoints will be loaded from here
     config.abnormal_score_func = 'L1'
     config.grad_weighted_rec_loss = True
     config.model = "mae_cvt"
     config.input_size = (320, 640)
     config.norm_pix_loss = False
     config.use_only_masked_tokens_ab = False
-    config.run_type = "inference"
+    config.run_type = "train"
     config.resume=False
 
     # Optimizer parameters
@@ -66,15 +66,21 @@ def get_configs_shanghai():
 
     # Dataset parameters
     config.dataset = "shanghai"
-    config.shanghai_path = "/home/alin/datasets/SanhaiTech"
-    config.shanghai_gt_path = "/media/alin/hdd/Transformer_Labels/Shanghai_gt"
-    config.percent_abnormal = 0.5
+    config.shanghai_path = "H:/AI/dataset/VAD/Featurize/ShanghaiTech"
+    config.shanghai_gt_path = "H:/AI/dataset/VAD/Featurize/ShanghaiTech/Shanghai_gt"
+    config.percent_abnormal = 0.25
     config.input_3d = True
     config.device = "cuda"
 
+    # Jigsaw
+    config.sample_num = 9
+    # config.dataset = "avenue"
+    config.filter_ratio = 0.8
+    config.checkpoint = "lib/vad/jigsaw/checkpoint/stc_84.24.pth"
+
     config.start_epoch = 0
     config.print_freq = 10
-    config.num_workers = 10
+    config.num_workers = 8
     config.pin_mem = False
 
     return config

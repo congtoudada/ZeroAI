@@ -182,13 +182,15 @@ def evaluate_model(predictions, labels, videos, video_output,
         # video_output[vid] = np.array([pair[0] * 0.75 + pair[1] * 0.25 for pair in video_output[vid]])
 
         # 0.21 MicroAUC: 0.938319034582237, MacroAUC: 0.9299158508214856
-        video_output[vid] = np.array([pair[0] * 0.6 + pair[1] * 0.4 for pair in video_output[vid]])
+        # video_output[vid] = np.array([pair[0] * 0.6 + pair[1] * 0.4 for pair in video_output[vid]])
 
         # 0.21 MicroAUC: 0.938319034582237, MacroAUC: 0.9299158508214856
         # video_output[vid] = np.array([pair[0] * 0.65 + pair[1] * 0.35 for pair in video_output[vid]])
 
         # 0.21 MicroAUC: 0.9380336667259613, MacroAUC: 0.9245246329731791
         # video_output[vid] = np.array([pair[0] * 0.55 + pair[1] * 0.45 for pair in video_output[vid]])
+
+        video_output[vid] = np.array([pair[0] * 1 + pair[1] * 0 for pair in video_output[vid]])
 
         # pred = video_output[vid]
         # pred += video_output[vid] * 0.3  # MicroAUC: 0.9239464530454763, MacroAUC: 0.9409956053829157
