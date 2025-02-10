@@ -17,6 +17,9 @@ def get_configs_avenue():
     config.use_only_masked_tokens_ab = False
     config.run_type = 'inference'
     config.resume = False
+    config.finetune = True
+    config.pred_cls = True
+
     # Optimizer parameters
     config.weight_decay = 0.05
     config.lr = 1e-4
@@ -37,7 +40,7 @@ def get_configs_avenue():
 
     config.start_epoch = 0
     config.print_freq = 10
-    config.num_workers = 0
+    config.num_workers = 4
     config.pin_mem = False
 
     return config
@@ -50,15 +53,17 @@ def get_configs_shanghai():
     config.mask_ratio = 0.5
     config.start_TS_epoch = 100
     config.masking_method = "random_masking"
-    config.output_dir = "experiments/shanghai"  # the checkpoints will be loaded from here
+    config.output_dir = "lib/vad/vad_mae/experiments/shanghai"  # the checkpoints will be loaded from here
     config.abnormal_score_func = 'L1'
     config.grad_weighted_rec_loss = True
     config.model = "mae_cvt"
     config.input_size = (320, 640)
     config.norm_pix_loss = False
     config.use_only_masked_tokens_ab = False
-    config.run_type = "train"
-    config.resume=False
+    config.run_type = "inference"
+    config.resume = False
+    config.finetune = True
+    config.pred_cls = False
 
     # Optimizer parameters
     config.weight_decay = 0.05
@@ -66,8 +71,8 @@ def get_configs_shanghai():
 
     # Dataset parameters
     config.dataset = "shanghai"
-    config.shanghai_path = "H:/AI/dataset/VAD/Featurize/ShanghaiTech"
-    config.shanghai_gt_path = "H:/AI/dataset/VAD/Featurize/ShanghaiTech/Shanghai_gt"
+    config.shanghai_path = "H:/AI/dataset/VAD/Featurize_png/shanghaitech"
+    config.shanghai_gt_path = "H:/AI/dataset/VAD/Featurize_png/shanghaitech/shanghai_gt"
     config.percent_abnormal = 0.25
     config.input_3d = True
     config.device = "cuda"
@@ -80,7 +85,7 @@ def get_configs_shanghai():
 
     config.start_epoch = 0
     config.print_freq = 10
-    config.num_workers = 8
+    config.num_workers = 2
     config.pin_mem = False
 
     return config

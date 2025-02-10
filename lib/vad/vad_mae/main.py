@@ -50,13 +50,17 @@ def main(args):
                                 use_only_masked_tokens_ab=args.use_only_masked_tokens_ab,
                                 abnormal_score_func=args.abnormal_score_func,
                                 masking_method=args.masking_method,
-                                grad_weighted_loss=args.grad_weighted_rec_loss).float()
+                                mask_ratio=args.mask_ratio,
+                                grad_weighted_loss=args.grad_weighted_rec_loss,
+                                pred_cls=args.pred_cls).float()
     else:
         model = mae_cvt_patch8(norm_pix_loss=args.norm_pix_loss, img_size=args.input_size,
                                use_only_masked_tokens_ab=args.use_only_masked_tokens_ab,
                                abnormal_score_func=args.abnormal_score_func,
                                masking_method=args.masking_method,
-                               grad_weighted_loss=args.grad_weighted_rec_loss).float()
+                               mask_ratio=args.mask_ratio,
+                               grad_weighted_loss=args.grad_weighted_rec_loss,
+                               pred_cls=args.pred_cls).float()
     model.to(device)
     if args.run_type == "train":
         do_training(args, data_loader_test, data_loader_train, device, log_writer, model)
@@ -84,6 +88,8 @@ def do_training(args, data_loader_test, data_loader_train, device, log_writer, m
     best_micro = 0.0
     best_micro_student = 0.0
     for epoch in range(args.start_epoch, args.epochs):
+        if epoch == args.start_TS_epoch:  # 加载最优权重
+            misc.load_model(args=args, model=model, optimizer=optimizer, loss_scaler=loss_scaler, train_TS=True)
 
         train_stats = train_one_epoch(
             model, data_loader_train,
@@ -105,6 +111,7 @@ def do_training(args, data_loader_test, data_loader_train, device, log_writer, m
             best_micro = test_stats['micro']
             misc.save_model(args=args, model=model, optimizer=optimizer,
                             loss_scaler=loss_scaler, epoch=epoch, best=True)
+
         if args.start_TS_epoch <= epoch:
             if test_stats['micro'] > best_micro_student:
                 best_micro_student = test_stats['micro']
@@ -125,7 +132,7 @@ def do_training(args, data_loader_test, data_loader_train, device, log_writer, m
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, default='shanghai')
+    parser.add_argument('--dataset', type=str, default='avenue')
     args = parser.parse_args()
     if args.dataset == 'avenue':
         args = get_configs_avenue()

@@ -12,18 +12,21 @@ from vad_mae.util.morphology import Erosion2d, Dilation2d
 
 class MaskedAutoencoderCvT(nn.Module):
     def __init__(self, img_size=(512, 512), patch_size=16, in_chans=9, out_chans=4,
-                 embed_dim=1024, depth=24, num_heads=16,
+                 embed_dim=1024, depth=24, num_heads=16, mask_ratio=0.5,
                  decoder_embed_dim=512, decoder_depth=8, decoder_num_heads=16,
                  mlp_ratio=4., norm_layer=nn.LayerNorm, norm_pix_loss=False,
                  use_only_masked_tokens_ab=False, abnormal_score_func='L1', masking_method="random_masking",
-                 grad_weighted_loss=True, student_depth=1):
+                 grad_weighted_loss=True, pred_cls=True, student_depth=1):
         super().__init__()
         # --------------------------------------------------------------------------
         # Abnormal specifics
         self.use_only_masked_tokens_ab = use_only_masked_tokens_ab
         self.abnormal_score_func = abnormal_score_func
         self.abnormal_score_func_TS = abnormal_score_func
-        self.cls_loss = BCELoss()
+        self.pred_cls = pred_cls
+        if pred_cls:
+            self.cls_loss = BCELoss()
+            self.cls_anomalies = nn.Linear(embed_dim, 1)
         # --------------------------------------------------------------------------
 
         self.masking = getattr(self, masking_method)
@@ -48,12 +51,16 @@ class MaskedAutoencoderCvT(nn.Module):
         self.cls_token = nn.Parameter(
             torch.zeros(1, 1, embed_dim)
         )
+        self.height = img_size[0] // patch_size
+        self.width = img_size[1] // patch_size
+        self.mask_height = self.height
+        self.mask_width = int(self.width * mask_ratio)
 
         self.blocks = nn.ModuleList([
-            Block(embed_dim, embed_dim, num_heads, mlp_ratio, qkv_bias=True, qk_scale=None, norm_layer=norm_layer)
+            Block(embed_dim, embed_dim, num_heads, mlp_ratio, qkv_bias=True, qk_scale=None, norm_layer=norm_layer,
+                  height=self.mask_height, width=self.mask_width)
             for i in range(depth)])
         self.norm = norm_layer(embed_dim)
-        self.cls_anomalies = nn.Linear(embed_dim, 1)
         # --------------------------------------------------------------------------
 
         # --------------------------------------------------------------------------
@@ -64,14 +71,14 @@ class MaskedAutoencoderCvT(nn.Module):
 
         self.decoder_blocks = nn.ModuleList([
             Block(decoder_embed_dim, decoder_embed_dim, decoder_num_heads, mlp_ratio, qkv_bias=True, qk_scale=None,
-                  norm_layer=norm_layer)
+                  norm_layer=norm_layer, official=False)
             for i in range(decoder_depth)])
 
         self.decoder_norm = norm_layer(decoder_embed_dim)
         self.decoder_pred = nn.Linear(decoder_embed_dim, patch_size ** 2 * out_chans, bias=True)  # decoder to patch
 
         self.decoder_student_block = Block(decoder_embed_dim, decoder_embed_dim, decoder_num_heads, mlp_ratio,
-                                           qkv_bias=True, qk_scale=None, norm_layer=norm_layer)
+                                           qkv_bias=True, qk_scale=None, norm_layer=norm_layer, official=False)
         self.decoder_student_norm = norm_layer(decoder_embed_dim)
         self.decoder_student_pred = nn.Linear(decoder_embed_dim, patch_size ** 2 * out_chans,
                                               bias=True)  # decoder to patch
@@ -84,6 +91,15 @@ class MaskedAutoencoderCvT(nn.Module):
 
         self.erosion_3 = Erosion2d(3, 3, 2, soft_max=False)
         self.dilation_3 = Dilation2d(3, 3, 3, soft_max=False)
+
+    def freeze_encoder(self):
+        self.cls_token.requires_grad = False
+        for param in self.norm.parameters():
+            param.requires_grad = False
+        for param in self.blocks.parameters():
+            param.requires_grad = False
+        for param in self.patch_embed.parameters():
+            param.requires_grad = False
 
     def freeze_backbone(self):
         self.cls_token.requires_grad = False
@@ -320,18 +336,20 @@ class MaskedAutoencoderCvT(nn.Module):
         if self.train_TS is False:
             pred = self.forward_decoder(latent, ids_restore)  # [N, L, p*p*3]
             loss = self.forward_loss(targets, grad_mask, pred, mask)
-            b, c, h, w = targets.shape
-            target_labels = self.patchify(targets[:, -1:, :, :], chans=1).mean(2)
-            num_patches = target_labels.shape[1]
-            target_labels = einops.rearrange(target_labels, 'b p->(b p)', p=num_patches)
-            flatten_mask = einops.rearrange(mask, 'b p->(b p)', p=num_patches)
-            target_labels = target_labels[flatten_mask == 0]
-            target_labels = einops.rearrange(target_labels, "(b p)-> b p", p=int(num_patches * (1-mask_ratio)))
-            target_labels = (target_labels != -1) * 1
-            # cls_token = latent[:, -1]
-            pred_anomalies = torch.sigmoid(self.cls_anomalies(latent[:, 1:, :]).squeeze())
-            cls_loss = self.cls_loss(pred_anomalies, target_labels.float())
-            loss = loss + 0.5 * cls_loss
+            pred_anomalies = None
+            if self.pred_cls:
+                b, c, h, w = targets.shape
+                target_labels = self.patchify(targets[:, -1:, :, :], chans=1).mean(2)
+                num_patches = target_labels.shape[1]
+                target_labels = einops.rearrange(target_labels, 'b p->(b p)', p=num_patches)
+                flatten_mask = einops.rearrange(mask, 'b p->(b p)', p=num_patches)
+                target_labels = target_labels[flatten_mask == 0]
+                target_labels = einops.rearrange(target_labels, "(b p)-> b p", p=int(num_patches * (1 - mask_ratio)))
+                target_labels = (target_labels != -1) * 1
+                # cls_token = latent[:, -1]
+                pred_anomalies = torch.sigmoid(self.cls_anomalies(latent[:, 1:, :]).squeeze())
+                cls_loss = self.cls_loss(pred_anomalies, target_labels.float())
+                loss = loss + 0.5 * cls_loss
             if self.training:
                 return loss, pred, mask
             else:
@@ -339,20 +357,20 @@ class MaskedAutoencoderCvT(nn.Module):
         else:
             pred_stud, pred_teacher = self.forward_decoder_TS(latent, ids_restore)  # [N, L, p*p*3]
             loss = self.forward_loss_TS(pred_stud, pred_teacher, mask)
-            b, c, h, w = targets.shape
-            target_labels = self.patchify(targets[:, -1:, :], chans=1).mean(2)
-            num_patches = target_labels.shape[1]
-            target_labels = einops.rearrange(target_labels, 'b p->(b p)', p=num_patches)
-            flatten_mask = einops.rearrange(mask, 'b p->(b p)', p=num_patches)
-            target_labels = target_labels[flatten_mask == 0]
-            target_labels = einops.rearrange(target_labels, "(b p)-> b p", p=int(num_patches * (1-mask_ratio)))
-            target_labels = (target_labels != -1) * 1
-            # cls_token = latent[:, -1]
-            pred_anomalies = torch.sigmoid(self.cls_anomalies(latent[:, 1:, :]).squeeze())
-            if pred_anomalies.shape != target_labels.shape:
-                pred_anomalies = pred_anomalies.unsqueeze(0)
-            cls_loss = self.cls_loss(pred_anomalies, target_labels.float())
-            loss = loss + 0.5 * cls_loss
+            pred_anomalies = None
+            if self.pred_cls:
+                b, c, h, w = targets.shape
+                target_labels = self.patchify(targets[:, -1:, :], chans=1).mean(2)
+                num_patches = target_labels.shape[1]
+                target_labels = einops.rearrange(target_labels, 'b p->(b p)', p=num_patches)
+                flatten_mask = einops.rearrange(mask, 'b p->(b p)', p=num_patches)
+                target_labels = target_labels[flatten_mask == 0]
+                target_labels = einops.rearrange(target_labels, "(b p)-> b p", p=int(num_patches * (1 - mask_ratio)))
+                target_labels = (target_labels != -1) * 1
+                # cls_token = latent[:, -1]
+                pred_anomalies = torch.sigmoid(self.cls_anomalies(latent[:, 1:, :]).squeeze())
+                cls_loss = self.cls_loss(pred_anomalies, target_labels.float())
+                loss = loss + 0.5 * cls_loss
             if self.training:
                 return loss, pred_stud, mask
             else:
@@ -361,10 +379,10 @@ class MaskedAutoencoderCvT(nn.Module):
 
     def abnormal_score(self, imgs, pred, mask, gradients, pred_anomalies):
         imgs = self.patchify(imgs)
-        grad_weights = F.max_pool2d(gradients, self.patch_size).mean(1)
-        grad_weights = rearrange(grad_weights, 'b h w -> b (h w)')
-        grad_weights = grad_weights / grad_weights.sum(dim=1, keepdims=True)
         if self.use_only_masked_tokens_ab:
+            grad_weights = F.max_pool2d(gradients, self.patch_size).mean(1)
+            grad_weights = rearrange(grad_weights, 'b h w -> b (h w)')
+            grad_weights = grad_weights / grad_weights.sum(dim=1, keepdims=True)
             mask = mask.bool()
             selected_pred = []
             selected_lbl = []
@@ -374,38 +392,44 @@ class MaskedAutoencoderCvT(nn.Module):
 
             pred = torch.stack(selected_pred)
             imgs = torch.stack(selected_lbl)
-        return [((imgs - pred) ** 2).mean((1, 2)), pred_anomalies.mean(1)]  # MSE
+        if pred_anomalies is not None:
+            return [((imgs - pred) ** 2).mean((1, 2)), pred_anomalies.mean(1)]  # MSE
+        else:
+            return [((imgs - pred) ** 2).mean((1, 2))]  # MSE
 
     def abnormal_score_TS(self, imgs, pred_stud, pred_teacher, mask, gradients, pred_anomalies):
         imgs = self.patchify(imgs)
-        grad_weights = F.avg_pool2d(gradients, self.patch_size).mean(1)
-        grad_weights = rearrange(grad_weights, 'b h w -> b (h w)')
-        grad_weights = grad_weights / grad_weights.sum(dim=1, keepdims=True)
-        grad_weights *=10
-        # if self.use_only_masked_tokens_ab:
-        mask = mask.bool()
-        selected_pred_stud = []
-        selected_pred_teacher = []
-        selected_lbl = []
-        selected_gradients = []
-        for i in range(0, imgs.shape[0]):
-            selected_pred_stud.append(pred_stud[i][mask[i]])
-            selected_pred_teacher.append(pred_teacher[i][mask[i]])
-            selected_lbl.append(imgs[i][mask[i]])
-            selected_gradients.append(grad_weights[i][mask[i]])
-        pred_stud_masked = torch.stack(selected_pred_stud)
-        pred_teacher_masked = torch.stack(selected_pred_teacher)
-        imgs_masked = torch.stack(selected_lbl)
-        grad_weights_masked = torch.stack(selected_gradients)
+        if self.use_only_masked_tokens_ab:
+            grad_weights = F.avg_pool2d(gradients, self.patch_size).mean(1)
+            grad_weights = rearrange(grad_weights, 'b h w -> b (h w)')
+            grad_weights = grad_weights / grad_weights.sum(dim=1, keepdims=True)
+            grad_weights *= 10
+            mask = mask.bool()
+            selected_pred_stud = []
+            selected_pred_teacher = []
+            selected_lbl = []
+            selected_gradients = []
+            for i in range(0, imgs.shape[0]):
+                selected_pred_stud.append(pred_stud[i][mask[i]])
+                selected_pred_teacher.append(pred_teacher[i][mask[i]])
+                selected_lbl.append(imgs[i][mask[i]])
+                selected_gradients.append(grad_weights[i][mask[i]])
+            pred_stud_masked = torch.stack(selected_pred_stud)
+            pred_teacher_masked = torch.stack(selected_pred_teacher)
+            imgs_masked = torch.stack(selected_lbl)
+            grad_weights_masked = torch.stack(selected_gradients)
         output = []
         if self.abnormal_score_func_TS == "L1":
-            output.append(torch.abs(pred_teacher - pred_stud).mean(2))  # MAE
-            output.append(torch.abs(imgs - pred_teacher).mean(2))
-            return [output[0].mean(1), output[1].mean(1), pred_anomalies.mean(1)]
+            output.append(torch.abs(pred_teacher - pred_stud).mean((2)))  # MAE
+            output.append(torch.abs(imgs - pred_teacher).mean((2)))
         elif self.abnormal_score_func_TS == "L2":
             output.append((((pred_teacher - pred_stud) ** 2).mean(2)))
             output.append((((imgs - pred_teacher) ** 2).mean(2)))
+        if pred_anomalies is not None:
             return [output[0].mean(1), output[1].mean(1), pred_anomalies.mean(1)]
+        else:
+            return [output[0].mean(1), output[1].mean(1)]
+
     def process_result(self, gradients, pred_stud, pred_teacher, do_erosion=True):
         gradients = gradients.mean(dim=1, keepdim=True)
         gradients = (gradients - torch.amin(gradients, dim=(1, 2), keepdim=True)) / (

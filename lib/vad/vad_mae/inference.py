@@ -24,7 +24,6 @@ def inference(model: torch.nn.Module, data_loader: Iterable,
     pred_anomalies = []
     labels = []
     videos = []
-    # fids = []
     frames = []
     for data_iter_step, (samples, grads, targets, label, vid, frame_name) in enumerate(
             metric_logger.log_every(data_loader, args.print_freq, header)):
@@ -56,11 +55,12 @@ def inference(model: torch.nn.Module, data_loader: Iterable,
         micro_auc, macro_auc = evaluate_model(predictions, labels, videos,
                                               normalize_scores=False,
                                               range=100, mu=11)
+
     else:
         predictions_teacher = np.array(predictions_teacher)
         predictions_student_teacher = np.array(predictions_student_teacher)
         pred_anomalies = np.array(pred_anomalies)
-        predictions = pred_anomalies + predictions_teacher + predictions_student_teacher
+        predictions = predictions_teacher + predictions_student_teacher + pred_anomalies
         micro_auc, macro_auc = evaluate_model(predictions, labels, videos,
                                               normalize_scores=True,
                                               range=120, mu=16)

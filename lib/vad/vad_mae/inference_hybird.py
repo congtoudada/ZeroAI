@@ -43,7 +43,7 @@ def inference_hybird(model: torch.nn.Module, data_loader: Iterable,
             if video_ not in video_output:
                 video_output[video_] = {}
                 for i in range(step):
-                    video_output[video_][i] = [1-1, 1-1]  # 首帧非异常
+                    video_output[video_][i] = [1-1, 1-1]
             if frame_ not in video_output[video_]:
                 video_output[video_][frame_] = []
                 video_output[video_][frame_].append(1-s_score_)
@@ -55,15 +55,23 @@ def inference_hybird(model: torch.nn.Module, data_loader: Iterable,
     # ideo_output_spatial, video_output_temporal, video_output_complete = remake_video_3d_output(video_output,
     #                                                                                            dataset=args.dataset)
     # micro_auc, macro_auc = save_and_evaluate(video_output, running_date, dataset=args.dataset)
+
     # 补尾帧
-    for vid, frames in video_output.items():
-        # 获取尾帧分数
-        len_frames = len(frames)
-        tail_s = video_output[vid][len_frames-1][0]
-        tail_t = video_output[vid][len_frames-1][1]
-        tail_score = [tail_s, tail_t]
-        for i in range(step):
-            video_output[vid][len_frames+i] = tail_score
+    # for vid, frames in video_output.items():
+    #     # 获取尾帧分数
+    #     # len_frames = len(frames)
+    #     test_path = None
+    #     if args.dataset == 'avenue':
+    #         test_path = os.path.join(args.avenue_path, "test/frames", vid)
+    #     else:
+    #         test_path = os.path.join(args.shanghai_path, "test/frames", vid)
+    #     len_frames = len(os.listdir(test_path))
+    #     print(f"获取尾帧分数: {vid} {len_frames}")
+    #     tail_s = video_output[vid][len_frames-1][0]
+    #     tail_t = video_output[vid][len_frames-1][1]
+    #     tail_score = [tail_s, tail_t]
+    #     for i in range(step):
+    #         video_output[vid][len_frames+i] = tail_score
 
     # 分数归一化
     # max_s_score = 0
@@ -166,6 +174,9 @@ def evaluate_model(predictions, labels, videos, video_output,
                 continue
             else:
                 video_output[vid][fid] = [0.5, 0.5]
+                if fid > 1:
+                    video_output[vid][fid][0] = video_output[vid][fid-1][0] * 0.5 + video_output[vid][fid-2][0] * 0.25
+                    video_output[vid][fid][1] = video_output[vid][fid-1][1] * 0.5 + video_output[vid][fid-2][1] * 0.25
         # fid = fids[np.array(videos) == vid]
         video_output[vid] = list(video_output[vid].values())
         # ------------------------ max ------------------------
@@ -176,7 +187,7 @@ def evaluate_model(predictions, labels, videos, video_output,
         # video_output[vid] = np.array([pair[0] * 0.25 + pair[1] * 0.75 for pair in video_output[vid]])
 
         # 0.21 MicroAUC: 0.938568288496407, MacroAUC: 0.9222412295592993
-        # video_output[vid] = np.array([pair[0] * 0.5 + pair[1] * 0.5 for pair in video_output[vid]])
+        video_output[vid] = np.array([pair[0] * 0.5 + pair[1] * 0.5 for pair in video_output[vid]])
 
         # 0.21 MicroAUC: 0.933944214206778, MacroAUC: 0.9315834605328955
         # video_output[vid] = np.array([pair[0] * 0.75 + pair[1] * 0.25 for pair in video_output[vid]])
@@ -190,7 +201,7 @@ def evaluate_model(predictions, labels, videos, video_output,
         # 0.21 MicroAUC: 0.9380336667259613, MacroAUC: 0.9245246329731791
         # video_output[vid] = np.array([pair[0] * 0.55 + pair[1] * 0.45 for pair in video_output[vid]])
 
-        video_output[vid] = np.array([pair[0] * 1 + pair[1] * 0 for pair in video_output[vid]])
+        # video_output[vid] = np.array([pair[0] * 1 + pair[1] * 0 for pair in video_output[vid]])
 
         # pred = video_output[vid]
         # pred += video_output[vid] * 0.3  # MicroAUC: 0.9239464530454763, MacroAUC: 0.9409956053829157

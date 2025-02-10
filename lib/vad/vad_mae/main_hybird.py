@@ -55,13 +55,15 @@ def main(args):
                                 use_only_masked_tokens_ab=args.use_only_masked_tokens_ab,
                                 abnormal_score_func=args.abnormal_score_func,
                                 masking_method=args.masking_method,
-                                grad_weighted_loss=args.grad_weighted_rec_loss).float()
+                                grad_weighted_loss=args.grad_weighted_rec_loss,
+                                pred_cls=args.pred_cls).float()
     else:
         model = mae_cvt_patch8(norm_pix_loss=args.norm_pix_loss, img_size=args.input_size,
                                use_only_masked_tokens_ab=args.use_only_masked_tokens_ab,
                                abnormal_score_func=args.abnormal_score_func,
                                masking_method=args.masking_method,
-                               grad_weighted_loss=args.grad_weighted_rec_loss).float()
+                               grad_weighted_loss=args.grad_weighted_rec_loss,
+                               pred_cls=args.pred_cls).float()
     model.to(device)
     if args.run_type == "train":
         do_training(args, data_loader_test, data_loader_train, device, log_writer, model)
@@ -83,7 +85,8 @@ def main(args):
         data_dir = f"H:/AI/dataset/VAD/Featurize_png/{args.dataset}/test/frames"
         detect_pkl = f'lib/vad/jigsaw/detect/{args.dataset}_test_detect_result_yolov3.pkl'
         testing_dataset = VideoAnomalyDataset_C3D(data_dir,
-                                                  dataset=args.dataset,
+                                                  # dataset=f"{args.dataset}tech",
+                                                  dataset=f"{args.dataset}",
                                                   detect_dir=detect_pkl,
                                                   fliter_ratio=args.filter_ratio,
                                                   frame_num=args.sample_num)
@@ -107,6 +110,8 @@ def do_training(args, data_loader_test, data_loader_train, device, log_writer, m
     best_micro = 0.0
     best_micro_student = 0.0
     for epoch in range(args.start_epoch, args.epochs):
+        if epoch == args.start_epoch:
+            misc.load_model(args=args, model=model, optimizer=optimizer, loss_scaler=loss_scaler, train_TS=True)
 
         train_stats = train_one_epoch(
             model, data_loader_train,

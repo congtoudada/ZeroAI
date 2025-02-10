@@ -128,14 +128,14 @@ class VideoAnomalyDataset(Dataset):
 
         img = None
         if self.dataset == 'ped2':
-            frame_ = "{}.jpg".format(frame)
+            frame_ = "{}.png".format(frame)
         elif self.dataset == 'avenue':
-            frame_ = "{}.jpg".format(frame)
+            frame_ = "{}.png".format(frame)
         else:
             if self.test_stage:
-                frame_ = "{}.jpg".format(frame)
+                frame_ = "{}.png".format(frame)
             else:
-                frame_ = "{}.jpg".format(frame)
+                frame_ = "{}.png".format(frame)
         assert (frame_ in frame_list), \
             "The frame {} is out of the range:{}.".format(int(frame_), len(frame_list))
 
@@ -176,7 +176,7 @@ if __name__ == '__main__':
     parser.add_argument("--sample_num", type=int, default=7)
 
     args = parser.parse_args()
-    data_dir = "H:/AI/dataset/VAD/Featurize/"  # directory for raw frames
+    data_dir = "H:/AI/dataset/VAD/Featurize_png/"  # directory for raw frames
     shanghai_dataset = VideoAnomalyDataset(data_dir=data_dir + args.dataset + '/' + args.phase + '/frames/',
                                            detect_dir='detect/' + args.dataset + '_' + args.phase + '_detect_result_yolov3.pkl',
                                            dataset=args.dataset,
