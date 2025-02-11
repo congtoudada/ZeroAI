@@ -144,13 +144,20 @@ def inference_hybird(model: torch.nn.Module, data_loader: Iterable,
     if args.dataset == 'avenue':
         predictions = 10.5 * predictions_teacher + 5.3 * predictions_student_teacher + 5.3 * pred_anomalies
         micro_auc, macro_auc = evaluate_model(predictions, labels, videos, video_output,
-                                              normalize_scores=False,
+                                              normalize_scores=False, dataset=args.dataset,
                                               range=100, mu=11)
     else:
-        predictions = pred_anomalies + predictions_teacher + predictions_student_teacher
+        if len(pred_anomalies) != 0:
+            pred_anomalies = np.array(pred_anomalies)
+            predictions = 10.5 * predictions_teacher + 5.3 * predictions_student_teacher + 5.3 * pred_anomalies
+        else:
+            predictions = 10.5 * predictions_teacher + 5.3 * predictions_student_teacher
         micro_auc, macro_auc = evaluate_model(predictions, labels, videos, video_output,
-                                              normalize_scores=True,
-                                              range=120, mu=16)
+                                              normalize_scores=False, dataset=args.dataset,
+                                              range=100, mu=11)
+        # micro_auc, macro_auc = evaluate_model(predictions, labels, videos, video_output,
+        #                                       normalize_scores=True,
+        #                                       range=900, mu=282)
 
     print(f"MicroAUC: {micro_auc}, MacroAUC: {macro_auc}")
 
@@ -162,7 +169,7 @@ def inference_hybird(model: torch.nn.Module, data_loader: Iterable,
 
 
 def evaluate_model(predictions, labels, videos, video_output,
-                   range=302, mu=21, normalize_scores=False):
+                   range=302, mu=21, normalize_scores=False, dataset="avenue"):
     aucs = []
     filtered_preds = []
     filtered_labels = []
@@ -236,8 +243,8 @@ def evaluate_model(predictions, labels, videos, video_output,
         plt.title(f"Anomaly Detection: Video {vid}")
 
         # Save the plot for this video
-        os.makedirs("lib/vad/vad_mae/experiments/graphs/avenue", exist_ok=True)
-        plt.savefig(f"lib/vad/vad_mae/experiments/graphs/avenue/{vid}.png")
+        os.makedirs(f"lib/vad/vad_mae/experiments/graphs/{dataset}", exist_ok=True)
+        plt.savefig(f"lib/vad/vad_mae/experiments/graphs/{dataset}/{vid}.png")
         plt.close()
 
         lbl = np.array([0] + list(lbl) + [1])

@@ -48,7 +48,7 @@ def get_configs_avenue():
 
 def get_configs_shanghai():
     config = ml_collections.ConfigDict()
-    config.batch_size = 32
+    config.batch_size = 100
     config.epochs = 50
     config.mask_ratio = 0.5
     config.start_TS_epoch = 100
@@ -57,7 +57,7 @@ def get_configs_shanghai():
     config.abnormal_score_func = 'L1'
     config.grad_weighted_rec_loss = True
     config.model = "mae_cvt"
-    config.input_size = (320, 640)
+    config.input_size = (160, 320)
     config.norm_pix_loss = False
     config.use_only_masked_tokens_ab = False
     config.run_type = "inference"
@@ -70,7 +70,7 @@ def get_configs_shanghai():
     config.lr = 1e-4
 
     # Dataset parameters
-    config.dataset = "shanghai"
+    config.dataset = "shanghaitech"
     config.shanghai_path = "H:/AI/dataset/VAD/Featurize_png/shanghaitech"
     config.shanghai_gt_path = "H:/AI/dataset/VAD/Featurize_png/shanghaitech/shanghai_gt"
     config.percent_abnormal = 0.25

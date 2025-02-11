@@ -114,25 +114,29 @@ class Block(nn.Module):
                  **kwargs):
         super().__init__()
         self.norm1 = norm_layer(dim_in)
-        if official:
-            self.attn = Attention(
-                dim_in, dim_out, num_heads, qkv_bias, attn_drop, drop,
-                **kwargs
-            )
-        else:
-            # official num_heads=4
-            self.attn = AgentAttention(
-                dim=dim_in, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop,
-                agent_num=49, height=height, width=width, **kwargs
-            )
-            # self.attn = HiLo(
-            #     dim=dim_in, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop,
-            #     window_size=2, alpha=0.5
-            # )
-            # self.attn = P2TAttention(
-            #     dim=dim_in, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=None,
-            #     attn_drop=attn_drop, proj_drop=drop, pool_ratios=(1, 3, 6)
-            # )
+        self.attn = Attention(
+            dim_in, dim_out, num_heads, qkv_bias, attn_drop, drop,
+            **kwargs
+        )
+        # if official:
+        #     self.attn = Attention(
+        #         dim_in, dim_out, num_heads, qkv_bias, attn_drop, drop,
+        #         **kwargs
+        #     )
+        # else:
+        #     # official num_heads=4
+        #     self.attn = AgentAttention(
+        #         dim=dim_in, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop,
+        #         agent_num=49, height=height, width=width, **kwargs
+        #     )
+        #     # self.attn = HiLo(
+        #     #     dim=dim_in, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop,
+        #     #     window_size=2, alpha=0.5
+        #     # )
+        #     # self.attn = P2TAttention(
+        #     #     dim=dim_in, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=None,
+        #     #     attn_drop=attn_drop, proj_drop=drop, pool_ratios=(1, 3, 6)
+        #     # )
 
         self.drop_path = DropPath(drop_path) \
             if drop_path > 0. else nn.Identity()

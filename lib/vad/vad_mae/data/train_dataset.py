@@ -16,7 +16,7 @@ class AbnormalDatasetGradientsTrain(torch.utils.data.Dataset):
         self.args = args
         if args.dataset == "avenue":
             data_path = args.avenue_path
-        elif args.dataset == "shanghai":
+        elif args.dataset == "shanghaitech":
             data_path = args.shanghai_path
         else:
             raise Exception("Unknown dataset!")

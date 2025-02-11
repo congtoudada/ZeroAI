@@ -13,12 +13,12 @@ import math
 
 def video_label_length(dataset='shanghaitech'):
     if dataset == 'shanghaitech':
-        label_path = "lib/vad/jigsaw/"
+        label_path = "H:/AI/dataset/VAD/Featurize_png/shanghaitech/test_frame_mask"
         video_length = {}
         files = sorted(os.listdir(label_path))
         length = 0
         for f in files:
-            label = np.load("{}/{}".format(label_path, f))
+            label = np.load("{}/{}.npy ".format(label_path, f))
             video_length[f.split(".")[0]] = label.shape[0]
             length += label.shape[0]
     elif dataset in ['ped1', 'ped2', 'avenue']:
@@ -49,7 +49,7 @@ def score_smoothing(score, ws=43, function='mean', sigma=10):
 
 
 def load_objects(dataset, frame_num=7):
-    root = 'H:/AI/dataset/VAD/Featurize'
+    root = 'H:/AI/dataset/VAD/Featurize_png'
     data_dir = os.path.join(root, dataset, 'test', 'frames')
 
     file_list = sorted(os.listdir(data_dir))
