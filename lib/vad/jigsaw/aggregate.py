@@ -18,7 +18,7 @@ def video_label_length(dataset='shanghaitech'):
         files = sorted(os.listdir(label_path))
         length = 0
         for f in files:
-            label = np.load("{}/{}.npy ".format(label_path, f))
+            label = np.load("{}/{} ".format(label_path, f))
             video_length[f.split(".")[0]] = label.shape[0]
             length += label.shape[0]
     elif dataset in ['ped1', 'ped2', 'avenue']:

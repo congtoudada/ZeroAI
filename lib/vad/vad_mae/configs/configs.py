@@ -85,7 +85,7 @@ def get_configs_shanghai():
 
     config.start_epoch = 0
     config.print_freq = 10
-    config.num_workers = 2
+    config.num_workers = 4
     config.pin_mem = False
 
     return config

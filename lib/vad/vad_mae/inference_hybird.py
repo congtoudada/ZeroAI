@@ -1,6 +1,8 @@
 import os
+import pickle
 from collections.abc import Iterable
 
+import numpy
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -8,7 +10,7 @@ from matplotlib import pyplot as plt
 from sklearn import metrics
 from tqdm import tqdm
 
-from jigsaw.aggregate import remake_video_3d_output
+from jigsaw.aggregate import remake_video_3d_output, remake_video_output
 from util import misc
 from util.abnormal_utils import filt
 
@@ -19,7 +21,8 @@ def inference_hybird(model: torch.nn.Module, data_loader: Iterable,
     # -------------------------- jigsaw --------------------------
     model2.eval()
     video_output = {}
-    step = int(args.sample_num * 0.5)
+    # step = int(args.sample_num * 0.5)
+
     for data in tqdm(data_loader2):
         videos = data["video"]
         frames = data["frame"].tolist()
@@ -38,66 +41,24 @@ def inference_hybird(model: torch.nn.Module, data_loader: Iterable,
         diag2 = torch.diagonal(temp_probs, offset=0, dim1=-2, dim2=-1)
         scores2 = diag2.min(-1)[0].cpu().numpy()
 
-        # jigsaw中分数越低越异常，这里取1-分数，即越高越异常
-        for video_, frame_, s_score_, t_score_ in zip(videos, frames, scores, scores2):
+        for video_, frame_, s_score_, t_score_  in zip(videos, frames, scores, scores2):
             if video_ not in video_output:
                 video_output[video_] = {}
-                for i in range(step):
-                    video_output[video_][i] = [1-1, 1-1]
             if frame_ not in video_output[video_]:
                 video_output[video_][frame_] = []
-                video_output[video_][frame_].append(1-s_score_)
-                video_output[video_][frame_].append(1-t_score_)
-            else:
-                video_output[video_][frame_][0] = max(video_output[video_][frame_][0], 1-s_score_)
-                video_output[video_][frame_][1] = max(video_output[video_][frame_][1], 1-t_score_)
+            video_output[video_][frame_].append([s_score_, t_score_])
 
-    # ideo_output_spatial, video_output_temporal, video_output_complete = remake_video_3d_output(video_output,
-    #                                                                                            dataset=args.dataset)
-    # micro_auc, macro_auc = save_and_evaluate(video_output, running_date, dataset=args.dataset)
-
-    # 补尾帧
-    # for vid, frames in video_output.items():
-    #     # 获取尾帧分数
-    #     # len_frames = len(frames)
-    #     test_path = None
-    #     if args.dataset == 'avenue':
-    #         test_path = os.path.join(args.avenue_path, "test/frames", vid)
-    #     else:
-    #         test_path = os.path.join(args.shanghai_path, "test/frames", vid)
-    #     len_frames = len(os.listdir(test_path))
-    #     print(f"获取尾帧分数: {vid} {len_frames}")
-    #     tail_s = video_output[vid][len_frames-1][0]
-    #     tail_t = video_output[vid][len_frames-1][1]
-    #     tail_score = [tail_s, tail_t]
-    #     for i in range(step):
-    #         video_output[vid][len_frames+i] = tail_score
-
-    # 分数归一化
-    # max_s_score = 0
-    # min_s_score = 1
-    # max_t_score = 0
-    # min_t_score = 1
-    # for vid, frames in video_output.items():
-    #     for fid, scores in frames.items():
-    #         s_score = scores[0]
-    #         t_score = scores[1]
-    #         if s_score > max_s_score:
-    #             max_s_score = s_score
-    #         if s_score < min_s_score:
-    #             min_s_score = s_score
-    #         if t_score > max_t_score:
-    #             max_t_score = t_score
-    #         if t_score < min_t_score:
-    #             min_t_score = t_score
-    # for vid, frames in video_output.items():
-    #     for fid, scores in frames.items():
-    #         scores[0] = (scores[0] - min_s_score) / (max_s_score - min_s_score)
-    #         scores[1] = (scores[1] - min_t_score) / (max_t_score - min_t_score)
-    # for k, v in video_output.items():
-    #     for fid in v.keys():
-    #         print(fid)
-    # print(video_output)
+    # jigsaw中分数越低越异常，这里取1-分数，即越高越异常
+    pickle_path = './logs/video_output_ori_{}.pkl'.format(args.dataset)
+    with open(pickle_path, 'wb') as write:
+        pickle.dump(video_output, write, pickle.HIGHEST_PROTOCOL)
+    if args.dataset == 'shanghaitech':
+        video_output_spatial, video_output_temporal, video_output_complete = remake_video_output(video_output,
+                                                                                                 dataset=args.dataset)
+    else:
+        video_output_spatial, video_output_temporal, video_output_complete = remake_video_3d_output(video_output,
+                                                                                                    dataset=args.dataset)
+    video_output = [1 - l for l in video_output_complete]
 
     # -------------------------- vad-mae --------------------------
     model.eval()
@@ -153,13 +114,13 @@ def inference_hybird(model: torch.nn.Module, data_loader: Iterable,
         else:
             predictions = 10.5 * predictions_teacher + 5.3 * predictions_student_teacher
         micro_auc, macro_auc = evaluate_model(predictions, labels, videos, video_output,
-                                              normalize_scores=False, dataset=args.dataset,
-                                              range=100, mu=11)
+                                              normalize_scores=True, dataset=args.dataset,
+                                              range=120, mu=16)
         # micro_auc, macro_auc = evaluate_model(predictions, labels, videos, video_output,
         #                                       normalize_scores=True,
         #                                       range=900, mu=282)
 
-    print(f"MicroAUC: {micro_auc}, MacroAUC: {macro_auc}")
+    # print(f"MicroAUC: {micro_auc}, MacroAUC: {macro_auc}")
 
     # np.save("st_tc_list.npy", predictions_student_teacher)
     # np.save("rec_list.npy", predictions_teacher)
@@ -173,19 +134,19 @@ def evaluate_model(predictions, labels, videos, video_output,
     aucs = []
     filtered_preds = []
     filtered_labels = []
-    for vid in np.unique(videos):
+    for idx, vid in enumerate(np.unique(videos)):
         pred = predictions[np.array(videos) == vid]
         # 补齐无对象帧结果
-        for fid, _ in enumerate(pred):
-            if video_output[vid].__contains__(fid):
-                continue
-            else:
-                video_output[vid][fid] = [0.5, 0.5]
-                if fid > 1:
-                    video_output[vid][fid][0] = video_output[vid][fid-1][0] * 0.5 + video_output[vid][fid-2][0] * 0.25
-                    video_output[vid][fid][1] = video_output[vid][fid-1][1] * 0.5 + video_output[vid][fid-2][1] * 0.25
+        # for fid, _ in enumerate(pred):
+        #     if video_output[vid].__contains__(fid):
+        #         continue
+        #     else:
+        #         video_output[vid][fid] = [0.5, 0.5]
+        #         if fid > 1:
+        #             video_output[vid][fid][0] = video_output[vid][fid-1][0] * 0.5 + video_output[vid][fid-2][0] * 0.25
+        #             video_output[vid][fid][1] = video_output[vid][fid-1][1] * 0.5 + video_output[vid][fid-2][1] * 0.25
         # fid = fids[np.array(videos) == vid]
-        video_output[vid] = list(video_output[vid].values())
+        # video_output[vid] = list(video_output[vid].values())
         # ------------------------ max ------------------------
         # video_output[vid] = np.array([max(pair[0], pair[1]) for pair in video_output[vid]])
 
@@ -194,7 +155,7 @@ def evaluate_model(predictions, labels, videos, video_output,
         # video_output[vid] = np.array([pair[0] * 0.25 + pair[1] * 0.75 for pair in video_output[vid]])
 
         # 0.21 MicroAUC: 0.938568288496407, MacroAUC: 0.9222412295592993
-        video_output[vid] = np.array([pair[0] * 0.5 + pair[1] * 0.5 for pair in video_output[vid]])
+        # video_output[vid] = np.array([pair[0] * 0.5 + pair[1] * 0.5 for pair in video_output[vid]])
 
         # 0.21 MicroAUC: 0.933944214206778, MacroAUC: 0.9315834605328955
         # video_output[vid] = np.array([pair[0] * 0.75 + pair[1] * 0.25 for pair in video_output[vid]])
@@ -215,9 +176,10 @@ def evaluate_model(predictions, labels, videos, video_output,
         # pred += video_output[vid] * 0.25  # MicroAUC: 0.9263334040489463, MacroAUC: 0.9385036530054336
         # pred += video_output[vid] * 0.23  # MicroAUC: 0.9267144964230156, MacroAUC: 0.9400302642977714
         # pred += video_output[vid] * 0.22  # MicroAUC: 0.9274323513072198, MacroAUC: 0.9377439964789929
-        pred += video_output[vid] * 0.21  # MicroAUC: 0.9275254124217831, MacroAUC: 0.9394392395403883
+        # pred += video_output[idx] * 0.21  # MicroAUC: 0.9275254124217831, MacroAUC: 0.9394392395403883
         # pred += video_output[vid] * 0.2  # MicroAUC: 0.9272279012524745, MacroAUC: 0.9381994910451334
         # pred += video_output[vid] * 0.18  # MicroAUC: 0.9268373289686024, MacroAUC: 0.9358369708170391
+        pred += video_output[idx]
         pred = filt(pred, range=range, mu=mu)
         if normalize_scores:
             pred = (pred - np.min(pred)) / (np.max(pred) - np.min(pred))
@@ -264,4 +226,5 @@ def evaluate_model(predictions, labels, videos, video_output,
     micro_auc = np.nan_to_num(micro_auc, nan=1.0)
 
     # gather the stats from all processes
+    print(f"MicroAUC: {micro_auc}, MacroAUC: {macro_auc}")
     return micro_auc, macro_auc

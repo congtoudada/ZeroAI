@@ -1,3 +1,4 @@
+import os
 from collections.abc import Iterable
 
 import numpy as np
@@ -65,8 +66,18 @@ def inference(model: torch.nn.Module, data_loader: Iterable,
         else:
             predictions = 10.5 * predictions_teacher + 5.3 * predictions_student_teacher
         micro_auc, macro_auc = evaluate_model(predictions, labels, videos,
+                                              normalize_scores=False,
+                                              range=50, mu=20)
+        micro_auc, macro_auc = evaluate_model(predictions, labels, videos,
                                               normalize_scores=True,
-                                              range=900, mu=282)
+                                              range=50, mu=20)
+        # range:50 mu:20 True
+        # range:50 mu:20 False
+        # range:120 mu:16 True MicroAUC: 0.6979951228689855, MacroAUC: 0.8224947369492023
+        # range:120 mu:16 False MicroAUC: 0.5280654536454747, MacroAUC: 0.8139392223992751
+        # range:200 mu:20 True MicroAUC: 0.7130767998462397, MacroAUC: 0.8282025714373306
+        # range:200 mu:20 False MicroAUC: 0.5413547710776061, MacroAUC: 0.8188680416257275
+        # range:300 mu:30 True MicroAUC: 0.7330919176192304, MacroAUC: 0.8381192056966079
     print(f"MicroAUC: {micro_auc}, MacroAUC: {macro_auc}")
 
     # np.save("st_tc_list.npy", predictions_student_teacher)
@@ -96,6 +107,25 @@ def evaluate_model(predictions, labels, videos,
         filtered_preds.append(pred)
         lbl = labels[np.array(videos) == vid]
         filtered_labels.append(lbl)
+
+        # pred + label
+        # Plot the anomaly score (pred) and the label (lbl) on the same graph
+        if normalize_scores:
+            pred_norm = pred
+        else:
+            pred_norm = (pred - np.min(pred)) / (np.max(pred) - np.min(pred))
+        plt.plot(pred_norm, label='Anomaly Score', color='b')
+        plt.plot(lbl, label='Ground Truth', color='r', linestyle='--')
+        plt.xlabel("Frames")
+        plt.ylabel("Anomaly Score")
+        plt.legend()
+        plt.title(f"Anomaly Detection: Video {vid}")
+
+        # Save the plot for this video
+        os.makedirs("lib/vad/vad_mae/experiments/graphs/shanghaitech", exist_ok=True)
+        plt.savefig(f"lib/vad/vad_mae/experiments/graphs/shanghaitech/{vid}.png")
+        plt.close()
+
         lbl = np.array([0] + list(lbl) + [1])
         pred = np.array([0] + list(pred) + [1])
         fpr, tpr, _ = metrics.roc_curve(lbl, pred)
