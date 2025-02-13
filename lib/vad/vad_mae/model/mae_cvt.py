@@ -16,7 +16,7 @@ class MaskedAutoencoderCvT(nn.Module):
                  decoder_embed_dim=512, decoder_depth=8, decoder_num_heads=16,
                  mlp_ratio=4., norm_layer=nn.LayerNorm, norm_pix_loss=False,
                  use_only_masked_tokens_ab=False, abnormal_score_func='L1', masking_method="random_masking",
-                 grad_weighted_loss=True, pred_cls=True, student_depth=1):
+                 grad_weighted_loss=True, pred_cls=True, finetune=True, student_depth=1):
         super().__init__()
         # --------------------------------------------------------------------------
         # Abnormal specifics
@@ -24,6 +24,7 @@ class MaskedAutoencoderCvT(nn.Module):
         self.abnormal_score_func = abnormal_score_func
         self.abnormal_score_func_TS = abnormal_score_func
         self.pred_cls = pred_cls
+        self.finetune = finetune
         if pred_cls:
             self.cls_loss = BCELoss()
             self.cls_anomalies = nn.Linear(embed_dim, 1)
@@ -71,14 +72,15 @@ class MaskedAutoencoderCvT(nn.Module):
 
         self.decoder_blocks = nn.ModuleList([
             Block(decoder_embed_dim, decoder_embed_dim, decoder_num_heads, mlp_ratio, qkv_bias=True, qk_scale=None,
-                  norm_layer=norm_layer, official=False)
+                  norm_layer=norm_layer, height=self.height, width=self.width, official=False)
             for i in range(decoder_depth)])
 
         self.decoder_norm = norm_layer(decoder_embed_dim)
         self.decoder_pred = nn.Linear(decoder_embed_dim, patch_size ** 2 * out_chans, bias=True)  # decoder to patch
 
         self.decoder_student_block = Block(decoder_embed_dim, decoder_embed_dim, decoder_num_heads, mlp_ratio,
-                                           qkv_bias=True, qk_scale=None, norm_layer=norm_layer, official=False)
+                                           qkv_bias=True, qk_scale=None, norm_layer=norm_layer,
+                                           height=self.height, width=self.width, official=False)
         self.decoder_student_norm = norm_layer(decoder_embed_dim)
         self.decoder_student_pred = nn.Linear(decoder_embed_dim, patch_size ** 2 * out_chans,
                                               bias=True)  # decoder to patch

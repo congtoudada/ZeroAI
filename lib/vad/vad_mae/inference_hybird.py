@@ -110,15 +110,14 @@ def inference_hybird(model: torch.nn.Module, data_loader: Iterable,
     else:
         if len(pred_anomalies) != 0:
             pred_anomalies = np.array(pred_anomalies)
-            predictions = 10.5 * predictions_teacher + 5.3 * predictions_student_teacher + 5.3 * pred_anomalies
+            predictions = predictions_teacher + predictions_student_teacher + pred_anomalies
         else:
-            predictions = 10.5 * predictions_teacher + 5.3 * predictions_student_teacher
+            predictions = predictions_teacher + predictions_student_teacher
         micro_auc, macro_auc = evaluate_model(predictions, labels, videos, video_output,
                                               normalize_scores=True, dataset=args.dataset,
-                                              range=120, mu=16)
-        # micro_auc, macro_auc = evaluate_model(predictions, labels, videos, video_output,
-        #                                       normalize_scores=True,
-        #                                       range=900, mu=282)
+                                              range=900, mu=282)
+        # MicroAUC: 0.85929995526554, MacroAUC: 0.920296636882029
+
 
     # print(f"MicroAUC: {micro_auc}, MacroAUC: {macro_auc}")
 
@@ -179,11 +178,14 @@ def evaluate_model(predictions, labels, videos, video_output,
         # pred += video_output[idx] * 0.21  # MicroAUC: 0.9275254124217831, MacroAUC: 0.9394392395403883
         # pred += video_output[vid] * 0.2  # MicroAUC: 0.9272279012524745, MacroAUC: 0.9381994910451334
         # pred += video_output[vid] * 0.18  # MicroAUC: 0.9268373289686024, MacroAUC: 0.9358369708170391
-        pred += video_output[idx]
-        pred = filt(pred, range=range, mu=mu)
-        if normalize_scores:
-            pred = (pred - np.min(pred)) / (np.max(pred) - np.min(pred))
 
+        if normalize_scores:
+            pred = filt(pred, range=range, mu=mu)
+            pred = (pred - np.min(pred)) / (np.max(pred) - np.min(pred))
+            pred = pred * 0.2 + video_output[idx] * 0.8
+        else:
+            pred = pred + video_output[idx] * 0.21
+            pred = filt(pred, range=range, mu=mu)
         pred = np.nan_to_num(pred, nan=0.)
         # plt.plot(pred)
         # plt.xlabel("Frames")

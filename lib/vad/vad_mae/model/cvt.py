@@ -114,29 +114,17 @@ class Block(nn.Module):
                  **kwargs):
         super().__init__()
         self.norm1 = norm_layer(dim_in)
-        self.attn = Attention(
-            dim_in, dim_out, num_heads, qkv_bias, attn_drop, drop,
-            **kwargs
-        )
-        # if official:
-        #     self.attn = Attention(
-        #         dim_in, dim_out, num_heads, qkv_bias, attn_drop, drop,
-        #         **kwargs
-        #     )
-        # else:
-        #     # official num_heads=4
-        #     self.attn = AgentAttention(
-        #         dim=dim_in, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop,
-        #         agent_num=49, height=height, width=width, **kwargs
-        #     )
-        #     # self.attn = HiLo(
-        #     #     dim=dim_in, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop,
-        #     #     window_size=2, alpha=0.5
-        #     # )
-        #     # self.attn = P2TAttention(
-        #     #     dim=dim_in, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=None,
-        #     #     attn_drop=attn_drop, proj_drop=drop, pool_ratios=(1, 3, 6)
-        #     # )
+        if official:
+            self.attn = Attention(
+                dim_in, dim_out, num_heads, qkv_bias, attn_drop, drop,
+                **kwargs
+            )
+        else:
+            # official num_heads=4
+            self.attn = AgentAttention(
+                dim=dim_in, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop,
+                agent_num=49, height=height, width=width, **kwargs
+            )
 
         self.drop_path = DropPath(drop_path) \
             if drop_path > 0. else nn.Identity()
@@ -664,128 +652,6 @@ class Attention(nn.Module):
         module.__flops__ += flops
 
 
-class HiLo(nn.Module):
-    """
-    HiLo Attention
-
-    Paper: Fast Vision Transformers with HiLo Attention
-    Link: https://arxiv.org/abs/2205.13213
-    """
-
-    def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.,
-                 window_size=2, alpha=0.5, with_cls_token=True):
-        super().__init__()
-        assert dim % num_heads == 0, f"dim {dim} should be divided by num_heads {num_heads}."
-        head_dim = int(dim / num_heads)  # 每个注意力头的通道数
-        self.dim = dim
-        self.with_cls_token = with_cls_token
-
-        # self-attention heads in Lo-Fi
-        self.l_heads = int(num_heads * alpha)  # 根据alpha来确定分配给低频注意力的注意力头的数量
-        # token dimension in Lo-Fi
-        self.l_dim = self.l_heads * head_dim  # 确定低频注意力的通道数
-
-        # self-attention heads in Hi-Fi
-        self.h_heads = num_heads - self.l_heads  # 总的注意力头个数-低频注意力头的个数==高频注意力头的个数
-        # token dimension in Hi-Fi
-        self.h_dim = self.h_heads * head_dim  # 确定高频注意力的通道数, 总通道数-低频注意力通道数==高频注意力通道数
-
-        self.ws = window_size  # 窗口的尺寸, 如果ws==2, 那么这个窗口就包含4个patch(或token)
-
-        # 如果窗口的尺寸等于1,这就相当于标准的自注意力机制了, 不存在窗口注意力了; 因此,也就没有高频的操作了,只剩下低频注意力机制了
-        if self.ws == 1:
-            self.h_heads = 0
-            self.h_dim = 0
-            self.l_heads = num_heads
-            self.l_dim = dim
-
-        self.scale = qk_scale or head_dim ** -0.5
-
-        # Low frequence attention (Lo-Fi)
-        if self.l_heads > 0:
-            if self.ws != 1:
-                self.sr = nn.AvgPool2d(kernel_size=window_size, stride=window_size)
-            self.l_q = nn.Linear(self.dim, self.l_dim, bias=qkv_bias)
-            self.l_kv = nn.Linear(self.dim, self.l_dim * 2, bias=qkv_bias)
-            self.l_proj = nn.Linear(self.l_dim, self.l_dim)
-
-        # High frequence attention (Hi-Fi)
-        # 如果高频注意力头的个数大于0, 那就说明存在高频注意力机制
-        if self.h_heads > 0:
-            self.h_qkv = nn.Linear(self.dim, self.h_dim * 3, bias=qkv_bias)
-            self.h_proj = nn.Linear(self.h_dim, self.h_dim)
-
-    # 高频注意力机制
-    def hifi(self, x):
-        B, H, W, C = x.shape
-
-        # 每行有w_group个窗口, 每列有h_group个窗口;
-        h_group, w_group = H // self.ws, W // self.ws
-        total_groups = h_group * w_group
-        x = x.reshape(B, h_group, self.ws, w_group, self.ws, C).transpose(2, 3)
-        qkv = self.h_qkv(x).reshape(B, total_groups, -1, 3, self.h_heads, self.h_dim // self.h_heads).permute(3, 0, 1,
-                                                                                                              4, 2, 5)
-        q, k, v = qkv[0], qkv[1], qkv[2]
-        attn = (q @ k.transpose(-2, -1)) * self.scale
-        attn = attn.softmax(dim=-1)
-        attn = (attn @ v).transpose(2, 3).reshape(B, h_group, w_group, self.ws, self.ws, self.h_dim)
-        x = attn.transpose(2, 3).reshape(B, h_group * self.ws, w_group * self.ws, self.h_dim)
-        x = self.h_proj(x)
-        return x
-
-    # 低频注意力机制
-    def lofi(self, x):
-        B, H, W, C = x.shape
-        q = self.l_q(x).reshape(B, H * W, self.l_heads, self.l_dim // self.l_heads).permute(0, 2, 1, 3)
-
-        # 如果窗口尺寸大于1, 在每个窗口执行池化 (如果窗口尺寸等于1,没有池化的必要)
-        if self.ws > 1:
-            x_ = x.permute(0, 3, 1, 2)
-            x_ = self.sr(x_).reshape(B, C, -1).permute(0, 2, 1)
-            kv = self.l_kv(x_).reshape(B, -1, 2, self.l_heads, self.l_dim // self.l_heads).permute(2, 0, 3, 1, 4)
-        else:
-            kv = self.l_kv(x).reshape(B, -1, 2, self.l_heads, self.l_dim // self.l_heads).permute(2, 0, 3, 1, 4)
-
-        k, v = kv[0], kv[1]
-
-        attn = (q @ k.transpose(-2, -1)) * self.scale
-        attn = attn.softmax(dim=-1)
-
-        x = (attn @ v).transpose(1, 2).reshape(B, H, W, self.l_dim)
-        x = self.l_proj(x)
-        return x
-
-    def forward(self, x, H=20, W=40):
-        if self.with_cls_token:
-            cls_token, x = torch.split(x, [1, H * W], 1)
-        B, N, C = x.shape
-
-        assert N == H * W, "N must equal H*W!"
-        # H = W = 每一列/行有多少个patch
-        # H = W = int(N ** 0.5)
-        x = x.reshape(B, H, W, C)
-
-        # 如果分配给高频注意力的注意力头的个数为0,那么仅仅执行低频注意力
-        if self.h_heads == 0:
-            x = self.lofi(x)
-            return x.reshape(B, N, C)
-
-        # 如果分配给低频注意力的注意力头的个数为0,那么仅仅执行高频注意力
-        if self.l_heads == 0:
-            x = self.hifi(x)
-            return x.reshape(B, N, C)
-
-        hifi_out = self.hifi(x)
-        lofi_out = self.lofi(x)
-
-        x = torch.cat((hifi_out, lofi_out), dim=-1)
-        x = x.reshape(B, N, C)
-
-        if self.with_cls_token:
-            x = torch.cat((cls_token, x), dim=1)
-        return x
-
-
 class AgentAttention(nn.Module):
     def __init__(self, dim, num_heads=8, qkv_bias=False, attn_drop=0., proj_drop=0.,
                  agent_num=49, height=20, width=20, method='dw_bn', kernel_size=3, stride_kv=1,
@@ -920,7 +786,7 @@ class AgentAttention(nn.Module):
             :param x: input features with shape of (num_windows*B, N, C)
         """
         if self.with_cls_token:
-            cls_token, x = torch.split(x, [1, self.height * self.width], 1)
+            cls_token, x = torch.split(x, [1, h * w], 1)
 
         b, n, c = x.shape
         # h = int(n ** 0.5)  # 每列有h个token
@@ -977,81 +843,6 @@ class AgentAttention(nn.Module):
             x = torch.cat((cls_token, x), dim=1)
         return x
 
-
-class P2TAttention(nn.Module):
-    def __init__(self, dim, num_heads=2, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.,
-                 pool_ratios=(1, 2, 3, 6), with_cls_token=True):
-        super().__init__()
-        assert dim % num_heads == 0, f"dim {dim} should be divided by num_heads {num_heads}."
-
-        self.dim = dim
-        self.num_heads = num_heads
-        self.num_elements = np.array([t * t for t in pool_ratios]).sum()
-        head_dim = dim // num_heads
-        self.scale = qk_scale or head_dim ** -0.5
-        self.with_cls_token = with_cls_token
-
-        self.q = nn.Sequential(nn.Linear(dim, dim, bias=qkv_bias))
-        self.kv = nn.Sequential(nn.Linear(dim, dim * 2, bias=qkv_bias))
-
-        self.attn_drop = nn.Dropout(attn_drop)
-        self.proj = nn.Linear(dim, dim)
-        self.proj_drop = nn.Dropout(proj_drop)
-
-        self.pool_ratios = pool_ratios  # 池化窗口大小
-        self.pools = nn.ModuleList()
-
-        self.norm = nn.LayerNorm(dim)
-        self.d_convs1 = nn.ModuleList(
-            [nn.Conv2d(dim, dim, kernel_size=3, stride=1, padding=1, groups=dim) for temp in self.pool_ratios])
-
-    def forward(self, x, H=20, W=40, d_convs=None):
-        if self.with_cls_token:
-            cls_token, x = torch.split(x, [1, H * W], 1)
-
-        B, N, C = x.shape
-
-        # 通过输入x生成q矩阵: (B,N,C) --q-> (B,N,C) --reshape-> (B,N,h,d) --permute-> (B,h,N,d);   C=h*d
-        q = self.q(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
-
-        pools = []
-
-        # 为了便于在x上执行多尺度池化操作,我们将其reshape重塑为2D类型: (B,N,C) --permute-> (B,C,N) --reshape-> (B,C,H,W)
-        x_ = x.permute(0, 2, 1).reshape(B, C, H, W)
-        # 遍历多个池化层, 假设池化窗口为: [1 ,2 ,3 ,6]
-        for (pool_ratio, l) in zip(self.pool_ratios, self.d_convs1):
-            # 分别计算当前池化窗口下的输出: input:(B,C,H,W);  1th_pool: (B,C,H/1,W/1); 2th_pool: (B,C,H/2,W/2); 3th_pool: (B,C,H/3,W/3); 4th_pool: (B,C,H/6,W/6)
-            pool = F.adaptive_avg_pool2d(x_, (round(H / pool_ratio), round(W / pool_ratio)))
-            # 将每一个尺度对应的池化层的输出, 再通过3*3的深度卷积进行相对位置编码, 然后与池化的输出相加
-            pool = pool + l(pool)
-            # 将每个尺度的输出重塑为与原始输入相同的shape: 1th_pool: (B,C,H/1,W/1) -->(B,C,(HW/1^2));  2th_pool: (B,C,H/2,W/2) --> (B,C,(HW/2^2));  3th_pool: (B,C,H/3,W/3) --> (B,C,(HW/3^2));   3th_pool: (B,C,H/6,W/6) --> (B,C,(HW/6^2));
-            pools.append(pool.view(B, C, -1))
-
-        # 将多个尺度池化层的输出在token维度进行拼接,其具有多尺度的上下文信息: (B,C,(HW/1^2)+(HW/2^2)+(HW/3^2)+(HW/6^2))==(B,C,token_num) , 令token_num = (HW/1^2)+(HW/2^2)+(HW/3^2)+(HW/6^2)
-        pools = torch.cat(pools, dim=2)
-        # 将其进行维度转换, 以便于后续计算: (B,C,token_num)--permute->(B,token_num,C)
-        pools = self.norm(pools.permute(0, 2, 1))
-
-        # 多尺度的上下文信息生成kv: (B,token_num,C) --kv-> (B,token_num,2C) --reshape-> (B,token_num,2,h,d) --permute-> (2,B,h,token_num,d);   C=h*d
-        kv = self.kv(pools).reshape(B, -1, 2, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
-        # k:(B,h,token_num,d); v:(B,h,token_num,d)
-        k, v = kv[0], kv[1]
-
-        # 计算Token-to-Region化的注意力矩阵(region是指池化是在窗口上进行的,窗口可以看作region): (B,h,N,d) @ (B,h,d,token_num) = (B,h,N,token_num)  N:输入的token总数, token_num:池化后的Token总数量
-        attn = (q @ k.transpose(-2, -1)) * self.scale
-        attn = attn.softmax(dim=-1)
-
-        # 通过注意力矩阵对value加权求和: (B,h,N,token_num) @ (B,h,token_num,d) = (B,h,N,d)
-        x = (attn @ v)
-
-        # 通过对输入进行重塑shape得到与原始输入相同的shape: (B,h,N,d) --transpose-> (B,N,h,d) --reshape-> (B,N,C)
-        x = x.transpose(1, 2).contiguous().reshape(B, N, C)
-        # 最后通过一个线性层进行映射, 得到最终输出: (B,N,C)-->(B,N,C)
-        x = self.proj(x)
-
-        if self.with_cls_token:
-            x = torch.cat((cls_token, x), dim=1)
-        return x
 
 
 if __name__ == '__main__':
