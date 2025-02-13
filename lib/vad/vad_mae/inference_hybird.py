@@ -116,7 +116,7 @@ def inference_hybird(model: torch.nn.Module, data_loader: Iterable,
         micro_auc, macro_auc = evaluate_model(predictions, labels, videos, video_output,
                                               normalize_scores=True, dataset=args.dataset,
                                               range=900, mu=282)
-        # MicroAUC: 0.85929995526554, MacroAUC: 0.920296636882029
+        # MicroAUC: 0.8641764246223367, MacroAUC: 0.9296769389292342
 
 
     # print(f"MicroAUC: {micro_auc}, MacroAUC: {macro_auc}")
@@ -183,6 +183,7 @@ def evaluate_model(predictions, labels, videos, video_output,
             pred = filt(pred, range=range, mu=mu)
             pred = (pred - np.min(pred)) / (np.max(pred) - np.min(pred))
             pred = pred * 0.2 + video_output[idx] * 0.8
+            pred = filt(pred, range=160, mu=12)
         else:
             pred = pred + video_output[idx] * 0.21
             pred = filt(pred, range=range, mu=mu)
