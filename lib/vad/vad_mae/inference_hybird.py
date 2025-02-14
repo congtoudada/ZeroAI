@@ -58,6 +58,7 @@ def inference_hybird(model: torch.nn.Module, data_loader: Iterable,
     else:
         video_output_spatial, video_output_temporal, video_output_complete = remake_video_3d_output(video_output,
                                                                                                     dataset=args.dataset)
+
     video_output = [1 - l for l in video_output_complete]
 
     # -------------------------- vad-mae --------------------------
@@ -104,20 +105,42 @@ def inference_hybird(model: torch.nn.Module, data_loader: Iterable,
 
     if args.dataset == 'avenue':
         predictions = 10.5 * predictions_teacher + 5.3 * predictions_student_teacher + 5.3 * pred_anomalies
-        micro_auc, macro_auc = evaluate_model(predictions, labels, videos, video_output,
-                                              normalize_scores=False, dataset=args.dataset,
-                                              range=100, mu=11)
+        # MicroAUC: 0.9453523376633725, MacroAUC: 0.9403822652221759 range=120, mu=12, weight=0.8, normalize_scores=False
+        evaluate_model(predictions, labels, videos, video_output,
+                       normalize_scores=False, dataset=args.dataset,
+                       range=120, mu=12, weight=0.8, draw_vis=True)
+        # 粗搜索
+        # weight_params = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        # for i in range(10):
+        #     for w in weight_params:
+        #         evaluate_model(predictions, labels, videos, video_output,
+        #                        normalize_scores=False, dataset=args.dataset,
+        #                        range=100+i*20, mu=10+i*2, weight=w)
+        # 细搜索
+        # weight_params = [0.78, 0.79, 0.80, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86]  # avenue
+        # for w in weight_params:
+        #     evaluate_model(predictions, labels, videos, video_output,
+        #                    normalize_scores=False, dataset=args.dataset,
+        #                    range=120, mu=12, weight=w)
+
     else:
         if len(pred_anomalies) != 0:
             pred_anomalies = np.array(pred_anomalies)
             predictions = predictions_teacher + predictions_student_teacher + pred_anomalies
         else:
             predictions = predictions_teacher + predictions_student_teacher
-        micro_auc, macro_auc = evaluate_model(predictions, labels, videos, video_output,
-                                              normalize_scores=True, dataset=args.dataset,
-                                              range=900, mu=282)
-        # MicroAUC: 0.8641764246223367, MacroAUC: 0.9296769389292342
-
+        # MicroAUC: 0.8673084615770787, MacroAUC: 0.9290096902395378 range=50, mu=5, weight=0.3, normalize_scores=True
+        evaluate_model(predictions, labels, videos, video_output,
+                       normalize_scores=True, dataset=args.dataset,
+                       range=50, mu=5, weight=0.3, draw_vis=True)
+        # 网格搜索
+        # weight_params = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        # weight_params = [0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36]
+        # for i in range(15):
+        #     for w in weight_params:
+        #         evaluate_model(predictions, labels, videos, video_output,
+        #                        normalize_scores=True, dataset=args.dataset,
+        #                        range=10+i*10, mu=1+i*1, weight=w)
 
     # print(f"MicroAUC: {micro_auc}, MacroAUC: {macro_auc}")
 
@@ -129,88 +152,42 @@ def inference_hybird(model: torch.nn.Module, data_loader: Iterable,
 
 
 def evaluate_model(predictions, labels, videos, video_output,
-                   range=302, mu=21, normalize_scores=False, dataset="avenue"):
+                   range=302, mu=21, normalize_scores=False, dataset="avenue",
+                   weight=0.8, draw_vis=False):
     aucs = []
     filtered_preds = []
     filtered_labels = []
     for idx, vid in enumerate(np.unique(videos)):
         pred = predictions[np.array(videos) == vid]
-        # 补齐无对象帧结果
-        # for fid, _ in enumerate(pred):
-        #     if video_output[vid].__contains__(fid):
-        #         continue
-        #     else:
-        #         video_output[vid][fid] = [0.5, 0.5]
-        #         if fid > 1:
-        #             video_output[vid][fid][0] = video_output[vid][fid-1][0] * 0.5 + video_output[vid][fid-2][0] * 0.25
-        #             video_output[vid][fid][1] = video_output[vid][fid-1][1] * 0.5 + video_output[vid][fid-2][1] * 0.25
-        # fid = fids[np.array(videos) == vid]
-        # video_output[vid] = list(video_output[vid].values())
-        # ------------------------ max ------------------------
-        # video_output[vid] = np.array([max(pair[0], pair[1]) for pair in video_output[vid]])
-
-        # ------------------------ add ------------------------
-        # 0.21 MicroAUC: 0.9353282584667615, MacroAUC: 0.9028670567235408
-        # video_output[vid] = np.array([pair[0] * 0.25 + pair[1] * 0.75 for pair in video_output[vid]])
-
-        # 0.21 MicroAUC: 0.938568288496407, MacroAUC: 0.9222412295592993
-        # video_output[vid] = np.array([pair[0] * 0.5 + pair[1] * 0.5 for pair in video_output[vid]])
-
-        # 0.21 MicroAUC: 0.933944214206778, MacroAUC: 0.9315834605328955
-        # video_output[vid] = np.array([pair[0] * 0.75 + pair[1] * 0.25 for pair in video_output[vid]])
-
-        # 0.21 MicroAUC: 0.938319034582237, MacroAUC: 0.9299158508214856
-        # video_output[vid] = np.array([pair[0] * 0.6 + pair[1] * 0.4 for pair in video_output[vid]])
-
-        # 0.21 MicroAUC: 0.938319034582237, MacroAUC: 0.9299158508214856
-        # video_output[vid] = np.array([pair[0] * 0.65 + pair[1] * 0.35 for pair in video_output[vid]])
-
-        # 0.21 MicroAUC: 0.9380336667259613, MacroAUC: 0.9245246329731791
-        # video_output[vid] = np.array([pair[0] * 0.55 + pair[1] * 0.45 for pair in video_output[vid]])
-
-        # video_output[vid] = np.array([pair[0] * 1 + pair[1] * 0 for pair in video_output[vid]])
-
-        # pred = video_output[vid]
-        # pred += video_output[vid] * 0.3  # MicroAUC: 0.9239464530454763, MacroAUC: 0.9409956053829157
-        # pred += video_output[vid] * 0.25  # MicroAUC: 0.9263334040489463, MacroAUC: 0.9385036530054336
-        # pred += video_output[vid] * 0.23  # MicroAUC: 0.9267144964230156, MacroAUC: 0.9400302642977714
-        # pred += video_output[vid] * 0.22  # MicroAUC: 0.9274323513072198, MacroAUC: 0.9377439964789929
-        # pred += video_output[idx] * 0.21  # MicroAUC: 0.9275254124217831, MacroAUC: 0.9394392395403883
-        # pred += video_output[vid] * 0.2  # MicroAUC: 0.9272279012524745, MacroAUC: 0.9381994910451334
-        # pred += video_output[vid] * 0.18  # MicroAUC: 0.9268373289686024, MacroAUC: 0.9358369708170391
 
         if normalize_scores:
-            pred = filt(pred, range=range, mu=mu)
+            pred = filt(pred, range=900, mu=282)
             pred = (pred - np.min(pred)) / (np.max(pred) - np.min(pred))
-            pred = pred * 0.2 + video_output[idx] * 0.8
-            pred = filt(pred, range=160, mu=12)
+            pred = pred * weight + video_output[idx] * (1.0 - weight)
         else:
-            pred = pred + video_output[idx] * 0.21
-            pred = filt(pred, range=range, mu=mu)
+            pred = pred * weight + video_output[idx] * (1.0 - weight)
+
+        pred = filt(pred, range=range, mu=mu)
         pred = np.nan_to_num(pred, nan=0.)
-        # plt.plot(pred)
-        # plt.xlabel("Frames")
-        # plt.ylabel("Anomaly Score")
-        # plt.savefig(f"graphs/{vid}.png")
-        # plt.close()
         filtered_preds.append(pred)
         lbl = labels[np.array(videos) == vid]
         filtered_labels.append(lbl)
 
-        # pred + label
-        # Plot the anomaly score (pred) and the label (lbl) on the same graph
-        pred_norm = (pred - np.min(pred)) / (np.max(pred) - np.min(pred))
-        plt.plot(pred_norm, label='Anomaly Score', color='b')
-        plt.plot(lbl, label='Ground Truth', color='r', linestyle='--')
-        plt.xlabel("Frames")
-        plt.ylabel("Anomaly Score")
-        plt.legend()
-        plt.title(f"Anomaly Detection: Video {vid}")
+        if draw_vis:
+            # pred + label
+            # Plot the anomaly score (pred) and the label (lbl) on the same graph
+            pred_norm = (pred - np.min(pred)) / (np.max(pred) - np.min(pred))
+            plt.plot(pred_norm, label='Anomaly Score', color='b')
+            plt.plot(lbl, label='Ground Truth', color='r', linestyle='--')
+            plt.xlabel("Frames")
+            plt.ylabel("Anomaly Score")
+            plt.legend()
+            plt.title(f"Anomaly Detection: Video {vid}")
 
-        # Save the plot for this video
-        os.makedirs(f"lib/vad/vad_mae/experiments/graphs/{dataset}", exist_ok=True)
-        plt.savefig(f"lib/vad/vad_mae/experiments/graphs/{dataset}/{vid}.png")
-        plt.close()
+            # Save the plot for this video
+            os.makedirs(f"lib/vad/vad_mae/experiments/graphs/{dataset}", exist_ok=True)
+            plt.savefig(f"lib/vad/vad_mae/experiments/graphs/{dataset}/{vid}.png")
+            plt.close()
 
         lbl = np.array([0] + list(lbl) + [1])
         pred = np.array([0] + list(pred) + [1])
@@ -229,5 +206,6 @@ def evaluate_model(predictions, labels, videos, video_output,
     micro_auc = np.nan_to_num(micro_auc, nan=1.0)
 
     # gather the stats from all processes
-    print(f"MicroAUC: {micro_auc}, MacroAUC: {macro_auc}")
+    print(f"MicroAUC: {micro_auc}, MacroAUC: {macro_auc} range={range}, mu={mu}, "
+          f"weight={weight}, normalize_scores={normalize_scores}")
     return micro_auc, macro_auc

@@ -22,7 +22,7 @@ def video_label_length(dataset='shanghaitech'):
             video_length[f.split(".")[0]] = label.shape[0]
             length += label.shape[0]
     elif dataset in ['ped1', 'ped2', 'avenue']:
-        test_frame_path = 'lib/vad/jigsaw/' + dataset + '/testing/'
+        test_frame_path = 'H:/AI/dataset/VAD/Featurize_png/' + dataset + '/test/frames'
         files = sorted(os.listdir(test_frame_path))
         video_length = {}
         for f in files:
@@ -81,7 +81,7 @@ def load_objects(dataset, frame_num=7):
         total_frames += length
         for frame in range(start_ind, length - start_ind):
             if detect is not None:
-                print(f"video_file:{video_file} frame:{frame}")
+                # print(f"video_file:{video_file} frame:{frame}")
                 detect_result = detect[video_file][frame]
                 detect_result = detect_result[detect_result[:, 4] > filter_ratio, :]
                 object_num = detect_result.shape[0]
@@ -110,7 +110,7 @@ def remake_video_3d_output(video_output, dataset='ped2', frame_num=7):
     object_list = load_objects(dataset, frame_num=frame_num)
 
     video_length = video_label_length(dataset=dataset)
-    
+
 
     return_output_spatial = []
     return_output_temporal = []
@@ -152,11 +152,11 @@ def remake_video_3d_output(video_output, dataset='ped2', frame_num=7):
 
                 video_[loc_V3[1]: loc_V3[3] + 1, loc_V3[0]: loc_V3[2] + 1, fno] = \
                     np.minimum(
-                        video_[loc_V3[1]: loc_V3[3] + 1, loc_V3[0]: loc_V3[2] + 1,fno], 
+                        video_[loc_V3[1]: loc_V3[3] + 1, loc_V3[0]: loc_V3[2] + 1,fno],
                         score_)
                 video2_[loc_V3[1]: loc_V3[3] + 1, loc_V3[0]: loc_V3[2] + 1, fno] = \
                     np.minimum(
-                        video2_[loc_V3[1]: loc_V3[3] + 1, loc_V3[0]: loc_V3[2] + 1,fno], 
+                        video2_[loc_V3[1]: loc_V3[3] + 1, loc_V3[0]: loc_V3[2] + 1,fno],
                         score2_)
 
                 local_max_ = max(score_, local_max_)
@@ -175,7 +175,7 @@ def remake_video_3d_output(video_output, dataset='ped2', frame_num=7):
         score = np.stack((video_, video2_))
         score = torch.from_numpy(score).unsqueeze(1)
         score = score.permute((0, 1, 4, 2, 3)).float().cuda()
-        # padding 
+        # padding
         p3d = (dim // 2, dim // 2, dim // 2, dim // 2, dim // 2, dim // 2)
         score_padding = F.pad(score, p3d, mode='constant', value=1)
         # 3d mean filter
@@ -184,7 +184,7 @@ def remake_video_3d_output(video_output, dataset='ped2', frame_num=7):
 
         video_ = score_3d[0]
         video2_ = score_3d[1]
-        
+
 
         frame_scores = np.ones(video_length[video])
         frame_scores2 = np.ones(video_length[video])
@@ -192,8 +192,8 @@ def remake_video_3d_output(video_output, dataset='ped2', frame_num=7):
         for i in range(video_length[video]):
             frame_scores[i] =  0.5 * video_[:, :, i].min() + 0.5 * video2_[:, :, i].min()
             frame_scores2[i] = video_[:, :, i].min()
-            frame_scores3[i] = video2_[:, :, i].min() 
-        
+            frame_scores3[i] = video2_[:, :, i].min()
+
         frame_scores -= frame_scores.min()
         frame_scores /= frame_scores.max()
 
@@ -202,7 +202,7 @@ def remake_video_3d_output(video_output, dataset='ped2', frame_num=7):
 
         frame_scores3 -= frame_scores3.min()
         frame_scores3 /= frame_scores3.max()
-        
+
         return_output_complete.append(frame_scores)
         return_output_spatial.append(frame_scores2)
         return_output_temporal.append(frame_scores3)
@@ -212,7 +212,7 @@ def remake_video_3d_output(video_output, dataset='ped2', frame_num=7):
 def gaussian_filter_(support, sigma):
     mu = support[len(support) // 2 - 1]
     filter = 1.0 / (sigma * np.sqrt(2 * math.pi)) * np.exp(-0.5 * ((support - mu) / sigma) ** 2)
-    return filter  
+    return filter
 
 
 def remake_video_output(video_output, dataset='ped2'):
@@ -237,7 +237,7 @@ def remake_video_output(video_output, dataset='ped2'):
 
             local_max_ = max(object_record[:, 0].max(), local_max_)
             local_max2_ = max(object_record[:, 1].max(), local_max2_)
-        
+
         # spatial
         non_ones = (video_ != 1).nonzero()[0]
         local_max_ = max(video_[non_ones])
@@ -247,7 +247,7 @@ def remake_video_output(video_output, dataset='ped2'):
         non_ones = (video2_ != 1).nonzero()[0]
         local_max2_ = max(video2_[non_ones])
         video2_[non_ones] = (video2_[non_ones] - min(video2_)) / (local_max2_ - min(video2_))
-            
+
         video_ = score_smoothing(video_)
         video2_ = score_smoothing(video2_)
 
@@ -281,7 +281,7 @@ if __name__ == '__main__':
         video_output_spatial, video_output_temporal, video_output_complete = remake_video_output(output, dataset=args.dataset)
     else:
         video_output_spatial, video_output_temporal, video_output_complete = remake_video_3d_output(output, dataset=args.dataset, frame_num=args.frame_num)
-    
+
     evaluate_auc(video_output_spatial, dataset=args.dataset)
     evaluate_auc(video_output_temporal, dataset=args.dataset)
     evaluate_auc(video_output_complete,  dataset=args.dataset)
