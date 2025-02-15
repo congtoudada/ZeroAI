@@ -12,7 +12,7 @@ import pickle
 from sklearn import metrics
 import math
 import json
-DATA_DIR='H:/AI/dataset/VAD/Featurize_png'
+DATA_DIR = 'H:/AI/dataset/VAD/Featurize_png'
 
 # normalize scores in each sub video
 NORMALIZE = True
@@ -93,9 +93,9 @@ class GroundTruthLoader(object):
     }
 
     NAME_FRAMES_MAPPING = {
-        AVENUE: os.path.join(DATA_DIR, 'avenue/test'),
-        PED1: os.path.join(DATA_DIR, 'ped1/test'),
-        PED2: os.path.join(DATA_DIR, 'ped2/test'),
+        AVENUE: os.path.join(DATA_DIR, 'avenue/test/frames'),
+        PED1: os.path.join(DATA_DIR, 'ped1/test/frames'),
+        PED2: os.path.join(DATA_DIR, 'ped2/test/frames'),
         ENTRANCE: os.path.join(DATA_DIR, 'enter/test/frames'),
         EXIT: os.path.join(DATA_DIR, 'exit/test/frames')
     }

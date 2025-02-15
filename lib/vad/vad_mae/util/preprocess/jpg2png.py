@@ -7,7 +7,16 @@ def convert_jpg_to_png(file_path):
         # 打开图片文件
         with Image.open(file_path) as img:
             # 构造新的文件名，替换.jpg为.png
-            new_file_path = file_path.rsplit('.', 1)[0] + '.png'
+            # new_file_path = file_path.rsplit('.', 1)[0] + '.png'
+            # 获取文件名（不带路径和扩展名）
+            base_name = os.path.basename(file_path)
+            file_name_without_extension = os.path.splitext(base_name)[0]
+
+            # 去除文件名中的前导零
+            new_file_name = str(int(file_name_without_extension))  # 转换为整数后再转换回字符串，会去掉前导零
+
+            # 构造新的文件路径，替换为.png扩展名
+            new_file_path = os.path.join(os.path.dirname(file_path), f"{new_file_name}.png")
             # 将图片保存为png格式
             img.save(new_file_path, 'PNG')
             print(f"Converted: {file_path} -> {new_file_path}")
@@ -28,5 +37,5 @@ def traverse_and_convert(directory):
 
 
 if __name__ == "__main__":
-    directory = rf"H:\AI\dataset\VAD\Featurize\shanghaitech\test"
+    directory = rf"H:\AI\dataset\VAD\Featurize\ShanghaiTech\test"
     traverse_and_convert(directory)

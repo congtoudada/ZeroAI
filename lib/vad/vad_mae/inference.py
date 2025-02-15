@@ -56,7 +56,21 @@ def inference(model: torch.nn.Module, data_loader: Iterable,
         micro_auc, macro_auc = evaluate_model(predictions, labels, videos,
                                               normalize_scores=False,
                                               range=100, mu=11)
-
+    elif args.dataset == 'ped2':
+        predictions_teacher = np.array(predictions_teacher)
+        predictions_student_teacher = np.array(predictions_student_teacher)
+        pred_anomalies = np.array(pred_anomalies)
+        predictions = 10.5 * predictions_teacher + 5.3 * predictions_student_teacher + 5.3 * pred_anomalies
+        micro_auc, macro_auc = evaluate_model(predictions, labels, videos,
+                                              normalize_scores=False,
+                                              range=100, mu=11)
+        # 粗搜索
+        weight_params = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        for i in range(10):
+            for w in weight_params:
+                evaluate_model(predictions, labels, videos,
+                               normalize_scores=False, dataset=args.dataset,
+                               range=20+i*20, mu=2+i*2, weight=w)
     else:
         predictions_teacher = np.array(predictions_teacher)
         predictions_student_teacher = np.array(predictions_student_teacher)

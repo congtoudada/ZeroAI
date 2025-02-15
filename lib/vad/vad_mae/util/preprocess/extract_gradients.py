@@ -42,11 +42,9 @@ def compute_gradients(data_root_folder, step, folder):
 
 
 if __name__ == "__main__":
-    # Avenue
-    # root_folder_avenue = rf"H:\AI\dataset\VAD\Featurize\avenue"
-    # compute_gradients(root_folder_avenue, 1, "train")
-    # compute_gradients(root_folder_avenue, 1, "test")
-    # ShanghaiTech
-    root_folder_shanghai = rf"H:\AI\dataset\VAD\Featurize\shanghaitech"
-    compute_gradients(root_folder_shanghai, 1, "train")
-    compute_gradients(root_folder_shanghai, 1, "test")
+    # dataset = "avenue"
+    # dataset = "shanghaitech"
+    dataset = "ped2"
+    root_folder = f"H:/AI/dataset/VAD/Featurize_png/{dataset}"
+    compute_gradients(root_folder, 1, "train")
+    compute_gradients(root_folder, 1, "test")
