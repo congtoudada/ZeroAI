@@ -50,12 +50,16 @@ atomics
 setuptools
 requests
 
-# for docker env
+# docker env
 markdown-it-py==2.2.0
 
-# for reid
+# reid
 yacs
 timm
 ftfy
 regex
 faiss-cpu
+
+# vad
+ml_collections
+einops

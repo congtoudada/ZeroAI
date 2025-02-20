@@ -6,9 +6,9 @@ stream:
   # 实时视频流初始化丢帧数
   runtime_drop_count: 10
   # 读取频率（越大性能越好，准确率越低） eg.2: 每2帧里面读1帧
-  read_frequency: 2
+  read_frequency: 1
   # 画面缩小倍数（越大画面分辨率越低，性能越好）
   reduce_scale: 1
 
 # 算法update帧率（-1表示无上限）
-update_fps: -1
+update_fps: -1  # 实时视频流可以取-1
