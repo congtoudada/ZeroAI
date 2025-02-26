@@ -10,6 +10,7 @@ stream:
     enable: True
 
 vad:
+  empty_filter: True  # 空对象过滤：如果没有检测到任何对象就不进行异常检测（依赖目标检测）
   frame:  # 帧级别异常
     enable: True  # 是否支持帧级异常
     batch_optimize: True  # 是否优化batch

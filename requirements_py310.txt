@@ -1,0 +1,65 @@
+# Last Update: 2024-07-15-13:31:20
+# yolox + bytetrack
+numpy==1.23.2
+torch
+opencv-python
+loguru
+tqdm
+torchvision
+Pillow
+thop
+ninja
+tabulate
+tensorboard
+lap
+motmetrics
+filterpy
+h5py
+PyYaml
+onnx
+onnxruntime
+onnx-simplifier
+
+# face recognition
+matplotlib
+easydict
+opencv-contrib-python
+pandas
+scikit-learn
+scikit-image
+scipy
+seaborn
+xmltodict
+basetrainer
+pybaseutils
+toolz
+
+# pycocotools
+cython
+pycocotools
+cython_bbox
+
+# video_stream
+mediapipe
+httpx
+flask
+
+# optimize
+ultradict
+atomics
+setuptools
+requests
+
+# docker env
+markdown-it-py
+
+# reid
+yacs
+timm
+ftfy
+regex
+faiss-cpu
+
+# vad
+ml_collections
+einops

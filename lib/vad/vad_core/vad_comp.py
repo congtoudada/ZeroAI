@@ -61,12 +61,15 @@ class VadComponent(BasedStreamComponent):
             return frame, None
         # 解析额外数据
         stream_package = self.read_dict[read_idx][self.config.input_ports[read_idx]]
-        input_det = stream_package[DetectionKey.DET_PACKAGE_RESULT.name]  # 目标检测结果
+        input_det = None
+        if stream_package.__contains__(DetectionKey.DET_PACKAGE_RESULT.name):
+            input_det = stream_package[DetectionKey.DET_PACKAGE_RESULT.name]  # 目标检测结果
         return frame, input_det
 
     def on_handle_stream(self, idx, frame, input_det) -> object:
-        if input_det is None:  # 什么都没检测到，可返回
-            return None
+        if self.config.vad_empty_filter:
+            if input_det is None:  # 什么都没检测到，可返回
+                return None
         # 帧级别异常检测器 (无batch优化)
         # pass
         now = self.frame_id_cache[idx]
@@ -130,7 +133,7 @@ class VadComponent(BasedStreamComponent):
                 self.data_dict[i].update_frame_score(score, self.config.vad_frame_threshold,
                                                      self.config.vad_frame_times,
                                                      self.config.vad_frame_valid * 2)
-                # print(score)
+                print(score)
             # if len(frame_scores) > 0:
             #     print(frame_scores)
 
@@ -141,7 +144,7 @@ class VadComponent(BasedStreamComponent):
         text_scale = 1
         text_thickness = 1
         # 标题线
-        cv2.putText(frame, 'VAD threshold:%.2f frame:%.2f | obj_s:%.2f | obj_t:%.2f' %
+        cv2.putText(frame, 'VAD threshold:%.3f score:%.3f | obj_s:%.3f | obj_t:%.3f' %
                     (self.config.vad_frame_threshold, self.data_dict[idx].frame_score,
                      self.data_dict[idx].obj_s_score, self.data_dict[idx].obj_t_score),
                     (0, int(15 * text_scale)), cv2.FONT_HERSHEY_PLAIN, text_scale,

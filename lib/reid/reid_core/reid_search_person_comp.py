@@ -4,7 +4,7 @@ import os
 import time
 import traceback
 from UltraDict import UltraDict
-from flask import request
+from flask import Flask, request, jsonify
 from loguru import logger
 
 from reid_core.helper.reid_helper import ReidHelper
@@ -28,7 +28,7 @@ class ReidSearchPersonComp(BaseWebComponent):
         self.rsp_package = []
 
     def on_start(self):
-        # 处理 POST 请求
+        # 处理请求
         @BaseWebComponent.app.route('/search_person')
         def search_person():
             # 获取 GET 请求中名为 'param' 的参数
@@ -44,9 +44,10 @@ class ReidSearchPersonComp(BaseWebComponent):
                 # 添加第一张图
                 cam_id = img_path.split('_')[-1].split('.')[0]
                 self.rsp_package.append({
-                    "cam_id": cam_id,
-                    "time": time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime()),
-                    "img_path": img_path,
+                    "camId": cam_id,
+                    "recordTime": time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())
+                                      .replace("\\", "/"),
+                    "shot_img": img_path,
                     "score": 1.0,
                 })
                 # 轮询

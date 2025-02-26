@@ -14,7 +14,8 @@ import torch.nn.functional as F
 from einops import rearrange
 from einops.layers.torch import Rearrange
 
-from timm.layers import DropPath, trunc_normal_
+from timm.models.layers import DropPath, trunc_normal_  # py38
+# from timm.layers import DropPath, trunc_normal_  # py310
 from torchsummary import summary
 
 
