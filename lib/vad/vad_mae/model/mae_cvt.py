@@ -328,7 +328,6 @@ class MaskedAutoencoderCvT(nn.Module):
         loss = (preds_stud - preds_teacher) ** 2
         loss = loss.mean(dim=-1)  # [N, L], mean loss per patch
         loss = (loss * mask).sum() / mask.sum()  # mean loss on removed patches
-
         return loss
 
     def forward(self, imgs, targets, grad_mask=None, mask_ratio=0.75):
@@ -370,7 +369,8 @@ class MaskedAutoencoderCvT(nn.Module):
                 target_labels = einops.rearrange(target_labels, "(b p)-> b p", p=int(num_patches * (1 - mask_ratio)))
                 target_labels = (target_labels != -1) * 1
                 # cls_token = latent[:, -1]
-                pred_anomalies = torch.sigmoid(self.cls_anomalies(latent[:, 1:, :]).squeeze())
+                # pred_anomalies = torch.sigmoid(self.cls_anomalies(latent[:, 1:, :]).squeeze()) # 源代码
+                pred_anomalies = torch.sigmoid(self.cls_anomalies(latent[:, 1:, :]).squeeze(-1))
                 cls_loss = self.cls_loss(pred_anomalies, target_labels.float())
                 loss = loss + 0.5 * cls_loss
             if self.training:

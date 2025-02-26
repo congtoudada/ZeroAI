@@ -3,6 +3,7 @@ from zero.info.based_stream_info import BasedStreamInfo
 
 class VadInfo(BasedStreamInfo):
     def __init__(self, data: dict):
+        self.vad_empty_filter = True  # 空对象过滤：如果没有检测到任何对象就不进行异常检测（依赖目标检测）
         # ------------------- 帧级别异常检测 -------------------
         self.vad_frame_enable = False  # 是否支持帧级异常
         self.vad_frame_batch_optimize = True  # 是否优化batch

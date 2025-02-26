@@ -254,6 +254,7 @@ vad/setup.py
 vad/jigsaw/__init__.py
 vad/jigsaw/aggregate.py
 vad/jigsaw/dataset.py
+vad/jigsaw/export_gt.py
 vad/jigsaw/gen_patches.py
 vad/jigsaw/main.py
 vad/jigsaw/models/__init__.py
@@ -272,7 +273,6 @@ vad/vad_core/vad_comp.py
 vad/vad_core/vad_info.py
 vad/vad_core/vad_item.py
 vad/vad_mae/__init__.py
-vad/vad_mae/arguments.py
 vad/vad_mae/engine_train.py
 vad/vad_mae/inference.py
 vad/vad_mae/inference_hybird.py
@@ -300,6 +300,7 @@ vad/vad_mae/util/preprocess/extract_frames.py
 vad/vad_mae/util/preprocess/extract_gradients.py
 vad/vad_mae/util/preprocess/format_jpg.py
 vad/vad_mae/util/preprocess/jpg2png.py
+vad/vad_mae/util/preprocess/tif2png.py
 vad/vad_mae/zero/__init__.py
 vad/vad_mae/zero/vad_mae_helper.py
 vad/vad_mae/zero/vad_mae_info.py

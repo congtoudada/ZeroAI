@@ -23,7 +23,7 @@ class DetectionComponent(BasedStreamComponent, ABC):
         # 由子类on_start加载
         self.config: DetectionInfo = None  # config
         self.predictor: IDetectionWrapper = None  # 推理模型
-        self.conf = 1  # 置信度阈值
+        self.conf = 0.5
 
     def on_start(self):
         """
@@ -31,6 +31,7 @@ class DetectionComponent(BasedStreamComponent, ABC):
         :return:
         """
         super().on_start()
+        self.conf = self.config.detection_reid_conf  # reid存图置信度阈值
         for i, output_port in enumerate(self.config.output_ports):
             self.write_dict[i][output_port] = None  # yolox package
         if self.config.detection_reid_enable:
