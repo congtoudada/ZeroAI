@@ -16,6 +16,8 @@ class AbnormalDatasetGradientsTrain(torch.utils.data.Dataset):
         self.args = args
         if args.dataset == "avenue":
             data_path = args.avenue_path
+        elif args.dataset == "ped2":
+            data_path = args.ped2_path
         elif args.dataset == "shanghaitech":
             data_path = args.shanghai_path
         else:
@@ -47,11 +49,14 @@ class AbnormalDatasetGradientsTrain(torch.utils.data.Dataset):
             gradients_path = []
             for img_path in imgs_path:
                 gradients_path.append(os.path.join(data_path, "train", "gradients2", video_name,
-                                              f"{int(os.path.basename(img_path).split('.')[0])}.png"))
+                                                   f"{int(os.path.basename(img_path).split('.')[0])}.png")
+                                      .replace("\\", "/"))
                 abnormal_data.append(os.path.join(data_path, "train", "frames_abnormal", video_name,
-                                                  f"{int(os.path.basename(img_path).split('.')[0])}.png"))
+                                                  f"{int(os.path.basename(img_path).split('.')[0])}.png")
+                                     .replace("\\", "/"))
                 masks_abnormal.append(os.path.join(data_path, "train", "masks_abnormal", video_name,
-                                                  f"{int(os.path.basename(img_path).split('.')[0])}.png"))
+                                                   f"{int(os.path.basename(img_path).split('.')[0])}.png")
+                                      .replace("\\", "/"))
             gradients += gradients_path
         return abnormal_data, data, gradients, masks_abnormal
 
@@ -67,7 +72,7 @@ class AbnormalDatasetGradientsTrain(torch.utils.data.Dataset):
             # next_img = cv2.resize(next_img, self.args.usual_size[::-1])
             if self.input_3d:
                 img = np.concatenate([previous_img, img, next_img], axis=-1)
-            mask = cv2.imread(self.masks_abnormal[index])[:,:,:1]
+            mask = cv2.imread(self.masks_abnormal[index])[:, :, :1]
             # mask = cv2.resize(mask, self.args.usual_size[::-1])
             # mask = np.expand_dims(mask, axis=-1)
         else:
@@ -77,7 +82,7 @@ class AbnormalDatasetGradientsTrain(torch.utils.data.Dataset):
             next_img = self.read_prev_next_frame_if_exists(dir_path, frame_no, direction=3, length=len_frame_no)
             if self.input_3d:
                 img = np.concatenate([previous_img, img, next_img], axis=-1)
-            mask = np.zeros((img.shape[0],img.shape[1],1),dtype=np.uint8)
+            mask = np.zeros((img.shape[0], img.shape[1], 1), dtype=np.uint8)
         gradient = cv2.imread(self.gradients[index])
         target = cv2.imread(self.data[index])
 

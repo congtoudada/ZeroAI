@@ -15,6 +15,9 @@ class AbnormalDatasetGradientsTest(torch.utils.data.Dataset):
         if args.dataset == "avenue":
             data_path = args.avenue_path
             gt_path = args.avenue_gt_path
+        elif args.dataset == "ped2":
+            data_path = args.ped2_path
+            gt_path = args.ped2_gt_path
         elif args.dataset == "shanghaitech":
             data_path = args.shanghai_path
             gt_path = args.shanghai_gt_path
@@ -79,8 +82,6 @@ class AbnormalDatasetGradientsTest(torch.utils.data.Dataset):
         target = np.swapaxes(target, 0, -1).swapaxes(1, -1)
         gradient = np.swapaxes(gradient, 0, 1).swapaxes(0, -1)
         return img, gradient, target, self.labels[index], self.data[index].split('/')[-2], self.data[index]
-        # return (img, gradient, target, self.labels[index], self.data[index].split('/')[-2], self.data[index],
-        #         int(self.data[index].split('/')[-1].split('.')[0]))
 
 
     def extract_meta_info(self, data, index):

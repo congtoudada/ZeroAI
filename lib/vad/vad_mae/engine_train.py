@@ -82,11 +82,18 @@ def test_one_epoch(model: torch.nn.Module, data_loader: Iterable,
         grads = grads.to(device)
         targets = targets.to(device)
         _, _, _, recon_error = model(samples, grad_mask=grads, targets=targets, mask_ratio=args.mask_ratio)
+        cls_k = 0 if args.finetune else 0.53
         if isinstance(recon_error, list) or isinstance(recon_error, tuple):
-            if len(recon_error) == 2:  # 微调屏蔽分类头（后续都是微调，就不单独判断了）
-                recon_error = 1.05 * recon_error[0] + 0 * recon_error[1]
+            if args.pred_cls:
+                if len(recon_error) == 2:
+                    recon_error = 1.05 * recon_error[0] + cls_k * recon_error[1]
+                else:
+                    recon_error = 1.05 * recon_error[0] + 0.53 * recon_error[1] + cls_k * recon_error[2]
             else:
-                recon_error = 1.05 * recon_error[0] + 0.53 * recon_error[1] + 0 * recon_error[2]
+                if len(recon_error) == 1:
+                    recon_error = recon_error[0]
+                else:
+                    recon_error = 1.05 * recon_error[0] + 0.53 * recon_error[1]
         recon_error = recon_error.detach().cpu().numpy()
         predictions += list(recon_error)
 

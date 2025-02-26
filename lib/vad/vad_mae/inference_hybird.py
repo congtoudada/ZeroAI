@@ -123,6 +123,18 @@ def inference_hybird(model: torch.nn.Module, data_loader: Iterable,
         #                    normalize_scores=False, dataset=args.dataset,
         #                    range=120, mu=12, weight=w)
 
+    elif args.dataset == 'ped2':
+        predictions = 10.5 * predictions_teacher + 5.3 * predictions_student_teacher + 5.3 * pred_anomalies
+        evaluate_model(predictions, labels, videos, video_output,
+                       normalize_scores=False, dataset=args.dataset,
+                       range=20, mu=5, weight=0.2, draw_vis=False)
+        # 粗搜索
+        weight_params = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        for i in range(10):
+            for w in weight_params:
+                evaluate_model(predictions, labels, videos, video_output,
+                               normalize_scores=False, dataset=args.dataset,
+                               range=10+i*10, mu=12+2*i, weight=w)
     else:
         if len(pred_anomalies) != 0:
             pred_anomalies = np.array(pred_anomalies)

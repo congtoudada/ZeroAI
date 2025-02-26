@@ -10,14 +10,14 @@ from timm.utils import NativeScaler
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from configs.configs import get_configs_avenue, get_configs_shanghai
+from configs.configs import get_configs_avenue, get_configs_shanghai, get_configs_ped2
 from data.test_dataset import AbnormalDatasetGradientsTest
 from data.train_dataset import AbnormalDatasetGradientsTrain
 from engine_train import train_one_epoch, test_one_epoch
 from inference import inference
 from jigsaw.dataset import VideoAnomalyDataset_C3D
 from jigsaw.models.model import WideBranchNet
-from model.model_factory import mae_cvt_patch16, mae_cvt_patch8
+from model.model_factory import mae_cvt_patch16, mae_cvt_patch8, mae_cvt_patch4
 from util import misc
 import torch
 
@@ -57,6 +57,13 @@ def main(args):
                                 masking_method=args.masking_method,
                                 grad_weighted_loss=args.grad_weighted_rec_loss,
                                 pred_cls=args.pred_cls).float()
+    elif args.dataset == 'ped2':
+        model = mae_cvt_patch4(norm_pix_loss=args.norm_pix_loss, img_size=args.input_size,
+                               use_only_masked_tokens_ab=args.use_only_masked_tokens_ab,
+                               abnormal_score_func=args.abnormal_score_func,
+                               masking_method=args.masking_method,
+                               grad_weighted_loss=args.grad_weighted_rec_loss,
+                               pred_cls=args.pred_cls).float()
     else:
         model = mae_cvt_patch8(norm_pix_loss=args.norm_pix_loss, img_size=args.input_size,
                                use_only_masked_tokens_ab=args.use_only_masked_tokens_ab,
@@ -90,7 +97,8 @@ def main(args):
                                                   detect_dir=detect_pkl,
                                                   fliter_ratio=args.filter_ratio,
                                                   frame_num=args.sample_num)
-        testing_data_loader = DataLoader(testing_dataset, batch_size=256, shuffle=False, num_workers=args.num_workers, drop_last=False)
+        testing_data_loader = DataLoader(testing_dataset, batch_size=256, shuffle=False, num_workers=args.num_workers,
+                                         drop_last=False)
 
         # inference
         with torch.no_grad():
@@ -153,12 +161,14 @@ def do_training(args, data_loader_test, data_loader_train, device, log_writer, m
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, default='shanghaitech')
+    parser.add_argument('--dataset', type=str, default='ped2')
     args = parser.parse_args()
     if args.dataset == 'avenue':
         args = get_configs_avenue()
+    elif args.dataset == 'ped2':
+        args = get_configs_ped2()
     else:
-        args = get_configs_shanghai()  #
+        args = get_configs_shanghai()
     if args.output_dir:
         Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     main(args)

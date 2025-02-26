@@ -868,18 +868,18 @@ if __name__ == '__main__':
     # summary(Baseline, (N, D))
     #
     # print("*********************************************")
-    # Model1 = AgentAttention(dim=D, num_heads=num_heads, qkv_bias=False, attn_drop=0., proj_drop=0.,
-    #                         agent_num=49, height=H, width=W, with_cls_token=False)
-    # Model1.to(device)
-    # out = Model1(X)
-    # X = torch.randn(1, N, D).to(device)
-    # start_time = time.time()
-    # for i in range(run_cnt):
-    #     out = Model1(X)
-    # end_time = time.time()
-    # print(f"AgentAttention执行时间: {end_time - start_time} 秒")
-    # print(out.shape)
-    # summary(Model1, (N, D))
+    Model1 = AgentAttention(dim=D, num_heads=num_heads, qkv_bias=False, attn_drop=0., proj_drop=0.,
+                            agent_num=49, height=H, width=W, with_cls_token=False)
+    Model1.to(device)
+    out = Model1(X)
+    X = torch.randn(1, N, D).to(device)
+    start_time = time.time()
+    for i in range(run_cnt):
+        out = Model1(X)
+    end_time = time.time()
+    print(f"AgentAttention执行时间: {end_time - start_time} 秒")
+    print(out.shape)
+    summary(Model1, (N, D))
 
     # print("**************************************************")
     # Model2 = HiLo(dim=D, num_heads=num_heads, window_size=2, alpha=0.5, with_cls_token=False)
@@ -908,18 +908,18 @@ if __name__ == '__main__':
     # print(out.shape)
     # summary(Model3, (N, D))
 
-    print("*********************************************")
-    Model4 = P2TAttention(
-        dim=256, num_heads=8, qkv_bias=True, qk_scale=None,
-        attn_drop=0., proj_drop=0., pool_ratios=(1, 3, 6)).to("cuda")
-    Model4.to(device)
-    X = X.reshape(B, N, D)
-    out = Model4(X)
-    X = torch.randn(1, N, D).to(device)
-    start_time = time.time()
-    for i in range(run_cnt):
-        out = Model4(X)
-    end_time = time.time()
-    print(f"P2TAttention执行时间: {end_time - start_time} 秒")
-    print(out.shape)
-    summary(Model4, (N, D))
+    # print("*********************************************")
+    # Model4 = P2TAttention(
+    #     dim=256, num_heads=8, qkv_bias=True, qk_scale=None,
+    #     attn_drop=0., proj_drop=0., pool_ratios=(1, 3, 6)).to("cuda")
+    # Model4.to(device)
+    # X = X.reshape(B, N, D)
+    # out = Model4(X)
+    # X = torch.randn(1, N, D).to(device)
+    # start_time = time.time()
+    # for i in range(run_cnt):
+    #     out = Model4(X)
+    # end_time = time.time()
+    # print(f"P2TAttention执行时间: {end_time - start_time} 秒")
+    # print(out.shape)
+    # summary(Model4, (N, D))
