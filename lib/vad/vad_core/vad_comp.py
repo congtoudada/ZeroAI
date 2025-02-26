@@ -98,8 +98,12 @@ class VadComponent(BasedStreamComponent):
                     # input_det_scale[:, [1, 3]] *= self.aspect_scale[idx][0]  # height scale
                     scores = self.vad_obj_helper.inference(batch, middle_det)
                     item.last_obj_id = now
-                    # print(f"{self.frame_id_cache[idx]}: {scores[0] * 100:.3f} | {scores[1] * 100:.3f}")
                     print(f"{self.frame_id_cache[idx]}: {scores[0] * 100:.3f} | {scores[1] * 100:.3f}")
+                    self.data_dict[idx].update_obj_score(1.0-scores[0], 1.0-scores[1],
+                                                         self.config.vad_obj_spatial_threshold,
+                                                         self.config.vad_obj_temporal_threshold,
+                                                         self.config.vad_obj_s_times, self.config.vad_obj_t_times,
+                                                         self.config.vad_obj_valid * 2)
         return input_det
 
     def on_update(self):
@@ -124,8 +128,9 @@ class VadComponent(BasedStreamComponent):
             frame_scores = self.vad_frame_helper.inference_batch(batches)  # 各个摄像头帧List
             for i, score in enumerate(frame_scores):
                 self.data_dict[i].update_frame_score(score, self.config.vad_frame_threshold,
-                                                     self.config.vad_frame_times, self.config.vad_frame_valid)
-                print(score)
+                                                     self.config.vad_frame_times,
+                                                     self.config.vad_frame_valid * 2)
+                # print(score)
             # if len(frame_scores) > 0:
             #     print(frame_scores)
 
@@ -136,12 +141,14 @@ class VadComponent(BasedStreamComponent):
         text_scale = 1
         text_thickness = 1
         # 标题线
-        cv2.putText(frame, 'video anomaly detection! threshold:%.2f score:%.2f' %
-                    (self.config.vad_frame_threshold, self.data_dict[idx].frame_score),
+        cv2.putText(frame, 'VAD threshold:%.2f frame:%.2f | obj_s:%.2f | obj_t:%.2f' %
+                    (self.config.vad_frame_threshold, self.data_dict[idx].frame_score,
+                     self.data_dict[idx].obj_s_score, self.data_dict[idx].obj_t_score),
                     (0, int(15 * text_scale)), cv2.FONT_HERSHEY_PLAIN, text_scale,
                     (0, 0, 255), thickness=text_thickness)
         # 设置字体和大小
-        if self.data_dict[idx].frame_valid >= self.config.vad_frame_valid:
+        if (self.data_dict[idx].frame_valid >= self.config.vad_frame_valid or
+                self.data_dict[idx].obj_valid >= self.config.vad_obj_valid):
             font = cv2.FONT_HERSHEY_SIMPLEX
             font_scale = 1
             font_color = (0, 0, 255)  # 红色

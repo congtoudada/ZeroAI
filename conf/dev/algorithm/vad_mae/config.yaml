@@ -25,8 +25,13 @@ vad:
   obj:  # 对象级异常
     enable: False  # 是否支持对象级异常
     config: ""  # 对象级异常检测配置
+    spatial_threshold: 0.96  # 空间异常阈值  高于该阈值视为异常
+    temporal_threshold: 0.9  # 时间异常阈值  高于该阈值视为异常
+    s_times: 2  # 空间异常倍数
+    t_times: 3  # 时间异常倍数
+    valid: 6  # 连续几帧检测到异常才视为异常 (受异常倍数影响)
     det_conf: 0.8  # 目标检测置信度
     nums: 7  # 对象级别异常单次执行至少需要的图片数  (也是sample_nums)
-    interval: 3  # 每隔n帧进行一次异常检测，如果检测到异常则n帧都视为异常
+    interval: 5  # 每隔n帧进行一次异常检测，如果检测到异常则n帧都视为异常
 
 update_fps: 300

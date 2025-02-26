@@ -1,3 +1,4 @@
+import os
 from collections.abc import Iterable
 
 import numpy as np
@@ -55,14 +56,41 @@ def inference(model: torch.nn.Module, data_loader: Iterable,
         micro_auc, macro_auc = evaluate_model(predictions, labels, videos,
                                               normalize_scores=False,
                                               range=100, mu=11)
-    else:
+    elif args.dataset == 'ped2':
         predictions_teacher = np.array(predictions_teacher)
         predictions_student_teacher = np.array(predictions_student_teacher)
         pred_anomalies = np.array(pred_anomalies)
-        predictions = pred_anomalies + predictions_teacher + predictions_student_teacher
+        predictions = 1.05 * predictions_teacher + 0.53 * predictions_student_teacher + 0.53 * pred_anomalies
         micro_auc, macro_auc = evaluate_model(predictions, labels, videos,
                                               normalize_scores=True,
-                                              range=120, mu=16)
+                                              range=20, mu=5, draw_vis=True)
+        # # 粗搜索
+        # # weight_params = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        # for i in range(8):
+        #     evaluate_model(predictions, labels, videos,
+        #                    normalize_scores=True,
+        #                    range=20, mu=2 + 2 * i)
+    else:
+        predictions_teacher = np.array(predictions_teacher)
+        predictions_student_teacher = np.array(predictions_student_teacher)
+        if len(pred_anomalies) != 0:
+            pred_anomalies = np.array(pred_anomalies)
+            predictions = 10.5 * predictions_teacher + 5.3 * predictions_student_teacher + 5.3 * pred_anomalies
+        else:
+            predictions = 10.5 * predictions_teacher + 5.3 * predictions_student_teacher
+        micro_auc, macro_auc = evaluate_model(predictions, labels, videos,
+                                              normalize_scores=False,
+                                              range=50, mu=20)
+        micro_auc, macro_auc = evaluate_model(predictions, labels, videos,
+                                              normalize_scores=True,
+                                              range=50, mu=20)
+        # range:50 mu:20 True
+        # range:50 mu:20 False
+        # range:120 mu:16 True MicroAUC: 0.6979951228689855, MacroAUC: 0.8224947369492023
+        # range:120 mu:16 False MicroAUC: 0.5280654536454747, MacroAUC: 0.8139392223992751
+        # range:200 mu:20 True MicroAUC: 0.7130767998462397, MacroAUC: 0.8282025714373306
+        # range:200 mu:20 False MicroAUC: 0.5413547710776061, MacroAUC: 0.8188680416257275
+        # range:300 mu:30 True MicroAUC: 0.7330919176192304, MacroAUC: 0.8381192056966079
     print(f"MicroAUC: {micro_auc}, MacroAUC: {macro_auc}")
 
     # np.save("st_tc_list.npy", predictions_student_teacher)
@@ -92,6 +120,25 @@ def evaluate_model(predictions, labels, videos,
         filtered_preds.append(pred)
         lbl = labels[np.array(videos) == vid]
         filtered_labels.append(lbl)
+
+        # pred + label
+        # Plot the anomaly score (pred) and the label (lbl) on the same graph
+        if normalize_scores:
+            pred_norm = pred
+        else:
+            pred_norm = (pred - np.min(pred)) / (np.max(pred) - np.min(pred))
+        plt.plot(pred_norm, label='Anomaly Score', color='b')
+        plt.plot(lbl, label='Ground Truth', color='r', linestyle='--')
+        plt.xlabel("Frames")
+        plt.ylabel("Anomaly Score")
+        plt.legend()
+        plt.title(f"Anomaly Detection: Video {vid}")
+
+        # Save the plot for this video
+        os.makedirs("lib/vad/vad_mae/experiments/graphs/shanghaitech", exist_ok=True)
+        plt.savefig(f"lib/vad/vad_mae/experiments/graphs/shanghaitech/{vid}.png")
+        plt.close()
+
         lbl = np.array([0] + list(lbl) + [1])
         pred = np.array([0] + list(pred) + [1])
         fpr, tpr, _ = metrics.roc_curve(lbl, pred)

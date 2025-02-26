@@ -19,6 +19,7 @@ from aggregate import remake_video_output, evaluate_auc, remake_video_3d_output
 
 torch.backends.cudnn.benchmark = False
 
+
 # Config
 def get_configs():
     parser = argparse.ArgumentParser(description="VAD-Jigsaw config")
@@ -49,17 +50,17 @@ def train(args):
     else:
         running_date = args.log_date
     print("The running_data : {}".format(running_date))
-    for k,v in vars(args).items():
+    for k, v in vars(args).items():
         print("-------------{} : {}".format(k, v))
 
     # Load Data
-    data_dir = f"/irip/wangguodong_2020/projects/datasets/vad/{args.dataset}/training"
-    detect_pkl = f'detect/{args.dataset}_train_detect_result_yolov3.pkl'
+    data_dir = f"H:/AI/dataset/VAD/Featurize_png/{args.dataset}/train/frames"
+    detect_pkl = f'lib/vad/jigsaw/detect/{args.dataset}_train_detect_result_yolov3.pkl'
 
-    vad_dataset = VideoAnomalyDataset_C3D(data_dir, 
+    vad_dataset = VideoAnomalyDataset_C3D(data_dir,
                                           dataset=args.dataset,
                                           detect_dir=detect_pkl,
-                                          fliter_ratio=args.filter_ratio, 
+                                          fliter_ratio=args.filter_ratio,
                                           frame_num=args.sample_num,
                                           static_threshold=args.static_threshold)
 
@@ -81,7 +82,7 @@ def train(args):
     optimizer = optim.Adam(params=net.parameters(), lr=1e-4)
 
     # Train
-    log_dir = './log/{}/'.format(running_date)
+    log_dir = './logs/{}/'.format(running_date)
     writer = SummaryWriter(log_dir)
 
     t0 = time.time()
@@ -92,7 +93,8 @@ def train(args):
 
     for epoch in range(args.epochs):
         for it, data in enumerate(vad_dataloader):
-            video, obj, temp_labels, spat_labels, t_flag = data['video'], data['obj'], data['label'], data["trans_label"], data["temporal"]
+            video, obj, temp_labels, spat_labels, t_flag = data['video'], data['obj'], data['label'], data[
+                "trans_label"], data["temporal"]
             n_temp = t_flag.sum().item()
 
             obj = obj.cuda(args.device, non_blocking=True)
@@ -117,8 +119,9 @@ def train(args):
             writer.add_scalar('Train/Spatial', spat_loss.item(), global_step=global_step)
 
             if (global_step + 1) % args.print_interval == 0:
-                print("[{}:{}/{}]\tloss: {:.6f} t_loss: {:.6f} s_loss: {:.6f} \ttime: {:.6f}".\
-                        format(epoch, it + 1, len(vad_dataloader), loss.item(), temp_loss.item(), spat_loss.item(),  time.time() - t0))
+                print("[{}:{}/{}]\tloss: {:.6f} t_loss: {:.6f} s_loss: {:.6f} \ttime: {:.6f}". \
+                      format(epoch, it + 1, len(vad_dataloader), loss.item(), temp_loss.item(), spat_loss.item(),
+                             time.time() - t0))
                 t0 = time.time()
 
             global_step += 1
@@ -136,7 +139,7 @@ def train(args):
 
                 print('cur max: ' + str(max_acc) + ' in ' + timestamp_in_max)
                 net = net.train()
-            
+
 
 def val(args, net=None):
     if not args.log_date:
@@ -146,10 +149,10 @@ def val(args, net=None):
     print("The running_date : {}".format(running_date))
 
     # Load Data
-    data_dir = f"/irip/wangguodong_2020/projects/datasets/vad/{args.dataset}/testing"
-    detect_pkl = f'detect/{args.dataset}_test_detect_result_yolov3.pkl'
+    data_dir = f"H:/AI/dataset/VAD/Featurize_png/{args.dataset}/test/frames"
+    detect_pkl = f'lib/vad/jigsaw/detect/{args.dataset}_test_detect_result_yolov3.pkl'
 
-    testing_dataset = VideoAnomalyDataset_C3D(data_dir, 
+    testing_dataset = VideoAnomalyDataset_C3D(data_dir,
                                               dataset=args.dataset,
                                               detect_dir=detect_pkl,
                                               fliter_ratio=args.filter_ratio,
@@ -163,7 +166,7 @@ def val(args, net=None):
         videos = data["video"]
         frames = data["frame"].tolist()
         obj = data["obj"].cuda(args.device)
-    
+
         with torch.no_grad():
             temp_logits, spat_logits = net(obj)
             temp_logits = temp_logits.view(-1, args.sample_num, args.sample_num)
@@ -176,7 +179,7 @@ def val(args, net=None):
         temp_probs = F.softmax(temp_logits, -1)
         diag2 = torch.diagonal(temp_probs, offset=0, dim1=-2, dim2=-1)
         scores2 = diag2.min(-1)[0].cpu().numpy()
-        
+
         for video_, frame_, s_score_, t_score_ in zip(videos, frames, scores, scores2):
             if video_ not in video_output:
                 video_output[video_] = {}
@@ -189,13 +192,15 @@ def val(args, net=None):
 
 
 def save_and_evaluate(video_output, running_date, dataset='shanghaitech'):
-    pickle_path = './log/video_output_ori_{}.pkl'.format(running_date)
+    pickle_path = './logs/video_output_ori_{}.pkl'.format(running_date)
     with open(pickle_path, 'wb') as write:
         pickle.dump(video_output, write, pickle.HIGHEST_PROTOCOL)
     if dataset == 'shanghaitech':
-        video_output_spatial, video_output_temporal, video_output_complete = remake_video_output(video_output, dataset=dataset)
+        video_output_spatial, video_output_temporal, video_output_complete = remake_video_output(video_output,
+                                                                                                 dataset=dataset)
     else:
-        video_output_spatial, video_output_temporal, video_output_complete = remake_video_3d_output(video_output, dataset=dataset)
+        video_output_spatial, video_output_temporal, video_output_complete = remake_video_3d_output(video_output,
+                                                                                                    dataset=dataset)
     evaluate_auc(video_output_spatial, dataset=dataset)
     evaluate_auc(video_output_temporal, dataset=dataset)
     smoothed_res, smoothed_auc_list = evaluate_auc(video_output_complete, dataset=dataset)
@@ -207,3 +212,5 @@ if __name__ == '__main__':
         os.makedirs('checkpoint')
     args = get_configs()
     train(args)
+    # --dataset shanghaitech --sample_num 9 --checkpoint pretrained/stc_84.24.pth
+    # --dataset avenue --sample_num 7 --checkpoint pretrained/avenue_92.18.pth

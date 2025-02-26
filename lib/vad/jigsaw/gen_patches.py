@@ -176,8 +176,8 @@ if __name__ == '__main__':
     parser.add_argument("--sample_num", type=int, default=7)
 
     args = parser.parse_args()
-    data_dir = "H:/AI/dataset/VAD/Featurize/"  # directory for raw frames
-    shanghai_dataset = VideoAnomalyDataset(data_dir=data_dir + args.dataset.capitalize() + '/' + args.phase + '/frames/',
+    data_dir = "H:/AI/dataset/VAD/Featurize_png/"  # directory for raw frames
+    shanghai_dataset = VideoAnomalyDataset(data_dir=data_dir + args.dataset + '/' + args.phase + '/frames/',
                                            detect_dir='detect/' + args.dataset + '_' + args.phase + '_detect_result_yolov3.pkl',
                                            dataset=args.dataset,
                                            filter_ratio=args.filter_ratio,
