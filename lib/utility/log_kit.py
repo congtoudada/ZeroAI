@@ -70,6 +70,8 @@ class LogKit:
         # 使用os.walk()遍历文件夹
         for root, dirs, files in os.walk(folder):
             for filename in files:
+                if not filename.endswith('.log'):
+                    continue
                 file_path = os.path.join(root, filename)
                 month = int(file_path.split('-')[1])
 

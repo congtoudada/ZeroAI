@@ -26,7 +26,6 @@ class YoloxComponent(DetectionComponent):
         exp = get_exp(self.config.yolox_args_exp_file, self.config.yolox_args_name)
         # 创建zero框架版的yolox目标检测器
         self.predictor = create_zero_predictor(self.config, exp, self.pname)
-        self.conf = self.config.yolox_args_conf
 
 
 def create_process(shared_memory, config_path: str):
