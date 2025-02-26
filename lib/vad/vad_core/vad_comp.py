@@ -133,7 +133,7 @@ class VadComponent(BasedStreamComponent):
                 self.data_dict[i].update_frame_score(score, self.config.vad_frame_threshold,
                                                      self.config.vad_frame_times,
                                                      self.config.vad_frame_valid * 2)
-                print(score)
+                # print(score)
             # if len(frame_scores) > 0:
             #     print(frame_scores)
 
