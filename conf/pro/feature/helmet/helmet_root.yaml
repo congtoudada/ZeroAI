@@ -1,0 +1,12 @@
+INCLUDE:
+  - conf/pro/feature/double_match.yaml
+  - conf/pro/algorithm/yolox/labels/helmet_labels.yaml
+
+stream:
+  output_dir: output/feature/helmet  # 输出目录
+  save_video:
+    filename: helmet
+dm:
+  match_method: 0  # 0:里外包围盒匹配  1:基于L2匹配
+  warn_type: 2  # 报警类型 (1:phone 2:helmet 3:card 4:intrude)
+  reid_enable: False  # 是否支持reid

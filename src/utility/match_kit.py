@@ -63,7 +63,7 @@ class MatchKit(object):
     def match_l2(main_boxes: List[DetectionRecord], sub_boxes: List[DetectionRecord],
                  tolerance: int = 10000) -> (List[int], List[int]):
         """
-        基于l2匹配: 找到相距最近的main_box和sub_box，且距离不得超过tolerance**2像素
+        基于l2匹配: 找到相距最近的main_box和sub_box，且距离不得超过tolerance像素
         匹配成功返回各自obj_id（-1代表匹配失败）
         TODO: 如果目标对象很多，可在比较过程中删除记录，加速这个过程
         """
@@ -79,6 +79,7 @@ class MatchKit(object):
             for j, sub_box in enumerate(sub_boxes):
                 if sub_box.has_match:
                     continue
+                # 人（取上半身）
                 sub_center_x = (sub_box.ltrb[0] + sub_box.ltrb[2]) / 2.
                 sub_center_y = (sub_box.ltrb[1] + sub_box.ltrb[3]) / 2.
 

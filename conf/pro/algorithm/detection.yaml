@@ -1,0 +1,18 @@
+INCLUDE:
+  - conf/pro/global/config.yaml
+  - conf/pro/global/based_stream.yaml
+
+detection:
+  reid_enable: False  # 是否支持reid存图(若支持，会定期对第0个类别发送reid存图请求)
+  reid_conf: 0.7  # reid存图阈值
+  reid_interval: 24  # 间隔多少帧发送一次reid存图请求
+
+stream:
+  output_dir: output/detection/yolox  # 输出目录
+  save_video:
+    enable: True  # 是否保存视频
+  draw_vis:
+    enable: True  # 是否可视化
+
+# 更新帧率（-1表示无上限）
+update_fps: 300

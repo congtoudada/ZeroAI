@@ -5,8 +5,8 @@ from zero.core.launch_comp import LaunchComponent
 
 
 def make_parser():
-    parser = argparse.ArgumentParser("ZeroAI Development!")
-    parser.add_argument("-app", "--application", type=str, default="conf/application-dev.yaml")
+    parser = argparse.ArgumentParser("ZeroAI Production!")
+    parser.add_argument("-app", "--application", type=str, default="conf/application-pro.yaml")
     return parser
 
 

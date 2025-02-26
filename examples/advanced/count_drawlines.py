@@ -11,15 +11,15 @@ from utility.yaml_kit import YamlKit
 
 # 用户设置变量
 # 图片设置
-img_path = "scripts/resources/Snipaste_2024-11-12_14-19-13.png"  # 打开本地图片
+img_path = "examples/advanced/imgs/Snipaste_2025-02-26_14-26-47.png"  # 打开本地图片
 # 视频设置
 vid_path = "res/videos/202411/count1.mp4"  # 打开视频路径
 frame_index = 50  # 替换为你想要读取的帧索引
 # 通用配置
 run_mode = 0  # 0 代表使用本地图片 1 代表使用本地视频
 expect_preview = (1280, 720)  # 期望分辨率
-input_file = "scripts/output/draw_line.yaml"  # 预览路径，每次会可视化该路径的结果，方便对比
-output_file = "scripts/output/draw_line.yaml"  # 输出路径（根据需求可以设置得和预览路径一样或不同）
+input_file = "examples/advanced/outputs/draw_line.yaml"  # 预览路径，每次会可视化该路径的结果，方便对比
+output_file = "examples/advanced/outputs/draw_line.yaml"  # 输出路径（根据需求可以设置得和预览路径一样或不同）
 auto_save = True
 mode_str = ['red', 'green']
 mode_idx = 0  # 0:red 1:green

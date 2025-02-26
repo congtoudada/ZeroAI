@@ -1,0 +1,12 @@
+INCLUDE:
+  - conf/pro/algorithm/yolox/labels/person_labels.yaml
+
+bytetrack:
+  args:
+    fps: 30 # frame rate (fps)
+    thresh: 0.5 # tracking confidence threshold
+    buffer: 30 # the frames for keep lost tracks
+    match_thresh: 0.8 # matching threshold for tracking
+    aspect_ratio_thresh: 5 # threshold for filtering out boxes of which aspect ratio are above the given value.
+    min_box_area: 5 # filter out tiny boxes
+    mot20: False

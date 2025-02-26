@@ -142,6 +142,7 @@ class RenlianComponent(CountComponent):
 
         # 保存图片
         try:
+            logger.info(f"{self.pname} reid存图: {image_path}")
             cv2.imwrite(image_path, img)
         except Exception as e:
             print(f"错误: 保存图像失败 - {e}")

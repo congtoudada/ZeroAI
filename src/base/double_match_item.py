@@ -47,14 +47,13 @@ class DoubleMatchItem:
             else:  # 不同则重置
                 self.valid_count = 0
                 self.main_cls = main_cls
+            # print(f"valid count: {self.valid_count}")
 
     def common_update(self, last_update_id, sub_ltrb):
         self.last_update_id = last_update_id
         self.sub_ltrb = sub_ltrb
-        if not self.main_valid:  # 当前帧无匹配项 -1分
+        if not self.main_valid and self.valid_count >= 1:  # 当前帧无匹配项 -1分
             self.valid_count -= 1
-            if self.valid_count < 0:
-                self.valid_count = 0
         else:
             self.main_valid = False
 
