@@ -59,8 +59,9 @@ class ReidComponent(Component):
         if self.config.reid_debug_enable:
             if not os.path.exists(self.config.reid_debug_output):
                 os.makedirs(self.config.reid_debug_output, exist_ok=True)
-        if not os.path.exists(self.config.reid_face_gallery_dir):
-            os.makedirs(self.config.reid_face_gallery_dir, exist_ok=True)
+        if os.path.exists(self.config.reid_face_gallery_dir):
+            shutil.rmtree(self.config.reid_face_gallery_dir)
+        os.makedirs(self.config.reid_face_gallery_dir, exist_ok=True)
         if os.path.exists(self.config.reid_camera_gallery_dir):
             shutil.rmtree(self.config.reid_camera_gallery_dir)
         os.makedirs(self.config.reid_camera_gallery_dir, exist_ok=True)
