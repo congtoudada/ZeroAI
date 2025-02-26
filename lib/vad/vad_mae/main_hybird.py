@@ -7,16 +7,21 @@ from pathlib import Path
 
 from timm.optim import optim_factory
 from timm.utils import NativeScaler
+from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from configs.configs import get_configs_avenue, get_configs_shanghai
+from configs.configs import get_configs_avenue, get_configs_shanghai, get_configs_ped2
 from data.test_dataset import AbnormalDatasetGradientsTest
 from data.train_dataset import AbnormalDatasetGradientsTrain
 from engine_train import train_one_epoch, test_one_epoch
 from inference import inference
-from model.model_factory import mae_cvt_patch16, mae_cvt_patch8
+from jigsaw.dataset import VideoAnomalyDataset_C3D
+from jigsaw.models.model import WideBranchNet
+from model.model_factory import mae_cvt_patch16, mae_cvt_patch8, mae_cvt_patch4
 from util import misc
 import torch
+
+from vad_mae.inference_hybird import inference_hybird
 
 
 def main(args):
@@ -50,29 +55,54 @@ def main(args):
                                 use_only_masked_tokens_ab=args.use_only_masked_tokens_ab,
                                 abnormal_score_func=args.abnormal_score_func,
                                 masking_method=args.masking_method,
-                                mask_ratio=args.mask_ratio,
                                 grad_weighted_loss=args.grad_weighted_rec_loss,
                                 pred_cls=args.pred_cls).float()
+    elif args.dataset == 'ped2':
+        model = mae_cvt_patch4(norm_pix_loss=args.norm_pix_loss, img_size=args.input_size,
+                               use_only_masked_tokens_ab=args.use_only_masked_tokens_ab,
+                               abnormal_score_func=args.abnormal_score_func,
+                               masking_method=args.masking_method,
+                               grad_weighted_loss=args.grad_weighted_rec_loss,
+                               pred_cls=args.pred_cls).float()
     else:
         model = mae_cvt_patch8(norm_pix_loss=args.norm_pix_loss, img_size=args.input_size,
                                use_only_masked_tokens_ab=args.use_only_masked_tokens_ab,
                                abnormal_score_func=args.abnormal_score_func,
                                masking_method=args.masking_method,
-                               mask_ratio=args.mask_ratio,
                                grad_weighted_loss=args.grad_weighted_rec_loss,
                                pred_cls=args.pred_cls).float()
     model.to(device)
     if args.run_type == "train":
         do_training(args, data_loader_test, data_loader_train, device, log_writer, model)
     elif args.run_type == "inference":
+        # vad-mae
         student = torch.load(args.output_dir + "/checkpoint-best-student.pth")['model']
         teacher = torch.load(args.output_dir + "/checkpoint-best.pth")['model']
         for key in student:
             if 'student' in key:
                 teacher[key] = student[key]
         model.load_state_dict(teacher, strict=False)
+
+        # jigsaw
+        net = WideBranchNet(time_length=args.sample_num, num_classes=[args.sample_num ** 2, 81])
+        state = torch.load(args.checkpoint)
+        print('load jigsaw: ' + args.checkpoint)
+        net.load_state_dict(state, strict=True)
+        net.to(device)
+        data_dir = f"H:/AI/dataset/VAD/Featurize_png/{args.dataset}/test/frames"
+        detect_pkl = f'lib/vad/jigsaw/detect/{args.dataset}_test_detect_result_yolov3.pkl'
+        testing_dataset = VideoAnomalyDataset_C3D(data_dir,
+                                                  # dataset=f"{args.dataset}tech",
+                                                  dataset=f"{args.dataset}",
+                                                  detect_dir=detect_pkl,
+                                                  fliter_ratio=args.filter_ratio,
+                                                  frame_num=args.sample_num)
+        testing_data_loader = DataLoader(testing_dataset, batch_size=256, shuffle=False, num_workers=args.num_workers,
+                                         drop_last=False)
+
+        # inference
         with torch.no_grad():
-            inference(model, data_loader_test, device, args=args)
+            inference_hybird(model, data_loader_test, net, testing_data_loader, device, args=args)
 
 
 def do_training(args, data_loader_test, data_loader_train, device, log_writer, model):
@@ -88,7 +118,7 @@ def do_training(args, data_loader_test, data_loader_train, device, log_writer, m
     best_micro = 0.0
     best_micro_student = 0.0
     for epoch in range(args.start_epoch, args.epochs):
-        if epoch == args.start_TS_epoch:  # 加载最优权重
+        if epoch == args.start_epoch:
             misc.load_model(args=args, model=model, optimizer=optimizer, loss_scaler=loss_scaler, train_TS=True)
 
         train_stats = train_one_epoch(
@@ -111,7 +141,6 @@ def do_training(args, data_loader_test, data_loader_train, device, log_writer, m
             best_micro = test_stats['micro']
             misc.save_model(args=args, model=model, optimizer=optimizer,
                             loss_scaler=loss_scaler, epoch=epoch, best=True)
-
         if args.start_TS_epoch <= epoch:
             if test_stats['micro'] > best_micro_student:
                 best_micro_student = test_stats['micro']
@@ -132,12 +161,14 @@ def do_training(args, data_loader_test, data_loader_train, device, log_writer, m
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, default='shanghaitech')
+    parser.add_argument('--dataset', type=str, default='ped2')
     args = parser.parse_args()
     if args.dataset == 'avenue':
         args = get_configs_avenue()
+    elif args.dataset == 'ped2':
+        args = get_configs_ped2()
     else:
-        args = get_configs_shanghai()  #
+        args = get_configs_shanghai()
     if args.output_dir:
         Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     main(args)

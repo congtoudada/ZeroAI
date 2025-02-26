@@ -40,8 +40,11 @@ def compute_gradients(data_root_folder, step, folder):
             Image.fromarray(gradient).save(os.path.join(data_root_folder, f"{folder}/gradients2/{os.path.basename(video)}",
                                                         os.path.basename(img_path)))
 
-if __name__=="__main__":
-    root_folder_avenue = "/home/alin/datasets/Avenue_Dataset/Avenue Dataset"
-    root_folder_shanghai = "/home/alin/datasets/SanhaiTech"
-    compute_gradients(root_folder_avenue, 1, "train")
-    compute_gradients(root_folder_avenue, 1, "test")
+
+if __name__ == "__main__":
+    # dataset = "avenue"
+    # dataset = "shanghaitech"
+    dataset = "ped2"
+    root_folder = f"H:/AI/dataset/VAD/Featurize_png/{dataset}"
+    compute_gradients(root_folder, 1, "train")
+    compute_gradients(root_folder, 1, "test")

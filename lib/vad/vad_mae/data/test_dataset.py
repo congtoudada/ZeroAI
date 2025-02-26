@@ -15,7 +15,10 @@ class AbnormalDatasetGradientsTest(torch.utils.data.Dataset):
         if args.dataset == "avenue":
             data_path = args.avenue_path
             gt_path = args.avenue_gt_path
-        elif args.dataset == "shanghai":
+        elif args.dataset == "ped2":
+            data_path = args.ped2_path
+            gt_path = args.ped2_gt_path
+        elif args.dataset == "shanghaitech":
             data_path = args.shanghai_path
             gt_path = args.shanghai_gt_path
         else:

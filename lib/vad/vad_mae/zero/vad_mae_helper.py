@@ -102,9 +102,7 @@ class VadMaeHelper(IVadFrameWrapper):
             pred_teacher = recon_error_st_tc[0].detach().cpu().numpy()
             pred_student = recon_error_st_tc[1].detach().cpu().numpy()
             pred_cls = recon_error_st_tc[2].detach().cpu().numpy()
-            score = 1.05 * pred_teacher + 0.53 * pred_student + 0.53 * pred_cls
-            if self.config.vad_mae_abnormal_score_func == 'L2':
-                score *= 10
+            score = 10.5 * pred_teacher + 5.3 * pred_student + 5.3 * pred_cls
             return list(score)
 
     def inference(self, frames):

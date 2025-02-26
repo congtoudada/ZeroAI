@@ -326,7 +326,11 @@ def save_model(args, epoch, model, optimizer, loss_scaler, latest=False, best=Fa
                 save_on_master(to_save, checkpoint_path)
 
 
-def load_model(args, model, optimizer=None, loss_scaler=None):
+def load_model(args, model, optimizer=None, loss_scaler=None, train_TS=False):
+    if train_TS:
+        teacher = torch.load(args.output_dir + "/checkpoint-best.pth")['model']
+        model.load_state_dict(teacher, strict=False)
+        return
     if args.resume:
         checkpoint = torch.load(os.path.join(args.output_dir, "checkpoint-latest.pth"), map_location='cpu')
         model.load_state_dict(checkpoint['model'])
@@ -338,6 +342,15 @@ def load_model(args, model, optimizer=None, loss_scaler=None):
                 if 'scaler' in checkpoint:
                     loss_scaler.load_state_dict(checkpoint['scaler'])
                 print("With optim & sched!")
+    if args.finetune:
+        teacher = torch.load(args.output_dir + "/checkpoint-best.pth")['model']
+        if os.path.exists(args.output_dir + "/checkpoint-best.pth"):
+            student = torch.load(args.output_dir + "/checkpoint-best-student.pth")['model']
+            for key in student:
+                if 'student' in key:
+                    teacher[key] = student[key]
+        model.load_state_dict(teacher, strict=False)
+        model.freeze_encoder()
 
 
 def all_reduce_mean(x):

@@ -16,7 +16,9 @@ class VadItem:
         self.frame_valid = 0  # 连续异常帧计数
         # 对象级异常检测
         self.last_obj_id = -100  # 上次执行对象异常检测的时间
-        self.obj_score = 0  # 最近一次对象级异常报警分数
+        self.obj_s_score = 0  # 最近一次对象级异常报警分数 (空间)
+        self.obj_t_score = 0  # 最近一次对象级异常报警分数 (时间)
+        self.obj_valid = 0  # 连续异常帧计数 (对象级)
         self.det_queue: deque = None  # bbox缓存队列
 
     def init(self, cam_id, capacity):
@@ -30,7 +32,9 @@ class VadItem:
         self.frame_valid = 0
         # 对象级异常检测
         self.last_obj_id = -1
-        self.obj_score = 0
+        self.obj_s_score = 0
+        self.obj_t_score = 0
+        self.obj_valid = 0
         self.det_queue = deque(maxlen=capacity)
 
     def push(self, frame, frame_id, input_det=None):
@@ -57,11 +61,29 @@ class VadItem:
         self.frame_score = score
         if score >= threshold:
             self.frame_valid += times
-            if self.frame_valid > valid_limit * 2:
-                self.frame_valid = valid_limit * 2
+            if self.frame_valid > valid_limit:
+                self.frame_valid = valid_limit
         else:
             self.frame_valid -= 1
             if self.frame_valid < 0:
                 self.frame_valid = 0
 
-
+    def update_obj_score(self, s_score, t_score, s_thresh, t_thresh, s_times, t_times, valid_limit):
+        self.obj_s_score = s_score
+        self.obj_t_score = t_score
+        occur = False
+        if s_score >= s_thresh:
+            occur = True
+            self.obj_valid += s_times
+            print(f'空间异常: {s_score}')
+        if t_score >= t_thresh:
+            occur = True
+            self.obj_valid += t_times
+            print(f'时间异常: {t_score}')
+        if occur:
+            if self.obj_valid > valid_limit:
+                self.obj_valid = valid_limit
+        else:
+            self.obj_valid -= 1
+            if self.obj_valid < 0:
+                self.obj_valid = 0

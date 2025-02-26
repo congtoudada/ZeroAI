@@ -1,4 +1,4 @@
-import os 
+import os
 from numpy.random import f, permutation, rand
 from PIL import Image
 import time
@@ -14,17 +14,18 @@ import cv2
 
 class VideoAnomalyDataset_C3D(Dataset):
     """Video Anomaly Dataset."""
+
     def __init__(self,
-                 data_dir, 
+                 data_dir,
                  dataset='shanghaitech',
-                 detect_dir=None, 
+                 detect_dir=None,
                  fliter_ratio=0.9,
                  frame_num=7,
                  static_threshold=0.1):
 
         assert os.path.exists(data_dir), "{} does not exist.".format(data_dir)
         assert dataset in ['shanghaitech', 'ped2', 'avenue'], 'wrong type of dataset.'
-        
+
         self.dataset = dataset
         self.data_dir = data_dir
         self.fliter_ratio = fliter_ratio
@@ -40,9 +41,9 @@ class VideoAnomalyDataset_C3D(Dataset):
 
         self.videos_list = []
 
-        if('train' in data_dir):
+        if 'train' in data_dir:
             self.test_stage = False
-        elif('test' in data_dir):
+        elif 'test' in data_dir:
             self.test_stage = True
         else:
             raise ValueError("data dir: {} is error, not train or test.".format(data_dir))
@@ -52,8 +53,8 @@ class VideoAnomalyDataset_C3D(Dataset):
             self.sample_step = 5
         else:
             self.sample_step = 1
-        
-        if detect_dir != None:
+
+        if detect_dir is not None:
             with open(detect_dir, 'rb') as f:
                 self.detect = pickle.load(f)
         else:
@@ -61,13 +62,13 @@ class VideoAnomalyDataset_C3D(Dataset):
 
         self.objects_list = []
         self._load_data(file_list)
-    
+
     def _load_data(self, file_list):
         t0 = time.time()
         total_frames = 0
         contain = 0
         total_small_ = 0
-        start_ind = self.half_frame_num if self.test_stage else self.frame_num - 1    
+        start_ind = self.half_frame_num if self.test_stage else self.frame_num - 1
         for video_file in file_list:
             if video_file not in self.videos_list:
                 self.videos_list.append(video_file)
@@ -83,26 +84,27 @@ class VideoAnomalyDataset_C3D(Dataset):
                 else:
                     object_num = 1
 
-                flag = detect_result[:, None, :4].repeat(object_num, 1) - detect_result[None, :, :4].repeat(object_num, 0)
+                flag = detect_result[:, None, :4].repeat(object_num, 1) - detect_result[None, :, :4].repeat(object_num,
+                                                                                                            0)
                 is_contain = np.all(np.concatenate((flag[:, :, :2] > 0, flag[:, :, 2:] < 0), -1), -1)
                 is_contain = is_contain.any(-1)
                 is_small = (detect_result[:, 2:4] - detect_result[:, 0:2]).max(-1) < 10
                 width = detect_result[:, 2] - detect_result[:, 0]
                 height = detect_result[:, 3] - detect_result[:, 1]
-                # aspect_ratio = np.minimum(width / height, height / width) 
+                # aspect_ratio = np.minimum(width / height, height / width)
                 aspect_ratio = height / width
                 for i in range(object_num):
                     if not is_contain[i]:
                         if not is_small[i]:
-                            self.objects_list.append({"video_name":video_file, "frame":frame, "object": i, 
-                                "loc": detect_result[i, :4], "aspect_ratio": aspect_ratio[i]})
+                            self.objects_list.append({"video_name": video_file, "frame": frame, "object": i,
+                                                      "loc": detect_result[i, :4], "aspect_ratio": aspect_ratio[i]})
                         else:
                             total_small_ += 1
                     else:
                         contain += 1
 
-        print("Load {} videos {} frames, {} objects, excluding {} inside objects and {} small objects in {} s."\
-            .format(self.videos, total_frames, len(self.objects_list), contain, total_small_, time.time() - t0))
+        print("Load {} videos {} frames, {} objects, excluding {} inside objects and {} small objects in {} s." \
+              .format(self.videos, total_frames, len(self.objects_list), contain, total_small_, time.time() - t0))
 
     def __len__(self):
         return len(self.objects_list)
@@ -110,8 +112,8 @@ class VideoAnomalyDataset_C3D(Dataset):
     def __video_list__(self):
         return self.videos_list
 
-    def __getitem__(self, idx): 
-        temproal_flag = idx % 2 == 0 
+    def __getitem__(self, idx):
+        temproal_flag = idx % 2 == 0
         record = self.objects_list[idx]
         if self.test_stage:
             perm = np.arange(self.frame_num)
@@ -142,20 +144,18 @@ class VideoAnomalyDataset_C3D(Dataset):
             obj = obj[:, perm, :, :]
         obj = torch.clamp(obj, 0., 1.)
 
-        ret = {"video": record["video_name"], "frame": record["frame"], "obj": obj, "label": perm, 
-            "trans_label": spatial_perm, "loc": record["loc"], "aspect_ratio": record["aspect_ratio"], "temporal": temproal_flag}
-        return  ret
-    
+        ret = {"video": record["video_name"], "frame": record["frame"], "obj": obj, "label": perm,
+               "trans_label": spatial_perm, "loc": record["loc"], "aspect_ratio": record["aspect_ratio"],
+               "temporal": temproal_flag}
+        return ret
 
     def get_object(self, video_name, frame, obj_id):
-        video_dir = os.path.join(self.dataset, self.phase, video_name)
-        obj = np.load(os.path.join(video_dir, str(frame) + '_' + str(obj_id) + '.npy'))   # (3, 7, 64, 64)
+        video_dir = os.path.join("lib/vad/jigsaw", self.dataset, self.phase, video_name)
+        obj = np.load(os.path.join(video_dir, str(frame) + '_' + str(obj_id) + '.npy'))  # (3, 7, 64, 64)
         if not self.test_stage:
             if random.random() < 0.5:
                 obj = obj[:, :, :, ::-1]
         return obj
-
-    
 
     def split_image(self, clip, border=2, patch_size=20):
         """
@@ -170,7 +170,6 @@ class VideoAnomalyDataset_C3D(Dataset):
                 patch_list.append(clip[:, :, y_offset: y_offset + patch_size, x_offset: x_offset + patch_size])
 
         return patch_list
-
 
     def concat(self, patch_list, border=2, patch_size=20, permuation=np.arange(9), num=3, dropout=False):
         """
@@ -188,9 +187,9 @@ class VideoAnomalyDataset_C3D(Dataset):
             clip[:, :, y_offset: y_offset + patch_size, x_offset: x_offset + patch_size] = patch_list[p_ind]
         return clip
 
-
     def jigsaw(self, clip, border=2, patch_size=20, permuation=None, dropout=False):
         patch_list = self.split_image(clip, border, patch_size)
-        clip = self.concat(patch_list, border=border, patch_size=patch_size, permuation=permuation, num=3, dropout=dropout)
+        clip = self.concat(patch_list, border=border, patch_size=patch_size, permuation=permuation, num=3,
+                           dropout=dropout)
         return clip
-    
+
