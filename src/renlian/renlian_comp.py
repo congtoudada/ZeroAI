@@ -38,7 +38,8 @@ class RenlianComponent(CountComponent):
         # 人脸识别请求
         current_id = self.frame_id_cache[0]
         for key, value in self.item_dict.items():
-            self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, value.base_y, self.cam_id)
+            self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, value.base_x,
+                                      value.base_y, self.cam_id)
         return ret
 
     def on_update(self):
@@ -88,19 +89,36 @@ class RenlianComponent(CountComponent):
     def on_draw_vis(self, idx, frame, input_mot):
         frame = super().on_draw_vis(idx, frame, input_mot)
         # 参考线
-        point1 = (0, int(self.face_helper.config.face_cull_up_y * self.stream_height))
+        # y
+        # point1 = (0, int(self.face_helper.config.face_cull_up_y * self.stream_height))
         point2 = (self.stream_width, int(self.face_helper.config.face_cull_up_y * self.stream_height))
-        point3 = (0, int((1 - self.face_helper.config.face_cull_down_y) * self.stream_height))
+        # point3 = (0, int((1 - self.face_helper.config.face_cull_down_y) * self.stream_height))
         point4 = (self.stream_width, int((1 - self.face_helper.config.face_cull_down_y) * self.stream_height))
-        cv2.line(frame, point1, point2, (127, 127, 127), 1)  # 绘制线条
-        cv2.line(frame, point3, point4, (127, 127, 127), 1)  # 绘制线条
+        # x
+        point5 = (int(self.face_helper.config.face_cull_left_x * self.stream_width), 0)
+        # point6 = (int(self.face_helper.config.face_cull_left_x * self.stream_width), self.stream_height)
+        point7 = (int((1 - self.face_helper.config.face_cull_right_x) * self.stream_width), 0)
+        # point8 = (int((1 - self.face_helper.config.face_cull_right_x) * self.stream_width), self.stream_height)
+        # 交线
+        line_up1 = (point5[0], point2[1])
+        line_up2 = (point7[0], point2[1])
+        line_down1 = (point5[0], point4[1])
+        line_down2 = (point7[0], point4[1])
+        line_left1 = (point5[0], point2[1])
+        line_left2 = (point5[0], point4[1])
+        line_right1 = (point7[0], point2[1])
+        line_right2 = (point7[0], point4[1])
+        cv2.line(frame, line_up1, line_up2, (255, 255, 0), 2)  # 绘制线条
+        cv2.line(frame, line_down1, line_down2, (255, 255, 0), 2)  # 绘制线条
+        cv2.line(frame, line_left1, line_left2, (255, 255, 0), 2)  # 绘制线条
+        cv2.line(frame, line_right1, line_right2, (255, 255, 0), 2)  # 绘制线条
         # 人脸识别结果
         for key, value in self.item_dict.items():
             ltrb = value.ltrb
             per_id = value.per_id
             cv2.putText(frame, f"{per_id}",
                         (int((ltrb[0] + ltrb[2]) / 2), int(ltrb[1])),
-                        cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=1)
+                        cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), thickness=2)
         # 可视化并返回
         return frame
 

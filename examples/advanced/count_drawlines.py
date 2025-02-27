@@ -11,7 +11,7 @@ from utility.yaml_kit import YamlKit
 
 # 用户设置变量
 # 图片设置
-img_path = "examples/advanced/imgs/Snipaste_2025-02-26_14-26-47.png"  # 打开本地图片
+img_path = "examples/advanced/imgs/Snipaste_2025-02-27_10-17-03.png"  # 打开本地图片
 # 视频设置
 vid_path = "res/videos/202411/count1.mp4"  # 打开视频路径
 frame_index = 50  # 替换为你想要读取的帧索引

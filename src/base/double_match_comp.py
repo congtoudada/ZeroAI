@@ -249,9 +249,9 @@ class DoubleMatchComponent(BasedStreamComponent):
     def on_draw_vis(self, idx, frame, input_mot):
         if input_mot is None:  # 检测主体的端口，不显示任何内容
             return None
-        text_scale = 1.25
-        text_thickness = 1
-        line_thickness = 2
+        text_scale = 2
+        text_thickness = 2
+        line_thickness = 3
         # 标题线
         num = 0 if input_mot is None else input_mot.shape[0]
         cv2.putText(frame, 'inference_fps:%.2f num:%d' %

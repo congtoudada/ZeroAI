@@ -72,7 +72,8 @@ class IntrudeComponent(BasedStreamComponent):
                 # 没有进入报警区域，就直接返回
                 if value.valid_count == 0:
                     continue
-                self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, value.base_y, self.cam_id)
+                self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, value.base_x,
+                                          value.base_y, self.cam_id)
             # 人脸识别帮助tick，用于接受响应
             self.face_helper.tick(current_id)
 

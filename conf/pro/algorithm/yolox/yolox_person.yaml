@@ -3,11 +3,11 @@ INCLUDE:
   - conf/pro/algorithm/yolox/labels/person_labels.yaml
 
 input_ports:  # 输入端口
-#  - camera2
+  - camera2
   - camera3
 
 output_ports:  # 输出端口
-#  - yolox-person2
+  - yolox-person2
   - yolox-person3
 
 detection:

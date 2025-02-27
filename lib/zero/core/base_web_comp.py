@@ -10,7 +10,7 @@ class BaseWebComponent(Component, ABC):
 
     app = Flask(__name__)
     is_running = False
-    host = "192.168.43.68"
+    host = "127.0.0.1"
     port = 5000  # 监听端口
 
     def __init__(self, shared_memory):
