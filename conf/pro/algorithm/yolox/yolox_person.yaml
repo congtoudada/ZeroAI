@@ -4,11 +4,13 @@ INCLUDE:
 
 input_ports:  # 输入端口
   - camera2
-  - camera3
+#  - camera3
+#  - camera4
 
 output_ports:  # 输出端口
   - yolox-person2
-  - yolox-person3
+#  - yolox-person3
+#  - yolox-person4
 
 detection:
   reid_enable: True  # 是否支持reid存图(若支持，会定期对第0个类别发送reid存图请求)

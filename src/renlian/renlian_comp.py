@@ -88,7 +88,7 @@ class RenlianComponent(CountComponent):
 
     def on_draw_vis(self, idx, frame, input_mot):
         frame = super().on_draw_vis(idx, frame, input_mot)
-        # 参考线
+        # 人脸参考线
         # y
         # point1 = (0, int(self.face_helper.config.face_cull_up_y * self.stream_height))
         point2 = (self.stream_width, int(self.face_helper.config.face_cull_up_y * self.stream_height))

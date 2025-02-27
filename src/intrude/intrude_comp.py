@@ -223,9 +223,9 @@ class IntrudeComponent(BasedStreamComponent):
         return center_x, center_y
 
     def on_draw_vis(self, idx, frame, input_mot):
-        text_scale = 1
-        text_thickness = 1
-        line_thickness = 2
+        text_scale = 2
+        text_thickness = 2
+        line_thickness = 3
         # 标题线
         num = 0 if input_mot is None else input_mot.shape[0]
         cv2.putText(frame, 'inference_fps:%.2f num:%d' %
@@ -257,26 +257,43 @@ class IntrudeComponent(BasedStreamComponent):
                                   color=obj_color, thickness=line_thickness)
                     cv2.putText(frame, f"{obj_id}",
                                 (int(ltrb[0]), int(ltrb[1])),
-                                cv2.FONT_HERSHEY_PLAIN, 1, obj_color, thickness=text_thickness)
+                                cv2.FONT_HERSHEY_PLAIN, text_scale, obj_color, thickness=text_thickness)
                     if self.data_dict.__contains__(obj_id):
                         if self.data_dict[obj_id].has_warn:
                             cv2.putText(frame, "error",
                                         (int(ltrb[0] + 50), int(ltrb[1])),
-                                        cv2.FONT_HERSHEY_PLAIN, 1, obj_color, thickness=text_thickness)
+                                        cv2.FONT_HERSHEY_PLAIN, text_scale, obj_color, thickness=text_thickness)
                         else:
                             cv2.putText(frame, "normal",
                                         (int(ltrb[0] + 50), int(ltrb[1])),
-                                        cv2.FONT_HERSHEY_PLAIN, 1, obj_color, thickness=text_thickness)
+                                        cv2.FONT_HERSHEY_PLAIN, text_scale, obj_color, thickness=text_thickness)
 
         if self.config.intrude_face_enable:
             face_dict = self.face_helper.face_dict
-            # 参考线
-            point1 = (0, int(self.face_helper.config.face_cull_up_y * self.stream_height))
+            # 人脸参考线
+            # y
+            # point1 = (0, int(self.face_helper.config.face_cull_up_y * self.stream_height))
             point2 = (self.stream_width, int(self.face_helper.config.face_cull_up_y * self.stream_height))
-            point3 = (0, int((1 - self.face_helper.config.face_cull_down_y) * self.stream_height))
+            # point3 = (0, int((1 - self.face_helper.config.face_cull_down_y) * self.stream_height))
             point4 = (self.stream_width, int((1 - self.face_helper.config.face_cull_down_y) * self.stream_height))
-            cv2.line(frame, point1, point2, (127, 127, 127), 1)  # 绘制线条
-            cv2.line(frame, point3, point4, (127, 127, 127), 1)  # 绘制线条
+            # x
+            point5 = (int(self.face_helper.config.face_cull_left_x * self.stream_width), 0)
+            # point6 = (int(self.face_helper.config.face_cull_left_x * self.stream_width), self.stream_height)
+            point7 = (int((1 - self.face_helper.config.face_cull_right_x) * self.stream_width), 0)
+            # point8 = (int((1 - self.face_helper.config.face_cull_right_x) * self.stream_width), self.stream_height)
+            # 交线
+            line_up1 = (point5[0], point2[1])
+            line_up2 = (point7[0], point2[1])
+            line_down1 = (point5[0], point4[1])
+            line_down2 = (point7[0], point4[1])
+            line_left1 = (point5[0], point2[1])
+            line_left2 = (point5[0], point4[1])
+            line_right1 = (point7[0], point2[1])
+            line_right2 = (point7[0], point4[1])
+            cv2.line(frame, line_up1, line_up2, (255, 255, 0), line_thickness)  # 绘制线条
+            cv2.line(frame, line_down1, line_down2, (255, 255, 0), line_thickness)  # 绘制线条
+            cv2.line(frame, line_left1, line_left2, (255, 255, 0), line_thickness)  # 绘制线条
+            cv2.line(frame, line_right1, line_right2, (255, 255, 0), line_thickness)  # 绘制线条
             # 人脸识别结果
             for key, value in face_dict.items():
                 if self.data_dict.__contains__(key):
@@ -285,7 +302,7 @@ class IntrudeComponent(BasedStreamComponent):
                     obj_color = self._get_color(obj_id)
                     cv2.putText(frame, f"per_id:{face_dict[key]['per_id']}",
                                 (int((ltrb[0] + ltrb[2]) / 2), int(self.data_dict[key].ltrb[1] + 20)),
-                                cv2.FONT_HERSHEY_PLAIN, 1, obj_color, thickness=1)
+                                cv2.FONT_HERSHEY_PLAIN, text_scale, obj_color, thickness=text_thickness)
         # 可视化并返回
         return frame
 

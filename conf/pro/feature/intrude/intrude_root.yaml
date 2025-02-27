@@ -8,4 +8,4 @@ intrude:
   valid_count: 10
   lost_frames: 180
   face_enable: True
-  face_config: conf/pro/feature/intrude/intrude_face_helper.yaml  # 人脸请求配置
+  face_config: conf/pro/feature/intrude/face_helper.yaml  # 人脸请求配置

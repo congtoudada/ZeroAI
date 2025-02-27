@@ -308,7 +308,7 @@ class CountComponent(BasedStreamComponent):
                                   color=self._get_color(obj_id), thickness=line_thickness)
                     cv2.putText(frame, f"{obj_id}",
                                 (int(ltrb[0]), int(ltrb[1])),
-                                cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), thickness=text_thickness)
+                                cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
         # 可视化并返回
         return frame
 
