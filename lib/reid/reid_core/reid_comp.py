@@ -59,8 +59,22 @@ class ReidComponent(Component):
         if self.config.reid_debug_enable:
             if not os.path.exists(self.config.reid_debug_output):
                 os.makedirs(self.config.reid_debug_output, exist_ok=True)
+        # if os.path.exists(self.config.reid_face_gallery_dir):
+        #     shutil.rmtree(self.config.reid_face_gallery_dir)
+        # os.makedirs(self.config.reid_face_gallery_dir, exist_ok=True)
+        # 删除前一天的reid结果
+        yesterday = time.time() - 24 * 60 * 60  # 24小时之前的时间戳
+        # 检查指定的目录是否存在
         if os.path.exists(self.config.reid_face_gallery_dir):
-            shutil.rmtree(self.config.reid_face_gallery_dir)
+            # 遍历目录中的所有文件
+            for filename in os.listdir(self.config.reid_face_gallery_dir):
+                file_path = os.path.join(self.config.reid_face_gallery_dir, filename)
+                # 获取文件的最后修改时间
+                file_mtime = os.path.getmtime(file_path)
+                # 如果文件的修改时间是前一天的文件，进行删除
+                if file_mtime < yesterday:
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)  # 删除文件
         os.makedirs(self.config.reid_face_gallery_dir, exist_ok=True)
         if os.path.exists(self.config.reid_camera_gallery_dir):
             shutil.rmtree(self.config.reid_camera_gallery_dir)
