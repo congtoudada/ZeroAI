@@ -83,7 +83,7 @@ class FaceHelper:
             return False
         if obj_y != -1 and not self.config.face_cull_up_y < obj_y < 1.0 - self.config.face_cull_down_y:  # 不在检测区域，不发送
             return False
-        if obj_x != -1 and not self.config.face_cull_left_x < obj_y < 1.0 - self.config.face_cull_right_x:  # 不在检测区域，不发送
+        if obj_x != -1 and not self.config.face_cull_left_x < obj_x < 1.0 - self.config.face_cull_right_x:  # 不在检测区域，不发送
             return False
         # 尝试发送人脸识别请求（内部可能还会判断）
         if frame is not None:
