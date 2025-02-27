@@ -6,6 +6,8 @@ class FaceHelperInfo(BaseInfo):
         # self.face_ports = []  # 请求端口
         self.face_cull_up_y = 0.1  # 从上剔除百分比，只有当对象进入中间区域才识别
         self.face_cull_down_y = 0.1  # 从下剔除百分比，只有当对象进入中间区域才识别
+        self.face_cull_left_x = 0.1  # 从上剔除百分比，只有当对象进入中间区域才识别
+        self.face_cull_right_x = 0.1  # 从下剔除百分比，只有当对象进入中间区域才识别
         self.face_min_send_interval = 60  # 最快每多少帧发送一次人脸请求（小于0为不限）
         self.face_max_retry = 5  # 单人最大重试次数
         self.face_lost_frames = 300  # 长期未更新对象多久销毁(帧数)

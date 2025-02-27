@@ -46,13 +46,14 @@ class FaceHelper:
         for key in clear_keys:
             self.face_dict.pop(key)  # 从字典中移除item
 
-    def try_send(self, now, frame, ltrb, obj_id, obj_y=-1, cam_id=0) -> bool:
+    def try_send(self, now, frame, ltrb, obj_id, obj_x=-1, obj_y=-1, cam_id=0) -> bool:
         """
         尝试发送识别请求
         :param now: 当前时间
         :param frame: 当前帧图像
         :param ltrb: 包围框
         :param obj_id: 对象id
+        :param obj_x: 对象y轴百分比，用于限定有效识别区域
         :param obj_y: 对象y轴百分比，用于限定有效识别区域
         :param cam_id: 请求摄像头id (仅调试)
         :return:
@@ -81,6 +82,8 @@ class FaceHelper:
         if req_diff < self.config.face_min_send_interval:  # 小于发送间隔，不发送
             return False
         if obj_y != -1 and not self.config.face_cull_up_y < obj_y < 1.0 - self.config.face_cull_down_y:  # 不在检测区域，不发送
+            return False
+        if obj_x != -1 and not self.config.face_cull_left_x < obj_y < 1.0 - self.config.face_cull_right_x:  # 不在检测区域，不发送
             return False
         # 尝试发送人脸识别请求（内部可能还会判断）
         if frame is not None:
