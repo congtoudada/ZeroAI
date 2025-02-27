@@ -256,9 +256,13 @@ class CountComponent(BasedStreamComponent):
             self.on_destroy_obj(key)
 
     def on_draw_vis(self, idx, frame, input_mot):
-        text_scale = 1
-        text_thickness = 1
-        line_thickness = 2
+        # 1920x1080
+        # text_scale = 1
+        # text_thickness = 1
+        # line_thickness = 2
+        text_scale = 2
+        text_thickness = 2
+        line_thickness = 3
         # 标题线
         num = 0 if input_mot is None else input_mot.shape[0]
         cv2.putText(frame, 'inference_fps:%.2f num:%d in:%d out:%d' %
