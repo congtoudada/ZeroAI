@@ -2,7 +2,6 @@ import multiprocessing
 import os
 import sys
 from typing import Dict
-from UltraDict import UltraDict
 from loguru import logger
 import numpy as np
 from PIL import Image
@@ -11,10 +10,7 @@ from reid_core.reid_comp import ReidComponent
 from reid_core.helper.reid_helper_info import ReidHelperInfo
 from reid_core.reid_key import ReidKey
 from utility.config_kit import ConfigKit
-from utility.img_kit import ImgKit
 from utility.object_pool import ObjectPool
-from zero.core.global_constant import GlobalConstant
-from zero.core.launch_comp import LaunchComponent
 
 
 class ReidHelper:
@@ -50,10 +46,10 @@ class ReidHelper:
     def start(self):
         if 2 in self.config.reid_quest_method:  # 支持FastReid
             self.rsp_queue = multiprocessing.Manager().Queue()  # Fast Reid接收队列
-            ReidComponent.reid_shared_memory[self.rsp_key] = self.rsp_queue
+            ReidComponent.reid_helper_memory[self.rsp_key] = self.rsp_queue
         if 3 in self.config.reid_quest_method:
             self.rsp_sp_queue = multiprocessing.Manager().Queue()  # 找人接收队列
-            ReidComponent.reid_shared_memory[self.rsp_sp_key] = self.rsp_sp_queue
+            ReidComponent.reid_helper_memory[self.rsp_sp_key] = self.rsp_sp_queue
 
     def tick(self, now=0):
         # 处理响应队列 FastReid
@@ -85,9 +81,10 @@ class ReidHelper:
         """
         存图请求
         """
-        if ReidComponent.reid_shared_memory.__contains__(ReidKey.REID_REQ.name):
+        if (ReidComponent.reid_helper_memory is not None and
+                ReidComponent.reid_helper_memory.__contains__(ReidKey.REID_REQ.name)):
             req_package = ReidHelper.make_package(cam_id, pid, obj_id, image, 1)
-            ReidComponent.reid_shared_memory[ReidKey.REID_REQ.name].put(req_package)
+            ReidComponent.reid_helper_memory[ReidKey.REID_REQ.name].put(req_package)
 
     def try_send_reid(self, now, image, obj_id, cam_id) -> bool:
         """
@@ -129,7 +126,8 @@ class ReidHelper:
         req_package = ReidHelper.make_package(cam_id, self.pid, obj_id, image, 2)
         logger.info(f"{self.pname} 发送Fast Reid请求: obj_id is {obj_id}")
         self.req_lock.add(obj_id)
-        ReidComponent.reid_shared_memory[ReidKey.REID_REQ.name].put(req_package)
+        if ReidComponent.reid_helper_memory is not None:
+            ReidComponent.reid_helper_memory[ReidKey.REID_REQ.name].put(req_package)
         return True
 
     def try_send_search_person(self, per_id):
@@ -146,9 +144,10 @@ class ReidHelper:
         img_np = np.array(img)[..., ::-1]  # RGB->BGR
         req_package = ReidHelper.make_package(0, self.pid, per_id, img_np, 3)
         logger.info(f"{self.pname} 发送Search Person请求: per_id is {per_id}")
-        ReidComponent.reid_shared_memory[ReidKey.REID_REQ.name].put(req_package)
-        self.search_per_id = per_id
-        self.req_lock.add(self.search_per_id)
+        if ReidComponent.reid_helper_memory is not None:
+            ReidComponent.reid_helper_memory[ReidKey.REID_REQ.name].put(req_package)
+            self.search_per_id = per_id
+            self.req_lock.add(self.search_per_id)
         return True, img_path
 
     def find_first_file(self, prefix):

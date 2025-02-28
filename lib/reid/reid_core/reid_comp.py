@@ -17,7 +17,6 @@ from reid_core.i_reid_wrapper import IReidWrapper
 from reid_core.reid_info import ReidInfo
 from reid_core.reid_key import ReidKey
 from utility.file_modify_kit import FileModifyKit
-from utility.img_kit import ImgKit
 from zero.core.component import Component
 from zero.core.global_constant import GlobalConstant
 from zero.helper.analysis_helper import AnalysisHelper
@@ -35,13 +34,13 @@ class ReidComponent(Component):
         2.每个请求方需主动开辟一块共享内存作为Rsp Queue，ClipReid会把处理后的结果根据请求pid放到相应位置。举例: Ultradict['REID_RSP'+pid].put({响应数据})
     """
     SHARED_MEMORY_NAME = "reid"
-    reid_shared_memory = UltraDict(name=SHARED_MEMORY_NAME, shared_lock=GlobalConstant.LOCK_MODE)
+    reid_helper_memory = UltraDict(name=SHARED_MEMORY_NAME, shared_lock=GlobalConstant.LOCK_MODE)
 
     def __init__(self, shared_memory, config_path: str):
         super().__init__(shared_memory)
         self.config: ReidInfo = ReidInfo(ConfigKit.load(config_path))  # 配置文件内容
         self.pname = f"[ {os.getpid()}:reid ]"
-        self.reid_shared_memory = ReidComponent.reid_shared_memory
+        self.reid_shared_memory = UltraDict(name=ReidComponent.SHARED_MEMORY_NAME, shared_lock=GlobalConstant.LOCK_MODE)
         self.req_queue = None  # 请求队列
         self.reid_model: IReidWrapper = ClipReidWrapper(self.config)  # clip_reid模型（理论上使用工厂模式更解耦，但我懒）
         # self.faiss_dict: Dict[int, FaissReidHelper] = {}  # 根据cam id分类的faiss字典(根据不同摄像头找人，暂不实现)
@@ -263,11 +262,9 @@ class ReidComponent(Component):
             os.remove(img_path)
 
     def on_destroy(self):
-        time.sleep(1)  # 延迟1s，避免
-        # self.reid_shared_memory = None
-        ReidComponent.reid_shared_memory.unlink()  # 读写共享内存
-        # ReidComponent.reid_shared_memory = None
-        # UltraDict.unlink_by_name(ReidComponent.reid_shared_memory)
+        ReidComponent.reid_helper_memory = None
+        time.sleep(1)  # 延迟1s unlink
+        self.reid_shared_memory.unlink()  # 读写共享内存
         super().on_destroy()
 
 
@@ -321,7 +318,7 @@ if __name__ == '__main__':
     # reid_comp.camera_gallery.tick(reid_comp.config.reid_refresh_interval*2 + 3)  # 切换半区
 
     print('---------------------------- 测试请求方式2: Fast Reid ----------------------------')
-    query_path = "res/images/reid/query/0002_000_01_02.jpg"
+    # query_path = "res/images/reid/query/0002_000_01_02.jpg"
     query_path = "output/service/clip_reid/tmp/Snipaste_2025-01-02_18-47-20.png"
     img = Image.open(query_path).convert('RGB')
     img_ndarray = np.array(img)[..., ::-1]  # RGB->BGR
