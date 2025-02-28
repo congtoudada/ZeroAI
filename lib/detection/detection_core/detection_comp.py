@@ -103,9 +103,9 @@ class DetectionComponent(BasedStreamComponent, ABC):
         """
         if process_data is None:
             return frame
-        text_scale = 1
-        text_thickness = 1
-        line_thickness = 2
+        text_scale = 2
+        text_thickness = 2
+        line_thickness = 3
         cv2.putText(frame, 'inference_fps:%.2f num:%d' %
                     (1. / max(1e-5, self.update_timer.average_time),
                      process_data.shape[0]), (0, int(15 * text_scale)),
@@ -134,7 +134,6 @@ class DetectionComponent(BasedStreamComponent, ABC):
         idx = (1 + idx) * 3
         color = ((37 * idx) % 255, (17 * idx) % 255, (29 * idx) % 255)
         return color
-
 
 # def create_process(shared_memory, config_path: str):
 #     comp = YoloxComponent(shared_memory, config_path)  # 创建组件
