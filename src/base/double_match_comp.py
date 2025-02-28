@@ -315,6 +315,10 @@ class DoubleMatchComponent(BasedStreamComponent):
         color = ((37 * idx) % 255, (17 * idx) % 255, (29 * idx) % 255)
         return color
 
+    def on_destroy(self):
+        self.reid_helper = None
+        super().on_destroy()
+
 
 def create_process(shared_memory, config_path: str):
     comp: DoubleMatchComponent = DoubleMatchComponent(shared_memory, config_path)  # 创建组件
