@@ -13,7 +13,6 @@ from UltraDict import UltraDict
 from loguru import logger
 
 from clip_reid.zero.clip_reid_wrapper import ClipReidWrapper
-from reid_core.helper.reid_helper import ReidHelper
 from reid_core.i_reid_wrapper import IReidWrapper
 from reid_core.reid_info import ReidInfo
 from reid_core.reid_key import ReidKey
@@ -36,6 +35,7 @@ class ReidComponent(Component):
         2.每个请求方需主动开辟一块共享内存作为Rsp Queue，ClipReid会把处理后的结果根据请求pid放到相应位置。举例: Ultradict['REID_RSP'+pid].put({响应数据})
     """
     SHARED_MEMORY_NAME = "reid"
+    reid_helper_memory = UltraDict(name=SHARED_MEMORY_NAME, shared_lock=GlobalConstant.LOCK_MODE)
 
     def __init__(self, shared_memory, config_path: str):
         super().__init__(shared_memory)
@@ -263,8 +263,8 @@ class ReidComponent(Component):
             os.remove(img_path)
 
     def on_destroy(self):
+        ReidComponent.reid_helper_memory.unlink()
         self.reid_shared_memory.unlink()
-        ReidHelper.reid_shared_memory.unlink()
         super().on_destroy()
 
 
