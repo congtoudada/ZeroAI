@@ -13,6 +13,7 @@ from UltraDict import UltraDict
 from loguru import logger
 
 from clip_reid.zero.clip_reid_wrapper import ClipReidWrapper
+from reid_core.helper.reid_helper import ReidHelper
 from reid_core.i_reid_wrapper import IReidWrapper
 from reid_core.reid_info import ReidInfo
 from reid_core.reid_key import ReidKey
@@ -263,6 +264,7 @@ class ReidComponent(Component):
 
     def on_destroy(self):
         self.reid_shared_memory.unlink()
+        ReidHelper.reid_shared_memory.unlink()
         super().on_destroy()
 
 
