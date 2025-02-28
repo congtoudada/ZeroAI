@@ -263,9 +263,8 @@ class ReidComponent(Component):
             os.remove(img_path)
 
     def on_destroy(self):
-        # ReidComponent.reid_helper_memory.unlink()
         time.sleep(1)  # 延迟1s，避免 weakref
-        ReidComponent.reid_helper_memory.unlink()  # 读写共享内存
+        ReidComponent.reid_shared_memory.unlink()  # 读写共享内存
         super().on_destroy()
 
 
