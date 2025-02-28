@@ -264,6 +264,7 @@ class ReidComponent(Component):
 
     def on_destroy(self):
         time.sleep(1)  # 延迟1s，避免 weakref
+        self.reid_shared_memory = None
         ReidComponent.reid_shared_memory.unlink()  # 读写共享内存
         super().on_destroy()
 
