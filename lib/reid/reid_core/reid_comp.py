@@ -263,9 +263,11 @@ class ReidComponent(Component):
             os.remove(img_path)
 
     def on_destroy(self):
-        time.sleep(1)  # 延迟1s，避免 weakref
+        time.sleep(1.5)  # 延迟1s，避免
         self.reid_shared_memory = None
-        ReidComponent.reid_shared_memory.unlink()  # 读写共享内存
+        # ReidComponent.reid_shared_memory.unlink()  # 读写共享内存
+        ReidComponent.reid_shared_memory = None
+        UltraDict.unlink_by_name(ReidComponent.reid_shared_memory)
         super().on_destroy()
 
 
