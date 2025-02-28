@@ -78,7 +78,7 @@ class RenlianComponent(CountComponent):
                 "camId": self.cam_id,
                 "status": status,
                 "personId": item.per_id,
-                "shotImg": img_path
+                "shotImg": os.path.abspath(img_path)
             }
             # WebKit.post(f"{WebKit.Prefix_url}/count", data)
             self.http_helper.post("/algorithm/face", data)

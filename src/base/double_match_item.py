@@ -16,6 +16,7 @@ class DoubleMatchItem:
         self.main_ltrb = (0, 0, 1, 1)  # 主体ltrb
         self.main_valid = False  # 主体是否有效（由于主体和次体未必同时出现，因此需要限制）
         self.main_score = 0  # 主体置信度
+        self.max_main_score = 0  # 主体最大置信度
         # 次要个体属性(通常是人)
         self.sub_obj_id = 0  # 追踪目标id
         self.sub_ltrb = (0, 0, 1, 1)  # 次体ltrb
@@ -32,6 +33,7 @@ class DoubleMatchItem:
         self.main_ltrb = (0, 0, 1, 1)
         self.main_valid = False
         self.main_score = 0
+        self.max_main_score = 0
         # 次体属性
         self.sub_obj_id = obj_id
         self.sub_ltrb = sub_ltrb
@@ -41,6 +43,8 @@ class DoubleMatchItem:
         if not self.has_warn:
             self.main_ltrb = main_ltrb
             self.main_score = main_score
+            if main_score > self.max_main_score:
+                self.max_main_score = main_score
             self.main_valid = True
             if self.main_cls == main_cls:  # 当前检测类别和记录的类别相同，递增
                 self.valid_count += 3

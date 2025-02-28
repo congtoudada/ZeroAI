@@ -213,14 +213,14 @@ class DoubleMatchComponent(BasedStreamComponent):
         if not item.has_warn and item.valid_count > self.config.dm_valid_count:
             if item.main_cls in self.config.dm_anomaly_cls:
                 logger.info(f"{self.pname} {DoubleMatchComponent.Warn_Desc[self.config.dm_warn_type]}异常: "
-                            f"obj_id:{item.sub_obj_id} score:{item.main_score:.3f}")
+                            f"obj_id:{item.sub_obj_id} score:{item.max_main_score:.3f}")
                 item.has_warn = True  # 一旦视为异常，则一直为异常，避免一个人重复报警
 
                 if not self.config.dm_reid_enable:  # 不支持reid就直接发送后端
                     img = ImgKit.draw_img_box(frame, item.main_ltrb)  # 画框
                     # 发送报警信息给后端
                     WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id,
-                                   self.config.dm_warn_type, item.sub_per_id, img, item.main_score,
+                                   self.config.dm_warn_type, item.sub_per_id, img, item.max_main_score,
                                    self.config.stream_export_img_enable, self.config.stream_web_enable)
                 else:
                     shot_img = ImgKit.crop_img(frame, item.sub_ltrb)  # 扣出人的包围框
@@ -234,7 +234,7 @@ class DoubleMatchComponent(BasedStreamComponent):
                                 img = ImgKit.draw_img_box(frame, item.main_ltrb).copy()
                                 self.reid_info_dict[item.sub_obj_id] = img
                     else:
-                        logger.error(f"{self.pname} Fatal Error! Sub ltrb is invalid: {item.sub_ltrb}")
+                        logger.warning(f"{self.pname} Fatal Error! Sub ltrb is invalid: {item.sub_ltrb}")
 
     def _is_in_zone(self, sub_ltrb, zone_ltrb):
         if len(zone_ltrb) == 0:

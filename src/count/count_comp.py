@@ -232,7 +232,7 @@ class CountComponent(BasedStreamComponent):
                 "recordTime": time_str,
                 "camId": self.cam_id,
                 "status": status,
-                "shotImg": img_path
+                "shotImg": os.path.abspath(img_path)
             }
             # WebKit.post(f"{WebKit.Prefix_url}/count", data)
             self.http_helper.post("/algorithm/count", data)

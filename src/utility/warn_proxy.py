@@ -47,7 +47,7 @@ class WarnProxy(object):
                 "camId": camId,
                 "warnType": warnType,
                 "personId": per_id,
-                "shotImg": img_path,
+                "shotImg": os.path.abspath(img_path),
                 "warnScore": float(warn_score)
             }
             if http_helper.config.debug_enable:
