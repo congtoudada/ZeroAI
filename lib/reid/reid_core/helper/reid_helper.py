@@ -90,7 +90,7 @@ class ReidHelper:
         req_package = ReidHelper.make_package(cam_id, pid, obj_id, image, 1)
         self.reid_helper_memory[ReidKey.REID_REQ.name].put(req_package)
 
-    def try_send_reid(self, now, image, obj_id, cam_id) -> bool:
+    def try_send_reid(self, now, image, obj_id, cam_id, status=-1) -> bool:
         """
         Reid请求: 在face shot中匹配
         """
@@ -129,7 +129,7 @@ class ReidHelper:
             return False
         # 发送
         self.reid_dict[obj_id]["last_send_req"] = now
-        req_package = ReidHelper.make_package(cam_id, self.pid, obj_id, image, 2)
+        req_package = ReidHelper.make_package(cam_id, self.pid, obj_id, image, 2, status)
         logger.info(f"{self.pname} 发送Fast Reid请求: obj_id is {obj_id}")
         self.req_lock.add(obj_id)
         if self.reid_helper_memory is not None:
@@ -165,13 +165,14 @@ class ReidHelper:
         return None
 
     @staticmethod
-    def make_package(cam_id, pid, obj_id, image, method):
+    def make_package(cam_id, pid, obj_id, image, method, status=-1):
         req_package = {
             ReidKey.REID_REQ_CAM_ID.name: cam_id,
             ReidKey.REID_REQ_PID.name: pid,
             ReidKey.REID_REQ_OBJ_ID.name: obj_id,
             ReidKey.REID_REQ_IMAGE.name: image,
-            ReidKey.REID_REQ_METHOD.name: method  # 方式2
+            ReidKey.REID_REQ_METHOD.name: method,  # 方式2
+            ReidKey.REID_REQ_STATUS.name: status
         }
         return req_package
 
