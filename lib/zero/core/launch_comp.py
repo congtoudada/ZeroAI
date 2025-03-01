@@ -1,6 +1,7 @@
 import multiprocessing
 import os
 import pickle
+import socket
 import sys
 import time
 import requests
@@ -105,7 +106,7 @@ class LaunchComponent(Component):
 
     def on_destroy(self):
         self.shared_memory[GlobalKey.ALL_READY.name] = True
-        if BaseWebComponent.is_running:
+        if self.is_port_open(BaseWebComponent.host, BaseWebComponent.port):
             logger.info("向Web进程发送退出信号~")
             try:
                 requests.get(f'http://{BaseWebComponent.host}:{BaseWebComponent.port}/shutdown')
@@ -127,4 +128,24 @@ class LaunchComponent(Component):
     #     logger.info(f'{self.pname} 接收到信号 {signal_num}, 开始清理并退出...')
     #     self.esc_event.set()
 
+    def is_port_open(self, host, port, timeout=1):
+        """
+        判断指定主机上的某端口是否启用。
+
+        :param host: 主机名或 IP 地址
+        :param port: 端口号
+        :param timeout: 超时时间(单位：秒)，默认 1 秒
+        :return: True/False
+        """
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)  # 设置连接超时
+        try:
+            sock.connect((host, port))
+            # 如果能连接成功，则认为端口启用
+            return True
+        except (socket.timeout, ConnectionRefusedError):
+            # 超时或连接被拒绝，端口未启用
+            return False
+        finally:
+            sock.close()
 
