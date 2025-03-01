@@ -1,0 +1,8 @@
+INCLUDE:
+  - conf/dev/algorithm/yolox/labels/person_labels.yaml
+  - conf/dev/algorithm/bytetrack/config.yaml
+
+bytetrack:
+  reid:
+    enable: True  # 是否支持reid存图(若支持，会定期对第0个类别发送reid存图请求)
+

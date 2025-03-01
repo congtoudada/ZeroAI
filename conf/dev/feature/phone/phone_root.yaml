@@ -4,6 +4,7 @@ INCLUDE:
 
 stream:
   output_dir: output/feature/phone  # 输出目录
+  mot_config: conf/dev/algorithm/bytetrack/config_reid.yaml  # mot配置（支持reid存图）
   save_video:
     filename: phone
 dm:

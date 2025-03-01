@@ -122,9 +122,10 @@ class CardComponent(BasedStreamComponent):
             return None
         
         input_det = input_det[input_det[:, 5] == 0]
-        mot_result = self.tracker.inference(input_det)  # 返回对齐输出后的mot结果
+        frame_id = self.frame_id_cache[0]
+        mot_result = self.tracker.inference(input_det, frame_id, frame, self.cam_id)  # 返回对齐输出后的mot结果
         # 根据mot结果进行计数
-        self._card_core(frame, mot_result, self.frame_id_cache[0], frame.shape[1], frame.shape[0])
+        self._card_core(frame, mot_result, frame_id, frame.shape[1], frame.shape[0])
         return mot_result
 
     def _card_core(self, frame, input_mot, current_frame_id, width, height):

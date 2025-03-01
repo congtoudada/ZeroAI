@@ -135,11 +135,12 @@ class DoubleMatchComponent(BasedStreamComponent):
             return None
         else:  # 人（此时主体记录已经填充）
             input_det = input_det[input_det[:, 5] == 0]
-            mot_result = self.tracker.inference(input_det)  # 返回对齐输出后的mot结果
+            frame_id = self.frame_id_cache[1]
+            mot_result = self.tracker.inference(input_det, frame_id, frame, self.cam_id)  # 返回对齐输出后的mot结果
             if mot_result is not None:
                 self.is_clear_main_records = True
             # 根据mot结果与主体检测结果匹配
-            self.double_match_core(frame, mot_result, self.frame_id_cache[1])
+            self.double_match_core(frame, mot_result, frame_id)
             return mot_result
 
     def double_match_core(self, frame, input_mot, current_frame_id):

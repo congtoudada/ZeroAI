@@ -1,8 +1,10 @@
 from UltraDict import UltraDict
 
 from insight.zero.component.insight_comp import InsightComponent
+from reid_core.reid_comp import ReidComponent
 
-clean_list = ['global', 'SimpleHttp', 'HttpForPhone', 'analysis', InsightComponent.SHARED_MEMORY_NAME]
+clean_list = ['global', 'SimpleHttp', 'HttpForPhone', 'analysis',
+              InsightComponent.SHARED_MEMORY_NAME, ReidComponent.SHARED_MEMORY_NAME]
 
 for i in range(len(clean_list)):
     try:
