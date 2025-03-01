@@ -41,4 +41,5 @@ class AnalysisHelper:
     @staticmethod
     def destroy():
         AnalysisHelper.global_shared_memory.unlink()
+        AnalysisHelper.global_shared_memory = None
 
