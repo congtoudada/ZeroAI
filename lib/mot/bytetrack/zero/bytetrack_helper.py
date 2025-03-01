@@ -21,6 +21,9 @@ class BytetrackHelper:
         # key: obj_id
         # value: {count: 0, last_time: 0, last_save_time: 0}  存图次数,上次更新时间,上次存图时间
         self.reid_cache = {}
+        self.reid_helper = None
+        if self.config.bytetrack_reid_enable:
+            self.reid_helper = ReidHelper()
 
     def inference(self, input_det, now=0, frame=None, cam_id=1):
         if input_det is None:
@@ -76,7 +79,8 @@ class BytetrackHelper:
                 continue
             shot_img = ImgKit.crop_img(frame, ltrb)
             if shot_img is not None:
-                ReidHelper.send_save_timing(cam_id, self.pid, obj_id, shot_img)
+                if self.reid_helper is not None:
+                    self.reid_helper.send_save_timing(cam_id, self.pid, obj_id, shot_img)
                 cache_item['count'] += 1
                 cache_item['last_save_time'] = now
 

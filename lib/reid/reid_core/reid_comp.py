@@ -34,7 +34,6 @@ class ReidComponent(Component):
         2.每个请求方需主动开辟一块共享内存作为Rsp Queue，ClipReid会把处理后的结果根据请求pid放到相应位置。举例: Ultradict['REID_RSP'+pid].put({响应数据})
     """
     SHARED_MEMORY_NAME = "reid"
-    reid_helper_memory = UltraDict(name=SHARED_MEMORY_NAME, shared_lock=GlobalConstant.LOCK_MODE)
 
     def __init__(self, shared_memory, config_path: str):
         super().__init__(shared_memory)
@@ -262,14 +261,8 @@ class ReidComponent(Component):
             os.remove(img_path)
 
     def on_destroy(self):
-        ReidComponent.reid_helper_memory = None
-        time.sleep(1)  # 延迟1s unlink
-        self.reid_shared_memory.clear()
+        time.sleep(1)
         self.reid_shared_memory.unlink()
-        try:
-            self.reid_shared_memory.close()
-        except FileNotFoundError:
-            pass  # 忽略共享内存已删除的情况
         super().on_destroy()
 
 
