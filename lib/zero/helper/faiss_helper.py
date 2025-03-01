@@ -110,6 +110,7 @@ class FaissHelper:
                 time_str = img_path.split('_')[-2]
                 item['cam_id'] = cam_id
                 item['time'] = time_str
+                item['shot_img'] = os.path.abspath(img_path)
             else:
                 logger.error(f"{self.pname} 搜索结果集找不到key: img_path")
         if self.enable_log:
