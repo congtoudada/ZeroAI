@@ -76,8 +76,8 @@ class DoubleMatchComponent(BasedStreamComponent):
         if self.reid_info_dict.__contains__(obj_id):
             # 发送报警信息给后端
             WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, self.config.dm_warn_type,
-                           per_id, self.reid_info_dict[obj_id], score, self.config.stream_export_img_enable,
-                           self.config.stream_web_enable)
+                           per_id, self.reid_info_dict[obj_id], self.item_dict[obj_id].max_main_score,
+                           self.config.stream_export_img_enable, self.config.stream_web_enable)
             self.reid_info_dict.pop(obj_id)
             if self.reid_helper is not None:
                 self.reid_helper.destroy_obj(obj_id)  # 主动销毁对象数据缓存(可选)
