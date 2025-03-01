@@ -266,6 +266,10 @@ class ReidComponent(Component):
         time.sleep(1)  # 延迟1s unlink
         self.reid_shared_memory.clear()
         self.reid_shared_memory.unlink()
+        try:
+            self.reid_shared_memory.close()
+        except FileNotFoundError:
+            pass  # 忽略共享内存已删除的情况
         super().on_destroy()
 
 
