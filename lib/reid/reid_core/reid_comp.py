@@ -144,6 +144,9 @@ class ReidComponent(Component):
         if reid_img is None or reid_img.shape[0] == 0 or reid_img.shape[1] == 0:
             logger.error(f"{self.pname} reid_img is None!")
             return
+        status = -1
+        if req_package.__contains__(ReidKey.REID_REQ_STATUS.name):
+            status = req_package[ReidKey.REID_REQ_STATUS.name]
         reid_method = req_package[ReidKey.REID_REQ_METHOD.name]  # 请求方式
 
         # Reid抽特征 BGR-->RGB
@@ -199,13 +202,14 @@ class ReidComponent(Component):
                 logger.info(
                     f"{self.pname} 响应Reid请求成功: pid:{pid} cam_id:{cam_id} obj_id:{obj_id} per_id:{per_id} score:{score:.2f}")
             # 额外存图(通常是异常检测到的对象)
-            time_str = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())
-            img_path = os.path.join(self.config.reid_anomaly_gallery_dir, f"{obj_id}_{time_str}_{cam_id}.jpg")
-            cv2.imwrite(img_path, reid_img)
-            extra_info = {"img_path": img_path}
-            self.anomaly_gallery.add(feat, extra_info)  # 将特征加入特征库
-            if self.config.reid_debug_enable:
-                logger.info(f"{self.pname} 当前anomaly gallery有效特征数: {self.anomaly_gallery.get_total()}")
+            if status == 1:  # 硬编码：只存手机的异常  1:Phone 2:Helmet 3:Card 4:Intrude
+                time_str = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())
+                img_path = os.path.join(self.config.reid_anomaly_gallery_dir, f"{obj_id}_{time_str}_{cam_id}.jpg")
+                cv2.imwrite(img_path, reid_img)
+                extra_info = {"img_path": img_path}
+                self.anomaly_gallery.add(feat, extra_info)  # 将特征加入特征库
+                if self.config.reid_debug_enable:
+                    logger.info(f"{self.pname} 当前anomaly gallery有效特征数: {self.anomaly_gallery.get_total()}")
         elif reid_method == 3:  # 找人
             k = 3  # topK的K值
             # 优先从异常库找
