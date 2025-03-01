@@ -60,6 +60,10 @@ class RenlianComponent(CountComponent):
         time_str = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())
         status_str = "In" if status == 1 else "Out"
         img_path = os.path.join(self.output_dir[0], f"{time_str}_{status_str}_{item.per_id}.jpg")
+        item.ltrb[0] = max(1, item.ltrb[0])
+        item.ltrb[1] = max(1, item.ltrb[1])
+        item.ltrb[2] = min(self.stream_width - 1, item.ltrb[2])
+        item.ltrb[3] = min(self.stream_height - 1, item.ltrb[3])
         img_shot = ImgKit.crop_img(frame, item.ltrb)
         if self.config.stream_export_img_enable:
             if img_shot is None or img_shot.shape[0] == 0 or img_shot.shape[1] == 0:
