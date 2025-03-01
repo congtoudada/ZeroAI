@@ -234,7 +234,8 @@ class DoubleMatchComponent(BasedStreamComponent):
                         # 发送reid
                         if self.reid_helper is not None:
                             ret = self.reid_helper.try_send_reid(self.frame_id_cache[1], shot_img,
-                                                                 item.sub_obj_id, self.cam_id)
+                                                                 item.sub_obj_id, self.cam_id,
+                                                                 self.config.dm_warn_type)
                             if ret:
                                 img = ImgKit.draw_img_box(frame, item.main_ltrb).copy()
                                 self.reid_info_dict[item.sub_obj_id] = img
