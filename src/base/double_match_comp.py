@@ -224,6 +224,10 @@ class DoubleMatchComponent(BasedStreamComponent):
                                    self.config.dm_warn_type, item.sub_per_id, img, item.max_main_score,
                                    self.config.stream_export_img_enable, self.config.stream_web_enable)
                 else:
+                    item.sub_ltrb[0] = max(1, item.sub_ltrb[0])
+                    item.sub_ltrb[1] = max(1, item.sub_ltrb[1])
+                    item.sub_ltrb[2] = min(self.stream_width-1, item.sub_ltrb[2])
+                    item.sub_ltrb[3] = min(self.stream_height-1, item.sub_ltrb[3])
                     shot_img = ImgKit.crop_img(frame, item.sub_ltrb)  # 扣出人的包围框
                     if shot_img is not None:
                         self.reid_info_dict[item.sub_obj_id] = shot_img

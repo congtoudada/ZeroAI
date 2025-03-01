@@ -38,12 +38,12 @@ class CountItem:
         self.base_y = base_y  # base_y 百分比
 
     def update_red(self, red_cur):
-        if red_cur < 0:
+        if red_cur == -1:
             return
         self.red_cur = red_cur
 
     def update_green(self, green_cur):
-        if green_cur < 0:
+        if green_cur == -1:
             return
         self.green_cur = green_cur
 
@@ -52,8 +52,8 @@ class CountItem:
         self.ltrb = (0, 0, 0, 0)  # 包围盒（实际像素位置）
         self.base_x = 0  # base_x 百分比
         self.base_y = 0  # base_y 百分比
-        self.red_cur = -1
-        self.green_cur = -1
+        # self.red_cur = -1
+        # self.green_cur = -1
 
 
 
