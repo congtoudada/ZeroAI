@@ -39,9 +39,12 @@ class BytetrackHelper:
         if frame is None:
             return
         # 清除无用缓存
+        clear_list = []
         for k, v in self.reid_cache.items():
             if now - v['last_time'] > self.config.bytetrack_reid_lost_frames:
-                self.reid_cache.pop(k)
+                clear_list.append(k)
+        for k in clear_list:
+            self.reid_cache.pop(k)
         # 遍历-存图
         for obj in mot_result:
             cls = int(obj[5])  # 提取当前目标的类别，转换为整数类型
