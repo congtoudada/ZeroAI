@@ -2,6 +2,8 @@ import multiprocessing
 import os
 import sys
 from typing import Dict
+
+from UltraDict import UltraDict
 from loguru import logger
 import numpy as np
 from PIL import Image
@@ -11,6 +13,7 @@ from reid_core.helper.reid_helper_info import ReidHelperInfo
 from reid_core.reid_key import ReidKey
 from utility.config_kit import ConfigKit
 from utility.object_pool import ObjectPool
+from zero.core.global_constant import GlobalConstant
 
 
 class ReidHelper:
@@ -18,40 +21,44 @@ class ReidHelper:
     人脸识别帮助类，由用户持有
     """
 
-    def __init__(self, config, reid_callback=None, search_person_callback=None):
-        if isinstance(config, str):
+    def __init__(self, config=None, reid_callback=None, search_person_callback=None):
+        if config is not None and isinstance(config, str):
             self.config: ReidHelperInfo = ReidHelperInfo(ConfigKit.load(config))
         else:
             self.config: ReidHelperInfo = config
         self.pid = os.getpid()
         self.pname = f"[ {self.pid}:reid_helper ]"
         self.req_lock: set = set()  # 请求队列
-        # FastReid
-        self.rsp_queue = None
-        self.rsp_key = ReidKey.REID_RSP.name + str(self.pid)
-        self.dict_pool = ObjectPool(20, dict)
-        # key: obj_id
-        # value: { "per_id": 1, "score": 0, "retry": 1, "last_time": 0, "last_send_req": 0 }
-        self.reid_dict: Dict[int, dict] = {}  # Reid结果集
-        self.reid_callback = reid_callback
+        self.reid_helper_memory = UltraDict(name=ReidComponent.SHARED_MEMORY_NAME, shared_lock=GlobalConstant.LOCK_MODE)
+        if self.config is not None:
+            # FastReid
+            self.rsp_queue = None
+            self.rsp_key = ReidKey.REID_RSP.name + str(self.pid)
+            self.dict_pool = ObjectPool(20, dict)
+            # key: obj_id
+            # value: { "per_id": 1, "score": 0, "retry": 1, "last_time": 0, "last_send_req": 0 }
+            self.reid_dict: Dict[int, dict] = {}  # Reid结果集
+            self.reid_callback = reid_callback
 
-        # Search Person
-        self.rsp_sp_queue = None
-        self.rsp_sp_key = ReidKey.REID_RSP_SP.name + str(self.pid)
-        self.search_per_id = 0
-        self.search_person_callback = search_person_callback
+            # Search Person
+            self.rsp_sp_queue = None
+            self.rsp_sp_key = ReidKey.REID_RSP_SP.name + str(self.pid)
+            self.search_per_id = 0
+            self.search_person_callback = search_person_callback
 
-        self.start()
+            self.start()
 
     def start(self):
         if 2 in self.config.reid_quest_method:  # 支持FastReid
             self.rsp_queue = multiprocessing.Manager().Queue()  # Fast Reid接收队列
-            ReidComponent.reid_helper_memory[self.rsp_key] = self.rsp_queue
+            self.reid_helper_memory[self.rsp_key] = self.rsp_queue
         if 3 in self.config.reid_quest_method:
             self.rsp_sp_queue = multiprocessing.Manager().Queue()  # 找人接收队列
-            ReidComponent.reid_helper_memory[self.rsp_sp_key] = self.rsp_sp_queue
+            self.reid_helper_memory[self.rsp_sp_key] = self.rsp_sp_queue
 
     def tick(self, now=0):
+        if self.config is None:
+            return
         # 处理响应队列 FastReid
         if self.rsp_queue is not None:
             while not self.rsp_queue.empty():
@@ -76,20 +83,19 @@ class ReidHelper:
         for key in clear_keys:
             self.reid_dict.pop(key)  # 从字典中移除item
 
-    @staticmethod
-    def send_save_timing(cam_id, pid, obj_id, image):
+    def send_save_timing(self, cam_id, pid, obj_id, image):
         """
         存图请求
         """
-        if (ReidComponent.reid_helper_memory is not None and
-                ReidComponent.reid_helper_memory.__contains__(ReidKey.REID_REQ.name)):
-            req_package = ReidHelper.make_package(cam_id, pid, obj_id, image, 1)
-            ReidComponent.reid_helper_memory[ReidKey.REID_REQ.name].put(req_package)
+        req_package = ReidHelper.make_package(cam_id, pid, obj_id, image, 1)
+        self.reid_helper_memory[ReidKey.REID_REQ.name].put(req_package)
 
     def try_send_reid(self, now, image, obj_id, cam_id) -> bool:
         """
         Reid请求: 在face shot中匹配
         """
+        if self.config is None:
+            return
         # 新建
         if not self.reid_dict.__contains__(obj_id):
             reid_item: dict = self.dict_pool.pop()
@@ -126,14 +132,16 @@ class ReidHelper:
         req_package = ReidHelper.make_package(cam_id, self.pid, obj_id, image, 2)
         logger.info(f"{self.pname} 发送Fast Reid请求: obj_id is {obj_id}")
         self.req_lock.add(obj_id)
-        if ReidComponent.reid_helper_memory is not None:
-            ReidComponent.reid_helper_memory[ReidKey.REID_REQ.name].put(req_package)
+        if self.reid_helper_memory is not None:
+            self.reid_helper_memory[ReidKey.REID_REQ.name].put(req_package)
         return True
 
     def try_send_search_person(self, per_id):
         """
         找人
         """
+        if self.config is None:
+            return
         # 如果正在请求队列，不发送
         if self.req_lock.__contains__(per_id):
             return False, None
@@ -144,8 +152,8 @@ class ReidHelper:
         img_np = np.array(img)[..., ::-1]  # RGB->BGR
         req_package = ReidHelper.make_package(0, self.pid, per_id, img_np, 3)
         logger.info(f"{self.pname} 发送Search Person请求: per_id is {per_id}")
-        if ReidComponent.reid_helper_memory is not None:
-            ReidComponent.reid_helper_memory[ReidKey.REID_REQ.name].put(req_package)
+        if self.reid_helper_memory is not None:
+            self.reid_helper_memory[ReidKey.REID_REQ.name].put(req_package)
             self.search_per_id = per_id
             self.req_lock.add(self.search_per_id)
         return True, img_path

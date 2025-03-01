@@ -24,6 +24,7 @@ class DetectionComponent(BasedStreamComponent, ABC):
         self.config: DetectionInfo = None  # config
         self.predictor: IDetectionWrapper = None  # 推理模型
         self.conf = 0.5
+        self.reid_helper = None
 
     def on_start(self):
         """
@@ -32,6 +33,8 @@ class DetectionComponent(BasedStreamComponent, ABC):
         """
         super().on_start()
         self.conf = self.config.detection_reid_conf  # reid存图置信度阈值
+        if self.config.detection_reid_enable:
+            self.reid_helper = ReidHelper()
         for i, output_port in enumerate(self.config.output_ports):
             self.write_dict[i][output_port] = None  # yolox package
         if self.config.detection_reid_enable:
@@ -87,9 +90,9 @@ class DetectionComponent(BasedStreamComponent, ABC):
                     if w < 50 or h < 100:
                         continue
                     shot_img = ImgKit.crop_img(frame, ltrb)
-                    if shot_img is not None:
+                    if shot_img is not None and self.reid_helper is not None:
                         self.save_id = (self.save_id + 1) % sys.maxsize
-                        ReidHelper.send_save_timing(self.cam_ids[idx], self.pid, self.save_id, shot_img)
+                        self.reid_helper.send_save_timing(self.cam_ids[idx], self.pid, self.save_id, shot_img)
                 self.last_reid_time[idx] = frame_id
         return result
 
