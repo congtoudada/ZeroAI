@@ -38,8 +38,22 @@ class RenlianComponent(CountComponent):
         # 人脸识别请求
         current_id = self.frame_id_cache[0]
         for key, value in self.item_dict.items():
+            # face 请求
             self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, value.base_x,
                                       value.base_y, self.cam_id)
+            # reid存图
+            if not value.has_save_reid and value.per_id != 1:
+                value.ltrb[0] = max(1, value.ltrb[0])
+                value.ltrb[1] = max(1, value.ltrb[1])
+                value.ltrb[2] = min(self.stream_width - 1, value.ltrb[2])
+                value.ltrb[3] = min(self.stream_height - 1, value.ltrb[3])
+                img_shot = ImgKit.crop_img(frame, value.ltrb)
+                if img_shot is None or img_shot.shape[0] == 0 or img_shot.shape[1] == 0:
+                    continue
+                self.save_reid_img(frame, value.ltrb, self.config.reid_path, value.per_id)
+                image_path = os.path.join(self.config.reid_path, f"{value.per_id}_{self.cam_id}.jpg")
+                logger.info(f"{self.pname} reid存图成功，路径: {image_path}")
+                value.has_save_reid = True
         return ret
 
     def on_update(self):
@@ -70,10 +84,10 @@ class RenlianComponent(CountComponent):
                 pass
             else:
                 cv2.imwrite(img_path, img_shot)
-                # reid存图
-                if self.config.reid_enable and item.per_id != 1:
-                    self.save_reid_img(frame, item.ltrb, self.config.reid_path, item.per_id)
-                    logger.info(f"{self.pname} reid存图成功，路径: {img_path}")
+                # reid存图（报警时记录）
+                # if self.config.reid_enable and item.per_id != 1:
+                #     self.save_reid_img(frame, item.ltrb, self.config.reid_path, item.per_id)
+                #     logger.info(f"{self.pname} reid存图成功，路径: {img_path}")
 
         if self.config.stream_web_enable:
             # 通知后端
