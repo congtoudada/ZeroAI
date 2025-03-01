@@ -28,11 +28,11 @@ class ReidSearchPersonComp(BaseWebComponent):
         self.tick_max_cnt = self.tick_fps * 10  # 一个请求最多处理10s
         self.tick_flag = 0
         self.rsp_package = []
-    
+
     def on_destroy(self):
         self.reid_helper = None
         super().on_destroy()
-    
+
     def on_start(self):
         # 处理请求
         @BaseWebComponent.app.route('/search_person', methods=['GET'])
@@ -52,8 +52,8 @@ class ReidSearchPersonComp(BaseWebComponent):
                 self.rsp_package.append({
                     "camId": cam_id,
                     "recordTime": time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())
-                                      .replace("\\", "/"),
-                    "shot_img": img_path,
+                    .replace("\\", "/"),
+                    "shot_img": os.path.abspath(img_path),
                     "score": 1.0,
                 })
                 # 轮询
