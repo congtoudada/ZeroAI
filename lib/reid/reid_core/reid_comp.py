@@ -242,13 +242,14 @@ class ReidComponent(Component):
                 faiss_idx = self.face_gallery_dict[per_id]
                 self.face_gallery.remove(faiss_idx)
             img_path = os.path.join(self.config.reid_face_gallery_dir, file)
-            # 打开图像并转换为RGB模式
-            img = Image.open(img_path).convert("RGB")
-            img_np = np.array(img)
-            extra_info = {"per_id": per_id, "img_path": img_path}
-            feat = self.reid_model.inference(img_np)
-            faiss_idx = self.face_gallery.add(feat, extra_info)  # 将特征加入特征库
-            self.face_gallery_dict[per_id] = faiss_idx
+            if os.path.exists(img_path):
+                # 打开图像并转换为RGB模式
+                img = Image.open(img_path).convert("RGB")
+                img_np = np.array(img)
+                extra_info = {"per_id": per_id, "img_path": img_path}
+                feat = self.reid_model.inference(img_np)
+                faiss_idx = self.face_gallery.add(feat, extra_info)  # 将特征加入特征库
+                self.face_gallery_dict[per_id] = faiss_idx
         # for file in removed: # 暂不考虑移除情况
         self.last_modify_time = new_mtime
 
