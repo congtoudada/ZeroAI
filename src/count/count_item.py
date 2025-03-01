@@ -38,12 +38,12 @@ class CountItem:
         self.base_y = base_y  # base_y 百分比
 
     def update_red(self, red_cur):
-        if red_cur == -1:
+        if red_cur < 0:
             return
         self.red_cur = red_cur
 
     def update_green(self, green_cur):
-        if green_cur == -1:
+        if green_cur < 0:
             return
         self.green_cur = green_cur
 

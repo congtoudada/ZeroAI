@@ -235,6 +235,8 @@ class CountComponent(BasedStreamComponent):
                 "status": status,
                 "shotImg": os.path.abspath(img_path)
             }
+            if self.http_helper.config.debug_enable:
+                logger.info(f"{self.pname} 发送计数结果: {data}")
             # WebKit.post(f"{WebKit.Prefix_url}/count", data)
             self.http_helper.post("/algorithm/count", data)
 

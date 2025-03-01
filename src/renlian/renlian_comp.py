@@ -69,7 +69,7 @@ class RenlianComponent(CountComponent):
                 # reid存图
                 if self.config.reid_enable and item.per_id != 1:
                     self.save_reid_img(frame, item.ltrb, self.config.reid_path, item.per_id)
-                logger.info(f"{self.pname} 存图成功，路径: {img_path}")
+                    logger.info(f"{self.pname} reid存图成功，路径: {img_path}")
 
         if self.config.stream_web_enable:
             # 通知后端
@@ -80,6 +80,8 @@ class RenlianComponent(CountComponent):
                 "personId": item.per_id,
                 "shotImg": os.path.abspath(img_path)
             }
+            if self.http_helper.config.debug_enable:
+                logger.info(f"{self.pname} 发送人脸结果: {data}")
             # WebKit.post(f"{WebKit.Prefix_url}/count", data)
             self.http_helper.post("/algorithm/face", data)
 
