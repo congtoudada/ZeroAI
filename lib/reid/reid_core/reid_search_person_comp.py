@@ -3,6 +3,8 @@ import multiprocessing
 import os
 import time
 import traceback
+
+import requests
 from UltraDict import UltraDict
 from flask import Flask, request, jsonify
 from loguru import logger
@@ -26,10 +28,14 @@ class ReidSearchPersonComp(BaseWebComponent):
         self.tick_max_cnt = self.tick_fps * 10  # 一个请求最多处理10s
         self.tick_flag = 0
         self.rsp_package = []
-
+    
+    def on_destroy(self):
+        self.reid_helper = None
+        super().on_destroy()
+    
     def on_start(self):
         # 处理请求
-        @BaseWebComponent.app.route('/search_person')
+        @BaseWebComponent.app.route('/search_person', methods=['GET'])
         def search_person():
             # 获取 GET 请求中名为 'param' 的参数
             per_id = request.args.get('per_id', type=int)  # 自动转换为 int 类型
@@ -86,3 +92,4 @@ if __name__ == '__main__':
     shared_memory[GlobalKey.EVENT_ESC.name] = multiprocessing.Manager().Event()
     reid_comp = ReidSearchPersonComp(shared_memory, config_path="")
     reid_comp.start()
+    reid_comp.run_server()  # 启动服务(已经启动则忽略)
