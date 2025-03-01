@@ -106,7 +106,11 @@ class LaunchComponent(Component):
     def on_destroy(self):
         self.shared_memory[GlobalKey.ALL_READY.name] = True
         if BaseWebComponent.is_running:
-            requests.get(f'http://{BaseWebComponent.host}:{BaseWebComponent.port}/shutdown')
+            logger.info("向Web进程发送退出信号~")
+            try:
+                requests.get(f'http://{BaseWebComponent.host}:{BaseWebComponent.port}/shutdown')
+            except Exception as e:
+                pass
         if os.path.exists(self.config.app_running_file):
            os.remove(self.config.app_running_file)
         logger.info("程序将在3s后退出！")
