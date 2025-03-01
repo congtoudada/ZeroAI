@@ -18,9 +18,6 @@ class BaseWebComponent(Component, ABC):
     def __init__(self, shared_memory):
         super().__init__(shared_memory)
 
-    def on_destroy(self):
-        pass
-
     def run_server(self):
         if not BaseWebComponent.is_running:
             @BaseWebComponent.app.route('/shutdown', methods=['GET'])
