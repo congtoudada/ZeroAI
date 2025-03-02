@@ -244,9 +244,9 @@ class CardComponent(BasedStreamComponent):
 
     #  用于在图像上进行可视化操
     def on_draw_vis(self, idx, frame, input_mot):
-        text_scale = 1.25
-        text_thickness = 1
-        line_thickness = 2
+        text_scale = 2
+        text_thickness = 2
+        line_thickness = 3
         # 标题线
         num = 0 if input_mot is None else input_mot.shape[0]
         # 在图像上添加文本信息，包括帧序号、视频帧率、推理帧率、目标数量以及进入和离开人数等信息
@@ -307,7 +307,7 @@ class CardComponent(BasedStreamComponent):
             if self.valid_count == 0:
                 self.valid = False
             font = cv2.FONT_HERSHEY_SIMPLEX
-            font_scale = 1
+            font_scale = 2
             font_color = (0, 0, 255)  # 红色
             line_type = 3
 
