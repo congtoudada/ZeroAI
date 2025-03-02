@@ -120,7 +120,7 @@ class CardComponent(BasedStreamComponent):
         """
         if input_det is None:
             return None
-        
+
         input_det = input_det[input_det[:, 5] == 0]
         frame_id = self.frame_id_cache[0]
         mot_result = self.tracker.inference(input_det, frame_id, frame, self.cam_id)  # 返回对齐输出后的mot结果
@@ -196,6 +196,11 @@ class CardComponent(BasedStreamComponent):
 
     # 判断是否通过了门
     def is_through_gate_line(self, key, base, last_base):
+        # 不在合法运动区域内就剔除
+        if not (self.config.card_valid_zone[0] < base[0] < self.config.card_valid_zone[2] and \
+                self.config.card_valid_zone[1] < base[1] < self.config.card_valid_zone[3]):
+            return False
+
         # 在这里实现判断是否通过大门线的逻辑
         if self.gate_dict[key] != 0:
             return False
@@ -258,25 +263,36 @@ class CardComponent(BasedStreamComponent):
         for i, red_point in enumerate(self.red_points):
             if i == 0:
                 continue
-            cv2.line(frame, (int(self.red_points[i][0] * self.stream_width), int(self.red_points[i][1] * self.stream_height)),
-                     (int(self.red_points[i-1][0] * self.stream_width), int(self.red_points[i-1][1] * self.stream_height)),
+            cv2.line(frame,
+                     (int(self.red_points[i][0] * self.stream_width), int(self.red_points[i][1] * self.stream_height)),
+                     (int(self.red_points[i - 1][0] * self.stream_width),
+                      int(self.red_points[i - 1][1] * self.stream_height)),
                      (0, 0, 255), line_thickness)  # 绘制线条
         # 绿线
         for i, green_point in enumerate(self.green_points):
             if i == 0:
                 continue
-            cv2.line(frame, (int(self.green_points[i][0] * self.stream_width), int(self.green_points[i][1] * self.stream_height)),
-                     (int(self.green_points[i-1][0] * self.stream_width), int(self.green_points[i-1][1] * self.stream_height)),
+            cv2.line(frame, (
+            int(self.green_points[i][0] * self.stream_width), int(self.green_points[i][1] * self.stream_height)),
+                     (int(self.green_points[i - 1][0] * self.stream_width),
+                      int(self.green_points[i - 1][1] * self.stream_height)),
                      (255, 0, 0), line_thickness)  # 绘制线条
         # 对象基准点、红绿信息
         for item in self.item_dict.values():
             screen_x = int(item.base_x * self.stream_width)
             screen_y = int(item.base_y * self.stream_height)
             cv2.circle(frame, (screen_x, screen_y), 4, (118, 154, 242), line_thickness)
-            # cv2.putText(frame, str(item.red_cur), (screen_x, screen_y), cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255),
-            #             thickness=text_thickness)
-            # cv2.putText(frame, str(item.green_cur), (screen_x + 10, screen_y), cv2.FONT_HERSHEY_PLAIN, text_scale, (255, 0, 0),
-            #             thickness=text_thickness)
+            # cv2.putText(frame, str(item.red_cur), (screen_x, screen_y), cv2.FONT_HERSHEY_PLAIN,
+            #             text_scale, (0, 0, 255), thickness=text_thickness)
+            # cv2.putText(frame, str(item.green_cur), (screen_x + 10, screen_y), cv2.FONT_HERSHEY_PLAIN,
+            #             text_scale, (255, 0, 0), thickness=text_thickness)
+        # 包围盒有效区域
+        bbox_min = (self.config.card_valid_zone[0] * self.stream_width,
+                    self.config.card_valid_zone[1] * self.stream_height)
+        bbox_max = (self.config.card_valid_zone[2] * self.stream_width,
+                    self.config.card_valid_zone[3] * self.stream_height)
+        cv2.rectangle(frame, pt1=(int(bbox_min[0]), int(bbox_min[1])), pt2=(int(bbox_max[0]), int(bbox_max[1])),
+                      color=(0, 255, 0), thickness=text_thickness)
         # 对象包围盒
         if input_mot is not None:
             for obj in input_mot:
@@ -291,7 +307,7 @@ class CardComponent(BasedStreamComponent):
                         text = "error"
                     cv2.rectangle(frame, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
                                   color=(0, 0, 255), thickness=text_thickness)
-                    cv2.putText(frame, f"{obj_id}"+text,
+                    cv2.putText(frame, f"{obj_id}" + text,
                                 (int(ltrb[0]), int(ltrb[1])),
                                 cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
 
@@ -307,7 +323,7 @@ class CardComponent(BasedStreamComponent):
             if self.valid_count == 0:
                 self.valid = False
             font = cv2.FONT_HERSHEY_SIMPLEX
-            font_scale = 2
+            font_scale = 1.25
             font_color = (0, 0, 255)  # 红色
             line_type = 3
 

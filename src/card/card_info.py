@@ -12,5 +12,6 @@ class CardInfo(BasedStreamInfo):
         self.card_item_valid_frames = 1  # 对象稳定出现多少帧，才开始计算
         self.card_item_lost_frames = 60  # 对象消失多少帧则丢弃 (业务层)
         self.card_warning_frame = 10  # 警告信息显示的帧数
+        self.card_valid_zone = [0, 0, 1, 1]  # 包围盒有效运动区域
         # self.card_ABC = 0
         super().__init__(data)  # 前面是声明，一定要最后调用这段赋值

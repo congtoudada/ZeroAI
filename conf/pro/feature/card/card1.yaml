@@ -4,3 +4,10 @@ INCLUDE:
 input_ports:
   - yolox-person3
 output_ports: []
+
+card:
+  valid_zone:
+    - 0.6
+    - 0
+    - 1
+    - 0.75

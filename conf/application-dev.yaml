@@ -7,8 +7,8 @@ service_list:
     conf: conf/dev/service/http/http.yaml
 #  - path: lib/facr/insight/zero/component/insight_comp.py  # 人脸识别服务
 #    conf: conf/dev/service/facr/insight/insight.yaml
-  - path: lib/reid/reid_core/reid_comp.py  # reid服务
-    conf: conf/dev/service/reid/clip_reid.yaml
+#  - path: lib/reid/reid_core/reid_comp.py  # reid服务
+#    conf: conf/dev/service/reid/clip_reid.yaml
 #  - path: lib/reid/reid_core/reid_search_person_comp.py  # 找人服务
 #    conf: conf/dev/service/reid/search_person.yaml
 
@@ -26,8 +26,8 @@ algorithm_list:
     conf: conf/dev/algorithm/yolox/yolox_person.yaml
 #  - path: lib/detection/yolox/zero/yolox_comp.py  # 安全帽
 #    conf: conf/dev/algorithm/yolox/yolox_helmet.yaml
-  - path: lib/detection/yolox/zero/yolox_comp.py  # 手机
-    conf: conf/dev/algorithm/yolox/yolox_phone.yaml
+#  - path: lib/detection/yolox/zero/yolox_comp.py  # 手机
+#    conf: conf/dev/algorithm/yolox/yolox_phone.yaml
   # ------------------- 视频异常检测算法 -------------------
 #  - path: lib/vad/vad_core/vad_comp.py
 #    conf: conf/dev/algorithm/vad_mae/config.yaml
@@ -41,10 +41,10 @@ algorithm_list:
 #    conf: conf/dev/feature/intrude/intrude1.yaml
 #  - path: src/helmet/helmet_comp.py  # 安全帽 (人检测+安全帽检测)
 #    conf: conf/dev/feature/helmet/helmet1.yaml
-#  - path: src/card/card_comp.py # 代刷卡 (人)
-#    conf: conf/dev/feature/card/card1.yaml
-  - path: src/phone/phone_comp.py  # 手机 (人+手机+reid服务)
-    conf: conf/dev/feature/phone/phone1.yaml
+  - path: src/card/card_comp.py # 代刷卡 (人)
+    conf: conf/dev/feature/card/card1.yaml
+#  - path: src/phone/phone_comp.py  # 手机 (人+手机+reid服务)
+#    conf: conf/dev/feature/phone/phone1.yaml
 
 app:
   running_file: bin/dev/runtime.pkl  # 框架运行时标识路径，运行时生成，删除该文件可以关闭算法端
