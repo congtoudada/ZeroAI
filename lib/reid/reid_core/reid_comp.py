@@ -242,9 +242,9 @@ class ReidComponent(Component):
         logger.info(f"{self.pname} update face gallery, modified num: {len(added)}")
         for file in added:
             per_id = file.split('_')[0]  # 首位存per id
-            if self.face_gallery_dict.__contains__(per_id):  # 已经存在该特征
-                faiss_idx = self.face_gallery_dict[per_id]
-                self.face_gallery.remove(faiss_idx)
+            # if self.face_gallery_dict.__contains__(per_id):  # 已经存在该特征
+            #     faiss_idx = self.face_gallery_dict[per_id]
+            #     self.face_gallery.remove(faiss_idx)
             img_path = os.path.join(self.config.reid_face_gallery_dir, file)
             if os.path.exists(img_path):
                 # 打开图像并转换为RGB模式
