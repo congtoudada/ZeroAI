@@ -70,6 +70,9 @@ class RenlianComponent(CountComponent):
         :param item:
         :return:
         """
+        # 方向过滤
+        if (status == 1 and self.config.count_filter == 1) or (status == 2 and self.config.count_filter == 2):
+            return
         # 导出图
         time_str = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())
         status_str = "In" if status == 1 else "Out"
