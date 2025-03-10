@@ -189,9 +189,15 @@ class CountComponent(BasedStreamComponent):
             item.green_seq.append(item.green_cur)
         else:
             if item.red_seq[-1] != item.red_cur:
-                item.red_seq.append(item.red_cur)
+                if len(item.red_seq) == 2:
+                    item.red_seq.pop(-1)
+                else:
+                    item.red_seq.append(item.red_cur)
             if item.green_seq[-1] != item.green_cur:
-                item.green_seq.append(item.green_cur)
+                if len(item.green_seq) == 2:
+                    item.green_seq.pop(-1)
+                else:
+                    item.green_seq.append(item.green_cur)
             # 计数结果
             if len(item.red_seq) == 2 and item.red_seq == item.green_seq:
                 ret = self._get_dir(item.red_seq[0] == 0, self.config.count_reverse)
