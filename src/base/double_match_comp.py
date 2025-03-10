@@ -260,10 +260,10 @@ class DoubleMatchComponent(BasedStreamComponent):
         line_thickness = 3
         # 标题线
         num = 0 if input_mot is None else input_mot.shape[0]
-        cv2.putText(frame, 'inference_fps:%.2f num:%d' %
-                    (1. / max(1e-5, self.update_timer.average_time),
-                     num), (0, int(15 * text_scale)),
-                    cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
+        # cv2.putText(frame, 'inference_fps:%.2f num:%d' %
+        #             (1. / max(1e-5, self.update_timer.average_time),
+        #              num), (0, int(15 * text_scale)),
+        #             cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
         # 合法检测区域
         if len(self.config.dm_zone) > 0:
             valid_zone_zone = self.config.dm_zone
@@ -290,14 +290,15 @@ class DoubleMatchComponent(BasedStreamComponent):
                     item = self.item_dict[obj_id]
                     cls = int(item.main_cls)
                     is_warn = item.has_warn
-                    cv2.putText(frame, f"{obj_id}:{self.config.detection_labels[cls]} warn:{is_warn}",
-                                (int(ltrb[0]), int(ltrb[1])),
-                                cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
+                    # cv2.putText(frame, f"{obj_id}:{self.config.detection_labels[cls]} warn:{is_warn}",
+                    #             (int(ltrb[0]), int(ltrb[1])),
+                    #             cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
                     # 次体的reid结果
                     if self.config.dm_reid_enable and item.has_warn:
-                        cv2.putText(frame, f"per_id:{item.sub_per_id} score:{item.sub_score:.2f}",
-                                    (int(ltrb[0]), int(ltrb[1]) + 20),
-                                    cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
+                        pass
+                        # cv2.putText(frame, f"per_id:{item.sub_per_id} score:{item.sub_score:.2f}",
+                        #             (int(ltrb[0]), int(ltrb[1]) + 20),
+                        #             cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
                 else:
                     cv2.putText(frame, f"{obj_id}",
                                 (int(ltrb[0]), int(ltrb[1])),
