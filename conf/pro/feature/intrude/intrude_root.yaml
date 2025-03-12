@@ -5,7 +5,7 @@ INCLUDE:
 stream:
   output_dir: output/feature/intrude  # 输出目录
 intrude:
-  valid_count: 10
+  valid_count: 10  # 对象有效报警帧阈值
   lost_frames: 180
   face_enable: True
   face_config: conf/pro/feature/intrude/face_helper.yaml  # 人脸请求配置

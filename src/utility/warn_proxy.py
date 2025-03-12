@@ -45,7 +45,7 @@ class WarnProxy(object):
             data = {
                 "recordTime": time_str,
                 "camId": camId,
-                "warnType": warnType,
+                "status": warnType,
                 "personId": per_id,
                 "shotImg": os.path.abspath(img_path),
                 "warnScore": float(warn_score)

@@ -290,15 +290,14 @@ class DoubleMatchComponent(BasedStreamComponent):
                     item = self.item_dict[obj_id]
                     cls = int(item.main_cls)
                     is_warn = item.has_warn
-                    # cv2.putText(frame, f"{obj_id}:{self.config.detection_labels[cls]} warn:{is_warn}",
-                    #             (int(ltrb[0]), int(ltrb[1])),
-                    #             cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
+                    cv2.putText(frame, f"{obj_id}:{self.config.detection_labels[cls]} warn:{is_warn}",
+                                (int(ltrb[0]), int(ltrb[1])),
+                                cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
                     # 次体的reid结果
                     if self.config.dm_reid_enable and item.has_warn:
-                        pass
-                        # cv2.putText(frame, f"per_id:{item.sub_per_id} score:{item.sub_score:.2f}",
-                        #             (int(ltrb[0]), int(ltrb[1]) + 20),
-                        #             cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
+                        cv2.putText(frame, f"per_id:{item.sub_per_id} score:{item.sub_score:.2f}",
+                                    (int(ltrb[0]), int(ltrb[1]) + 20),
+                                    cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
                 else:
                     cv2.putText(frame, f"{obj_id}",
                                 (int(ltrb[0]), int(ltrb[1])),
@@ -312,9 +311,9 @@ class DoubleMatchComponent(BasedStreamComponent):
             if cls in self.config.dm_draw_cls:  # 只绘制异常类型
                 cv2.rectangle(frame, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
                               color=(0, 0, 255), thickness=line_thickness)
-            # id_text = f"cls:{self.config.detection_labels[cls]}({score:.2f})"
-            # cv2.putText(frame, id_text, (int(ltrb[0]), int(ltrb[1])), cv2.FONT_HERSHEY_PLAIN,
-            #             text_scale, (0, 0, 255), thickness=text_thickness)
+            id_text = f"cls:{self.config.detection_labels[cls]}({score:.2f})"
+            cv2.putText(frame, id_text, (int(ltrb[0]), int(ltrb[1])), cv2.FONT_HERSHEY_PLAIN,
+                        text_scale, (0, 0, 255), thickness=text_thickness)
         return frame
 
     def _get_color(self, idx):
