@@ -12,4 +12,4 @@ yolox:
     tsize: 640  # test img size
     fp16: False # Adopting mix precision evaluating.
     fuse: False # Fuse conv and bn for testing.
-    trt: False  # Using TensorRT model for testing.
+    trt: True  # Using TensorRT model for testing.
