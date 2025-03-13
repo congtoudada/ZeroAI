@@ -1,4 +1,5 @@
 import os
+import shutil
 from typing import List
 import cv2
 from UltraDict import UltraDict
@@ -57,6 +58,9 @@ class BasedStreamComponent(Component, ABC):
                     os.path.abspath(os.path.join(self.config.stream_output_dir, f"camera{cam_id}")))
             else:
                 self.output_dir.append(os.path.join(self.config.stream_output_dir, f"camera{cam_id}"))
+            # 如果目录存在，删除整个目录及其内容
+            if os.path.exists(self.output_dir[i]):
+                shutil.rmtree(self.output_dir[i])
             os.makedirs(self.output_dir[i], exist_ok=True)
             # 初始化视频存储
             if self.config.stream_save_video_enable:
