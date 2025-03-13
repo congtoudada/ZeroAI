@@ -90,7 +90,7 @@ class LaunchComponent(Component):
         dir_path = os.path.dirname(self.config.app_running_file)
         # 如果目录不存在，则创建它
         if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
+            os.makedirs(dir_path, exist_ok=True)
         write_data = {"main": "running"}
         pickle.dump(write_data, open(self.config.app_running_file, 'wb'))
         # ########################## 主进程相关 End ############################

@@ -154,11 +154,20 @@ class build_transformer(nn.Module):
                 return torch.cat([img_feature, img_feature_proj], dim=1)
 
 
+    # def load_param(self, trained_path):
+    #     param_dict = torch.load(trained_path)
+    #     for i in param_dict:
+    #         self.state_dict()[i.replace('module.', '')].copy_(param_dict[i])
+    #     print('Loading pretrained model from {}'.format(trained_path))
+
+    #pzy
     def load_param(self, trained_path):
         param_dict = torch.load(trained_path)
         for i in param_dict:
-            self.state_dict()[i.replace('module.', '')].copy_(param_dict[i])
-        print('Loading pretrained model from {}'.format(trained_path))
+            if 'classifier' in i:  # 跳过分类层的权重
+                continue
+            if i in self.state_dict() and self.state_dict()[i.replace('module.', '')].shape == param_dict[i].shape:
+                self.state_dict()[i.replace('module.', '')].copy_(param_dict[i])
 
     def load_param_finetune(self, model_path):
         param_dict = torch.load(model_path)
