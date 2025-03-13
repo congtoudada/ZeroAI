@@ -55,7 +55,6 @@ class BytetrackHelper:
             if cls != 0:
                 continue
             obj_id = int(obj[6])  # 提取当前目标的唯一标识符，转换为整数类型
-            cache_item = None
             if not self.reid_cache.__contains__(obj_id):
                 cache_item = {'count': 0, 'last_time': now, 'last_save_time': 0}
                 self.reid_cache[obj_id] = cache_item
@@ -72,10 +71,14 @@ class BytetrackHelper:
             if conf < self.config.bytetrack_reid_conf:
                 continue
             ltrb = obj[:4]  # 提取当前目标的边界框坐标，即左上角和右下角的坐标
+            # 不在有效区域的点不存
+            base_y = (ltrb[1] + ltrb[3]) * 0.5 / frame.shape[1]
+            if base_y < self.config.bytetrack_reid_cull_up_y or base_y > (1-self.config.bytetrack_reid_cull_down_y):
+                continue
             # 包围盒太小的不存或比例奇怪的不存
             w = ltrb[2] - ltrb[0]
             h = ltrb[3] - ltrb[1]
-            if w < 40 or h < 80:
+            if (float(w) / h) > 0.75:
                 continue
             shot_img = ImgKit.crop_img(frame, ltrb)
             if shot_img is not None:

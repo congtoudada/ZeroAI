@@ -105,7 +105,7 @@ class FaceHelper:
             self.face_dict.pop(obj_id)
 
     def face_callback(self, obj_id, per_id, score):
-        logger.info(f"{self.pname} 收到人脸响应: {obj_id} {per_id} {score}")
+        logger.info(f"{self.pname} Receive Face: {obj_id} {per_id} {score}")
         if self.face_dict.__contains__(obj_id):
             # 添加到结果集缓存
             self.face_dict[obj_id]["per_id"] = per_id

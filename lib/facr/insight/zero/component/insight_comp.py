@@ -35,6 +35,8 @@ class InsightComponent(Component):
         self.req_queue = None  # 人脸请求队列
         self.database_file = os.path.join(os.path.dirname(self.config.insight_database),
                                           "database-{}.json".format(self.config.insight_rec_feature))  # 人脸特征库配置文件路径
+        if os.path.exists(self.database_file):
+            os.remove(self.database_file)
         self.face_model: FaceRecognizer = FaceRecognizer(self.config)  # 人脸识别模型（含人脸检测、人脸关键点检测、特征对齐、人脸识别）
         self.time_flag = 0  # 时间标识，用于检查是否重建特征库
         self.check_database_time = max(self.config.update_fps * 30, 1800)  # 半分钟检查一次

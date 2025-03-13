@@ -17,6 +17,8 @@ class BytetrackInfo(BaseInfo):
         self.bytetrack_reid_min_interval = 30  # reid存图最小间隔(支持reid存图才有效)
         self.bytetrack_reid_max_interval = 300  # reid存图最大间隔(支持reid存图才有效)
         self.bytetrack_reid_lost_frames = 180  # 对象消失多少帧则销毁
+        self.bytetrack_reid_cull_up_y = 0.2  # 向上剔除百分比
+        self.bytetrack_reid_cull_down_y = 0.2  # 向下剔除百分比
         self.bytetrack_reid_camera_gallery = "output/service/clip_reid/camera_gallery"  # 存图路径(支持reid存图才有效)
         super().__init__(data)  # 前面是声明，一定要最后调用这段赋值
 
