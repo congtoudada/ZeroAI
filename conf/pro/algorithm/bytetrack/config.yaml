@@ -16,6 +16,6 @@ bytetrack:
     min_interval: 300  # reid存图最小间隔(支持reid存图才有效)
     max_interval: 3600  # reid存图最大间隔(支持reid存图才有效)
     lost_frames: 180  # 对象消失多少帧则销毁
-    cull_up_y: 0.2  # 向上剔除百分比
-    cull_down_y: 0.2  # 向下剔除百分比
+    cull_up_y: 0.2
+    cull_down_y: 0.2
     camera_gallery: output/service/clip_reid/camera_gallery  # 存图路径(支持reid存图才有效)

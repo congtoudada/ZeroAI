@@ -1,0 +1,20 @@
+INCLUDE:
+  - conf/pro/global/config.yaml
+reid:
+  dimension: 1280  # VIT特征维度(1280) RN50(3072)
+  # dimension: 3072  # VIT特征维度(1280) RN50(3072)
+  threshold: 0.86  # reid相似度阈值
+  search_person_threshold: 0.85  # 找人相似度阈值
+  config_file: lib/reid/clip_reid/configs/person/vit_clipreid.yml  # vit模型配置文件
+  # config_file: lib/reid/clip_reid/configs/person/cnn_clipreid.yml  # cnn模型配置文件
+  face_gallery_dir: output/service/clip_reid/face_gallery  # 由人脸识别捕捉的带id的人像gallery
+  camera_gallery_dir: output/service/clip_reid/camera_gallery  # 由摄像头定期截图的gallery
+  refresh_mode: 0  # 刷新模式 0:基于时间刷新 1:基于特征数量刷新 2:综合刷新(满足其中一项就刷新)
+  refresh_interval: 54000  # 经过n帧刷新一次特征库（30fps * 60s * 30min = 54000 frame）
+  refresh_count: 10000  # 达到n条数据刷新一次特征库
+  cull_mode: 0  # 0:全部进行reid 1:只开启白名单 2:只开启黑名单 3:开启黑、白名单，黑名单优先级更高
+  white_list: []  # 只有当开启白名单制时有效，在白名单的摄像头id会参与reid计算，其他不会
+  black_list: []  # 只有当开启黑名单制时有效，在黑名单的摄像头id会不参与reid计算，其他都会
+  debug_enable: True  # 是否debug
+  debug_output: output/service/clip_reid/debug  # debug输出路径
+update_fps: 30

@@ -2,5 +2,5 @@ INCLUDE:
   - conf/pro/feature/renlian/renlian_root.yaml
   - conf/pro/feature/renlian/renlian1_zone.yaml
 input_ports:  # 输入端口
-  - yolox-person3
+  - yolox-person5
 output_ports: []  # 输出端口

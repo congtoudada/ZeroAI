@@ -1,0 +1,13 @@
+INCLUDE:
+  - conf/pro/feature/card/card1_zone.yaml
+  - conf/pro/feature/card/card_root.yaml
+input_ports:
+  - yolox-person3
+output_ports: []
+
+card:
+  valid_zone:
+    - 0.6
+    - 0
+    - 1
+    - 0.75

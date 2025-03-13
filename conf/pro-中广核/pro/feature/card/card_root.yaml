@@ -1,0 +1,13 @@
+INCLUDE:
+  - conf/pro/feature/common.yaml
+  - conf/pro/global/based_stream.yaml
+  - conf/pro/global/config.yaml
+stream:
+  output_dir: output/feature/card  # 输出目录
+card:
+  lost_frames: 200 # card区的obj消失多少帧则丢弃,根据从car区到gate区所需时间确定
+  item:
+    base: 0
+    valid_frames: 1 # 对象稳定出现多少帧，才开始计算
+    lost_frames: 60  # 对象消失多少帧则丢弃 (业务层)
+  draw_warning_time: 10 # 警告信息显示的帧数

@@ -3,5 +3,5 @@ INCLUDE:
   - conf/pro/feature/intrude/intrude_root.yaml
 
 input_ports:  # 输入端口
-  - yolox-person2
+  - yolox-person4
 output_port: []  # 输出端口

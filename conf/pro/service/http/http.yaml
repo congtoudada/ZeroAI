@@ -1,7 +1,7 @@
 INCLUDE:
   - conf/pro/global/config.yaml
 http:
-  web_address: 127.0.0.1:8080
+  web_address: 10.0.5.198:8080
   delay_enable: True
   delay_frame: 30
 

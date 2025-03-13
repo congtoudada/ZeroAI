@@ -1,10 +1,9 @@
-# 摄像头1
+# 代刷卡
 INCLUDE:
   - conf/pro/stream/stream_root.yaml
 
 stream:
   cam_id: 3  # 摄像头编号（对应数据库）
-#  url: res/video/phone01.mp4 # 取流地址（输入）
-  url: rtsp://admin:hik12345@192.168.1.102:554/h264/ch1/main/av_stream # 取流地址（输入）
+  url: rtsp://admin:zwjs123456@192.168.1.113:554/h264/ch1/main/av_stream_card  # 取流地址（输入）
 
 output_port: camera3  # 输出端口

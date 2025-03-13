@@ -3,9 +3,9 @@ stream:
   mot_config: conf/pro/algorithm/bytetrack/config.yaml  # mot配置
   http_config: conf/pro/service/http/http_helper.yaml  # http帮助类配置
   save_video:
-    enable: True  # 是否保存视频
+    enable: False  # 是否保存视频
   draw_vis:
-    enable: True  # 是否可视化
+    enable: False  # 是否可视化
 
 # 更新帧率
-update_fps: 100
+update_fps: 300

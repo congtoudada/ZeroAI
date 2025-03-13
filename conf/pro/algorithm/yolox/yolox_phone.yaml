@@ -4,13 +4,22 @@ INCLUDE:
 
 input_ports:  # 输入端口
   - camera2
+  - camera6
+  - camera8
+  - camera9
 
 output_ports:  # 输出端口
   - yolox-phone2
+  - yolox-phone6
+  - yolox-phone8
+  - yolox-phone9
 
 stream:
   save_video:
     filename: phone
+    enable: False  # 是否保存视频
+  draw_vis:
+    enable: False  # 是否可视化
 
 yolox:
   args:

@@ -3,10 +3,10 @@ INCLUDE:
   - conf/pro/algorithm/yolox/labels/helmet_labels.yaml
 
 input_ports:  # 输入端口
-  - camera2
+  - camera5
 
 output_ports:  # 输出端口
-  - yolox-helmet2
+  - yolox-helmet5
 
 stream:
   save_video:

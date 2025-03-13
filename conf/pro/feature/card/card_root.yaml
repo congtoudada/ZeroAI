@@ -7,7 +7,7 @@ stream:
 card:
   lost_frames: 200 # card区的obj消失多少帧则丢弃,根据从car区到gate区所需时间确定
   item:
-    base: 0
+    base: 1  # 0:cener 1:left-top
     valid_frames: 1 # 对象稳定出现多少帧，才开始计算
     lost_frames: 60  # 对象消失多少帧则丢弃 (业务层)
   draw_warning_time: 10 # 警告信息显示的帧数
