@@ -45,7 +45,7 @@ class FaceProcessHelper:
         :return:
         """
         if self.can_send(obj_id):
-            logger.info(f"{self.pname} 发送人脸识别请求: {obj_id}")
+            # logger.info(f"{self.pname} 发送人脸识别请求: {obj_id}")
             self.send_lock.add(obj_id)
             self.face_shared_memory[FaceKey.FACE_REQ.name].put({
                 FaceKey.FACE_REQ_CAM_ID.name: cam_id,

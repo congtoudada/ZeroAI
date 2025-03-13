@@ -65,30 +65,30 @@ TEST:
   IMS_PER_BATCH: 1
   RE_RANKING: False
   # WEIGHT: 'pretrained/reid/clip_reid/MSMT17_clipreid_RN50_120.pth'
-  WEIGHT: 'pretrained/reid/clip_reid/MSMT17_clipreid_ViT-B-16_60.pth'
+  WEIGHT: 'pretrained/reid/clip_reid/ViT-B-16_60_mmt.pth'
   NECK_FEAT: 'before'
   FEAT_NORM: 'yes'
 
-#DATASETS:
-#   NAMES: ('market1501')
-#   ROOT_DIR: ('H:/BaiduNetdiskDownload/dataset/ReID')
-#OUTPUT_DIR: 'output/market1501'
-
-
-#DATASETS:
-#   NAMES: ('msmt17')
-#   ROOT_DIR: ('H:/BaiduNetdiskDownload/dataset/ReID')
-#OUTPUT_DIR: 'output/msmt17'
-
-#DATASETS:
-#   NAMES: ('msmt17')
-#   ROOT_DIR: ('H:/BaiduNetdiskDownload/dataset/ReID')
-#OUTPUT_DIR: 'output/msmt17'
-
 DATASETS:
-   NAMES: ('cong2025')
-   ROOT_DIR: ('res/images/reid/CustomDataset')
+  NAMES: ('market1501')
+  ROOT_DIR: ('res/images/reid')
 OUTPUT_DIR: 'output/service/clip_reid'
+
+
+#DATASETS:
+#   NAMES: ('msmt17')
+#   ROOT_DIR: ('H:/BaiduNetdiskDownload/dataset/ReID')
+#OUTPUT_DIR: 'output/msmt17'
+
+#DATASETS:
+#   NAMES: ('msmt17')
+#   ROOT_DIR: ('H:/BaiduNetdiskDownload/dataset/ReID')
+#OUTPUT_DIR: 'output/msmt17'
+
+# DATASETS:
+#    NAMES: ('cong2025')
+#    ROOT_DIR: ('res/images/reid/CustomDataset')
+# OUTPUT_DIR: 'output/service/clip_reid'
 
 # CUDA_VISIBLE_DEVICES=3 python train_clipreid.py --config_file configs/VehicleID/vit_clipreid.yml
 # CUDA_VISIBLE_DEVICES=0 python test_clipreid.py --config_file configs/person/vit_clipreid.yml TEST.WEIGHT 'pretrained/reid/clip_reid/MSMT17_clipreid_ViT-B-16_60.pth'
