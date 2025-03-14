@@ -173,7 +173,7 @@ class ReidComponent(Component):
             # 更新本地face shot特征库
             self.update_face_shot()
             k = 1  # topK的K值
-            extra_info = self.face_gallery.search(feat, k, self.config.reid_threshold)
+            extra_info = self.face_gallery.search(feat, k, self.config.reid_match_threshold)
             per_id = 1
             score = 0
             if len(extra_info) == 0:
