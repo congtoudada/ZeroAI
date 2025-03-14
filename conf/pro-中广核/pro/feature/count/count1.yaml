@@ -1,9 +1,0 @@
-INCLUDE:
-  - conf/pro/feature/count/count_root.yaml
-  - conf/pro/feature/count/count1_zone.yaml
-input_ports:  # 输入端口
-  - yolox-count1
-output_ports: []  # 输出端口
-
-count:
-  reverse: True  # 默认从上到下为进入，从下到上为离开

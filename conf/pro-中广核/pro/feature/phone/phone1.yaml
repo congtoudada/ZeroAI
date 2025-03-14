@@ -1,8 +1,0 @@
-INCLUDE:
-  - conf/pro/feature/phone/phone_root.yaml
-
-
-input_ports:  # 输入端口 (先手机再人)
-  - yolox-phone2
-  - yolox-person2
-output_port: []  # 输出端口
