@@ -36,39 +36,39 @@ stream_list:
 # 算法
 algorithm_list:
   # ------------------- 目标检测算法 -------------------
-  # - path: lib/detection/yolox/zero/yolox_comp.py  # 计数
-  #   conf: conf/pro/algorithm/yolox/yolox_count.yaml
+  - path: lib/detection/yolox/zero/yolox_comp.py  # 计数
+    conf: conf/pro/algorithm/yolox/yolox_count.yaml
   - path: lib/detection/yolox/zero/yolox_comp.py  # 人1
     conf: conf/pro/algorithm/yolox/yolox_person1.yaml
   - path: lib/detection/yolox/zero/yolox_comp.py  # 人2
     conf: conf/pro/algorithm/yolox/yolox_person2.yaml
-  # - path: lib/detection/yolox/zero/yolox_comp.py  # 安全帽
-  #   conf: conf/pro/algorithm/yolox/yolox_helmet.yaml
-  # - path: lib/detection/yolox/zero/yolox_comp.py  # 手机
-  #   conf: conf/pro/algorithm/yolox/yolox_phone.yaml
+  - path: lib/detection/yolox/zero/yolox_comp.py  # 安全帽
+    conf: conf/pro/algorithm/yolox/yolox_helmet.yaml
+  - path: lib/detection/yolox/zero/yolox_comp.py  # 手机
+    conf: conf/pro/algorithm/yolox/yolox_phone.yaml
   # ------------------- 视频异常检测算法 -------------------
 #  - path: lib/vad/vad_core/vad_comp.py
 #    conf: conf/pro/algorithm/vad_mae/config.yaml
 
   # ------------------- 业务算法 -------------------
-  # - path: src/count/count_comp.py  # 计数 (计数检测)
-  #   conf: conf/pro/feature/count/count1.yaml
-  # - path: src/renlian/renlian_comp.py  # 人脸 (人检测)
-  #   conf: conf/pro/feature/renlian/renlian1.yaml
+  - path: src/count/count_comp.py  # 计数 (计数检测)
+    conf: conf/pro/feature/count/count1.yaml
+  - path: src/renlian/renlian_comp.py  # 人脸 (人检测)
+    conf: conf/pro/feature/renlian/renlian1.yaml
   - path: src/intrude/intrude_comp.py  # 入侵 (人检测+人脸服务)
     conf: conf/pro/feature/intrude/intrude1.yaml
-  # - path: src/helmet/helmet_comp.py  # 安全帽 (人检测+安全帽检测)
-  #   conf: conf/pro/feature/helmet/helmet1.yaml
-  # - path: src/card/card_comp.py # 代刷卡 (人)
-  #   conf: conf/pro/feature/card/card1.yaml
-  # - path: src/phone/phone_comp.py
-  #   conf: conf/pro/feature/phone/phone2.yaml
-  # - path: src/phone/phone_comp.py
-  #   conf: conf/pro/feature/phone/phone6.yaml
-  # - path: src/phone/phone_comp.py  # 手机 (人+手机+reid服务)
-  #   conf: conf/pro/feature/phone/phone8.yaml
-  # - path: src/phone/phone_comp.py
-  #   conf: conf/pro/feature/phone/phone9.yaml
+  - path: src/helmet/helmet_comp.py  # 安全帽 (人检测+安全帽检测)
+    conf: conf/pro/feature/helmet/helmet1.yaml
+  - path: src/card/card_comp.py # 代刷卡 (人)
+    conf: conf/pro/feature/card/card1.yaml
+  - path: src/phone/phone_comp.py
+    conf: conf/pro/feature/phone/phone2.yaml
+  - path: src/phone/phone_comp.py
+    conf: conf/pro/feature/phone/phone6.yaml
+  - path: src/phone/phone_comp.py  # 手机 (人+手机+reid服务)
+    conf: conf/pro/feature/phone/phone8.yaml
+  - path: src/phone/phone_comp.py
+    conf: conf/pro/feature/phone/phone9.yaml
 
 app:
   running_file: bin/pro/runtime.pkl  # 框架运行时标识路径，运行时生成，删除该文件可以关闭算法端
