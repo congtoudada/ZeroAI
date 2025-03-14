@@ -42,7 +42,6 @@ class IntrudeComponent(BasedStreamComponent):
         self.http_helper = SimpleHttpHelper(self.config.stream_http_config)  # http帮助类
         self.reid_helper: ReidHelper = None
         self.face_helper: FaceHelper = None
-        self.reid_info_dict = {}  # reid 额外信息
         self.intrude_zone = []  # 检测区域像素 ltrb
 
     def on_start(self):
@@ -73,21 +72,23 @@ class IntrudeComponent(BasedStreamComponent):
         super().on_update()
         now = self.frame_id_cache[0]
         if self.config.intrude_reid_enable:
-            self.reid_helper.tick(now)
             for key, value in self.item_dict.items():
+                if value.valid_count == 0 or value.has_warn:
+                    continue
                 value.ltrb[0] = max(1, value.ltrb[0])
                 value.ltrb[1] = max(1, value.ltrb[1])
                 value.ltrb[2] = min(self.stream_width - 1, value.ltrb[2])
                 value.ltrb[3] = min(self.stream_height - 1, value.ltrb[3])
                 shot_img = ImgKit.crop_img(self.frames[0], value.ltrb)  # 扣出人的包围框
-                self.reid_helper.try_send_reid(self.frame_id_cache[1], shot_img,
-                                               value.ltrb, self.cam_id, 4)
+                self.reid_helper.try_send_reid(self.frame_id_cache[0], shot_img, key, self.cam_id, 4)
+            self.reid_helper.tick(now)
+
         if self.config.intrude_face_enable:
             # 人脸识别请求
             for key, value in self.item_dict.items():
                 # 没有进入报警区域，就直接返回
-                # if value.valid_count == 0:
-                #     continue
+                if value.valid_count == 0 or value.has_warn:
+                    continue
                 self.face_helper.try_send(now, self.frames[0], value.ltrb, key, value.base_x,
                                           value.base_y, self.cam_id)
             # 人脸识别帮助tick，用于接受响应
@@ -157,17 +158,21 @@ class IntrudeComponent(BasedStreamComponent):
                     in_warn = self._is_in_warn(ltrb)  # 判断是否处于警戒区
                     x, y = self._get_base(0, ltrb)  # 基于包围盒中心点计算百分比x,y
                     self.item_dict[obj_id].update(current_frame_id, in_warn, x / width, y / height, ltrb)
-
                 # 处理Item结果
                 item = self.item_dict[obj_id]
+                # 如果开启reid检测，小于重试次数的陌生人不报警
+                retry = 0
+                if self.reid_helper is not None:
+                    if self.reid_helper.reid_dict.__contains__(obj_id):
+                        retry = self.reid_helper.reid_dict[obj_id]["retry"]
+                        if item.per_id == 1 and retry < self.reid_helper.config.reid_max_retry:
+                            continue
                 # 如果开启人脸检测，小于重试次数的陌生人不报警
-                if self.face_helper.face_dict.__contains__(obj_id):
-                    retry = self.face_helper.face_dict[obj_id]["retry"]
-                else:
-                    retry = 0
-                if self.config.intrude_face_enable:
-                    if item.per_id == 1 and retry < self.face_helper.config.face_max_retry:
-                        continue
+                if self.face_helper is not None:
+                    if self.face_helper.face_dict.__contains__(obj_id):
+                        retry = self.face_helper.face_dict[obj_id]["retry"]
+                        if item.per_id == 1 and retry < self.face_helper.config.face_max_retry:
+                            continue
                 # 如果Item没有报过警且报警帧数超过有效帧，判定为入侵异常
                 if not item.has_warn and item.get_valid_count() > self.config.intrude_valid_count:
                     logger.info(f"{self.pname} obj_id: {obj_id} 入侵异常")
@@ -214,6 +219,8 @@ class IntrudeComponent(BasedStreamComponent):
         clear_keys.reverse()  # 从尾巴往前删除，确保索引正确性
         for key in clear_keys:
             self.pool.push(self.item_dict[key])
+            if self.reid_helper is not None:
+                self.reid_helper.destroy_obj(key)
             if self.face_helper is not None:
                 self.face_helper.destroy_obj(key)
             self.item_dict.pop(key)  # 从字典中移除item
@@ -289,7 +296,17 @@ class IntrudeComponent(BasedStreamComponent):
                             cv2.putText(frame, "normal",
                                         (int(ltrb[0] + 50), int(ltrb[1])),
                                         cv2.FONT_HERSHEY_PLAIN, text_scale, obj_color, thickness=text_thickness)
-
+        if self.config.intrude_reid_enable:
+            # reid识别结果
+            reid_dict = self.reid_helper.reid_dict
+            for key, value in reid_dict.items():
+                if self.item_dict.__contains__(key):
+                    ltrb = self.item_dict[key].ltrb
+                    obj_id = self.item_dict[key].obj_id
+                    obj_color = self._get_color(obj_id)
+                    cv2.putText(frame, f"per_id:{reid_dict[key]['per_id']}",
+                                (int((ltrb[0] + ltrb[2]) / 2), int(self.item_dict[key].ltrb[1] + 20)),
+                                cv2.FONT_HERSHEY_PLAIN, text_scale, obj_color, thickness=text_thickness)
         if self.config.intrude_face_enable:
             face_dict = self.face_helper.face_dict
             # 人脸参考线
@@ -316,7 +333,7 @@ class IntrudeComponent(BasedStreamComponent):
             cv2.line(frame, line_down1, line_down2, (255, 255, 0), line_thickness)  # 绘制线条
             cv2.line(frame, line_left1, line_left2, (255, 255, 0), line_thickness)  # 绘制线条
             cv2.line(frame, line_right1, line_right2, (255, 255, 0), line_thickness)  # 绘制线条
-            # 人脸识别结果
+            # 识别结果
             for key, value in face_dict.items():
                 if self.item_dict.__contains__(key):
                     ltrb = self.item_dict[key].ltrb

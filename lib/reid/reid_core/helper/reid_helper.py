@@ -187,12 +187,13 @@ class ReidHelper:
             self.reid_dict.pop(obj_id)
 
     def reid_callback(self, obj_id, per_id, score):
-        logger.info(f"{self.pname} 收到reid响应: {obj_id} {per_id} {score}")
+        # logger.info(f"{self.pname} 收到reid响应: {obj_id} {per_id} {score}")
         # 添加到结果集缓存
         if self.reid_dict.__contains__(obj_id):
             self.reid_dict[obj_id]["per_id"] = per_id
             self.reid_dict[obj_id]["score"] = score
             self.reid_dict[obj_id]["retry"] += 1
+            re =  self.reid_dict[obj_id]["retry"]
             # 触发外界回调函数
             if self.reid_callback is not None:
                 self.reid_callback(obj_id, per_id, score)
