@@ -17,4 +17,4 @@ insight:
     ckpt: pretrained/facr/insight/feature/pth/resnet50.pth  # 人脸特征提取权重文件
   database: res/images/face/database  # 特征库位置
   # reconstruct_file: bin/runtime/face.pkl  # 人脸标识文件路径（该文件用于通知重建特征库）
-update_fps: 144
+update_fps: 100
