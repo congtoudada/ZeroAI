@@ -5,7 +5,7 @@ reid:
   # dimension: 3072  # VIT特征维度(1280) RN50(3072)
   anomaly_threshold: 0.90  # reid相似度阈值
   camera_threshold: 0.86  # 普通reid相似阈值
-  search_person_threshold: 0.85  # 找人相似度阈值
+  search_match_threshold: 0.86  # 找人相似度阈值
   config_file: lib/reid/clip_reid/configs/person/vit_clipreid.yml  # vit模型配置文件
   # config_file: lib/reid/clip_reid/configs/person/cnn_clipreid.yml  # cnn模型配置文件
   face_gallery_dir: output/service/clip_reid/face_gallery  # 由人脸识别捕捉的带id的人像gallery
