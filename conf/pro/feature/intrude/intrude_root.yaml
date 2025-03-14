@@ -5,7 +5,9 @@ INCLUDE:
 stream:
   output_dir: output/feature/intrude  # 输出目录
 intrude:
-  valid_count: 3
-  lost_frames: 180
+  valid_count: 3  # 对象有效报警帧阈值
+  lost_frames: 180  # 消失多少帧丢弃
+  reid_enable: True  # 是否开启reid（优先级大于人脸，二者只会开启一个）
+  reid_config: conf/pro/service/reid/helper/fast_reid_helper.yaml  # reid helper config
   face_enable: True
   face_config: conf/pro/feature/intrude/face_helper.yaml  # 人脸请求配置
