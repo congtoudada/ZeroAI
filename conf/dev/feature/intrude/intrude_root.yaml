@@ -9,5 +9,3 @@ intrude:
   lost_frames: 180
   reid_enable: True
   reid_config: conf/dev/service/reid/helper/fast_reid_helper.yaml
-  face_enable: True
-  face_config: conf/dev/feature/intrude/intrude_face_helper.yaml  # 人脸请求配置

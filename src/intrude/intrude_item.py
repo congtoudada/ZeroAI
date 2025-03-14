@@ -12,6 +12,7 @@ class IntrudeItem:
         self.per_id = 1  # 默认为陌生人
         self.score = 0  # 置信度分数
         self.ltrb = [0, 0, 0, 0]  # 包围盒（实际像素位置）
+        self.warn_img = None  # 报警时缓存
 
     def init(self, obj_id, last_update_id):
         self.obj_id = obj_id
@@ -24,6 +25,7 @@ class IntrudeItem:
         self.per_id = 1  # 默认为陌生人
         self.score = 0  # 置信度分数
         self.ltrb = [0, 0, 0, 0]  # 包围盒（实际像素位置）
+        self.warn_img = None  # 报警时缓存
 
     def update(self, last_update_id, in_warn, base_x, base_y, ltrb):
         self.last_update_id = last_update_id
