@@ -9,9 +9,9 @@ detection:
 stream:
   output_dir: output/detection/yolox  # 输出目录
   save_video:
-    enable: False  # 是否保存视频
+    enable: True  # 是否保存视频
   draw_vis:
-    enable: False  # 是否可视化
+    enable: True  # 是否可视化
 
 # 更新帧率（-1表示无上限）
 update_fps: 300
