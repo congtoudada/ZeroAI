@@ -5,7 +5,7 @@ INCLUDE:
 stream:
   output_dir: output/feature/intrude  # 输出目录
 intrude:
-  valid_count: 3
+  valid_count: 10
   lost_frames: 180
   reid_enable: True
   reid_config: conf/dev/service/reid/helper/fast_reid_helper.yaml
