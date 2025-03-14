@@ -6,10 +6,10 @@ import cv2
 import numpy as np
 from loguru import logger
 
+from reid_core.helper.reid_helper import ReidHelper
 from src.intrude.intrude_info import IntrudeInfo
 from src.intrude.intrude_item import IntrudeItem
 from bytetrack.zero.bytetrack_helper import BytetrackHelper
-from insight.zero.component.face_helper import FaceHelper
 from simple_http.simple_http_helper import SimpleHttpHelper
 from src.utility.warn_proxy import WarnProxy
 from zero.core.based_stream_comp import BasedStreamComponent
@@ -34,18 +34,18 @@ class IntrudeComponent(BasedStreamComponent):
         self.cam_id = 0
         self.stream_width = 0
         self.stream_height = 0
-        self.data_dict: Dict[int, IntrudeItem] = {}
+        self.item_dict: Dict[int, IntrudeItem] = {}
         self.zone_points = []
         self.zone_vec = []
         self.tracker: BytetrackHelper = BytetrackHelper(self.config.stream_mot_config)  # 追踪器
         self.http_helper = SimpleHttpHelper(self.config.stream_http_config)  # http帮助类
-        self.face_helper: FaceHelper = None
-        self.intrude_zone = []  # 检测区域像素 ltrb
+        self.reid_helper: ReidHelper = None
+        self.intrude_zone = []  # 检测区域像素
 
     def on_start(self):
         super().on_start()
-        if self.config.intrude_face_enable:
-            self.face_helper = FaceHelper(self.config.intrude_face_config, self._face_callback)
+        if self.config.intrude_reid_enable:
+            self.reid_helper = ReidHelper(self.config.intrude_reid_config, self._reid_callback)
         self.cam_id = self.read_dict[0][StreamKey.STREAM_CAM_ID.name]
         self.stream_width = int(self.read_dict[0][StreamKey.STREAM_WIDTH.name])
         self.stream_height = int(self.read_dict[0][StreamKey.STREAM_HEIGHT.name])
@@ -65,22 +65,19 @@ class IntrudeComponent(BasedStreamComponent):
     def on_update(self):
         self.release_unused()  # 清理无用资源（一定要在最前面调用）
         super().on_update()
-        if self.config.intrude_face_enable:
-            # 人脸识别请求
-            current_id = self.frame_id_cache[0]
-            for key, value in self.data_dict.items():
-                # 没有进入报警区域，就直接返回
-                # if value.valid_count == 0:
-                #     continue
-                self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, value.base_x,
-                                          value.base_y, self.cam_id)
-            # 人脸识别帮助tick，用于接受响应
-            self.face_helper.tick(current_id)
+        if self.reid_helper is not None:
+            now = self.frame_id_cache[0]
+            self.reid_helper.tick(now)
 
-    def _face_callback(self, obj_id, per_id, score):
-        if self.data_dict.__contains__(obj_id):
-            self.data_dict[obj_id].per_id = per_id
-            self.data_dict[obj_id].score = score
+    def _reid_callback(self, obj_id, per_id, score):
+        # 发送报警
+        if self.item_dict.__contains__(obj_id):
+            item = self.item_dict[obj_id]
+            item.per_id = per_id
+            item.score = score
+            # 发送报警信息给后端
+            WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, 4, per_id,
+                           item.warn_img, 1, self.config.stream_export_img_enable, self.config.stream_web_enable)
 
     def on_get_stream(self, read_idx):
         frame, _ = super().on_get_stream(read_idx)  # 解析视频帧id+视频帧
@@ -118,7 +115,7 @@ class IntrudeComponent(BasedStreamComponent):
         if input_mot is None:
             return
         # 清空前一帧状态
-        for item in self.data_dict.values():
+        for item in self.item_dict.values():
             item.reset_update()
 
         for obj in input_mot:
@@ -128,47 +125,44 @@ class IntrudeComponent(BasedStreamComponent):
             obj_id = int(obj[6])
             if cls == 0:  # 人
                 # 更新Item状态
-                if not self.data_dict.__contains__(obj_id):  # 没有被记录过
+                if not self.item_dict.__contains__(obj_id):  # 没有被记录过
                     item = self.pool.pop()
                     item.init(obj_id, current_frame_id)
-                    self.data_dict[obj_id] = item
+                    self.item_dict[obj_id] = item
                 else:  # 已经记录过（更新状态）
                     in_warn = self._is_in_warn(ltrb)  # 判断是否处于警戒区
                     x, y = self._get_base(0, ltrb)  # 基于包围盒中心点计算百分比x,y
-                    self.data_dict[obj_id].update(current_frame_id, in_warn, x / width, y / height, ltrb)
-
+                    self.item_dict[obj_id].update(current_frame_id, in_warn, x / width, y / height, ltrb)
                 # 处理Item结果
-                item = self.data_dict[obj_id]
-                # 如果开启人脸检测，小于重试次数的陌生人不报警
-                if self.face_helper.face_dict.__contains__(obj_id):
-                    retry = self.face_helper.face_dict[obj_id]["retry"]
-                else:
-                    retry = 0
-                if self.config.intrude_face_enable:
-                    if item.per_id == 1 and retry < self.face_helper.config.face_max_retry:
-                        continue
+                item = self.item_dict[obj_id]
                 # 如果Item没有报过警且报警帧数超过有效帧，判定为入侵异常
                 if not item.has_warn and item.get_valid_count() > self.config.intrude_valid_count:
                     logger.info(f"{self.pname} obj_id: {obj_id} 入侵异常")
                     # 全图带bbox
-                    shot_img = ImgKit.draw_img_box(frame, ltrb)
+                    img = ImgKit.draw_img_box(frame, ltrb)
                     screen_x = int((ltrb[0] + ltrb[2]) * 0.5)
                     screen_y = int((ltrb[1] + ltrb[3]) * 0.5)
-                    cv2.circle(shot_img, (screen_x, screen_y), 4, (118, 154, 242), 2)
+                    cv2.circle(img, (screen_x, screen_y), 4, (118, 154, 242), 2)
                     # 画警戒线
                     for i, point in enumerate(self.zone_points):
                         if i == 0:
                             continue
-                        cv2.line(shot_img, (
+                        cv2.line(img, (
                             int(self.zone_points[i][0] * self.stream_width),
                             int(self.zone_points[i][1] * self.stream_height)),
                                  (int(self.zone_points[i - 1][0] * self.stream_width),
                                   int(self.zone_points[i - 1][1] * self.stream_height)),
                                  (0, 255, 255), 2)  # 绘制线条
                     item.has_warn = True
-                    # 发送报警信息给后端
-                    WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, 4, item.per_id,
-                                   shot_img, 1, self.config.stream_export_img_enable, self.config.stream_web_enable)
+                    # 有reid需要发送请求
+                    if self.config.intrude_reid_enable:
+                        item.warn_img = img  # 缓存报警图
+                        shot_img = ImgKit.crop_img(frame, ltrb)  # 扣出人的包围框
+                        self.reid_helper.try_send_reid(self.frame_id_cache[0], shot_img, item.obj_id, self.cam_id, 4)
+                    else:  # 没有reid直接报警
+                        # 发送报警信息给后端
+                        WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, 4, item.per_id,
+                                       img, 1, self.config.stream_export_img_enable, self.config.stream_web_enable)
 
     def _get_base(self, base, ltrb):
         """
@@ -187,15 +181,15 @@ class IntrudeComponent(BasedStreamComponent):
         :return:
         """
         clear_keys = []
-        for key, item in self.data_dict.items():
+        for key, item in self.item_dict.items():
             if self.frame_id_cache[0] - item.last_update_id > self.config.intrude_lost_frame:
                 clear_keys.append(key)
         clear_keys.reverse()  # 从尾巴往前删除，确保索引正确性
         for key in clear_keys:
-            self.pool.push(self.data_dict[key])
-            if self.face_helper is not None:
-                self.face_helper.destroy_obj(key)
-            self.data_dict.pop(key)  # 从字典中移除item
+            self.pool.push(self.item_dict[key])
+            if self.reid_helper is not None:
+                self.reid_helper.destroy_obj(key)
+            self.item_dict.pop(key)  # 从字典中移除item
 
     def _is_in_warn(self, ltrb) -> bool:
         base_x, base_y = self.cal_center(ltrb)
@@ -237,11 +231,10 @@ class IntrudeComponent(BasedStreamComponent):
         for i, point in enumerate(self.zone_points):
             if i == 0:
                 continue
-            cv2.line(frame, (
-            int(self.zone_points[i][0] * self.stream_width), int(self.zone_points[i][1] * self.stream_height)),
-                     (int(self.zone_points[i - 1][0] * self.stream_width),
-                      int(self.zone_points[i - 1][1] * self.stream_height)),
-                     (0, 0, 255), line_thickness)  # 绘制线条
+            cv2.line(frame, (int(self.zone_points[i][0] * self.stream_width), int(self.zone_points[i][1] * self.stream_height)),
+                                 (int(self.zone_points[i - 1][0] * self.stream_width),
+                                 int(self.zone_points[i - 1][1] * self.stream_height)),
+                                 (0, 0, 255), line_thickness)  # 绘制线条
 
         # 对象基准点、包围盒
         if input_mot is not None:
@@ -259,8 +252,8 @@ class IntrudeComponent(BasedStreamComponent):
                     cv2.putText(frame, f"{obj_id}",
                                 (int(ltrb[0]), int(ltrb[1])),
                                 cv2.FONT_HERSHEY_PLAIN, text_scale, obj_color, thickness=text_thickness)
-                    if self.data_dict.__contains__(obj_id):
-                        if self.data_dict[obj_id].has_warn:
+                    if self.item_dict.__contains__(obj_id):
+                        if self.item_dict[obj_id].has_warn:
                             cv2.putText(frame, "error",
                                         (int(ltrb[0] + 50), int(ltrb[1])),
                                         cv2.FONT_HERSHEY_PLAIN, text_scale, obj_color, thickness=text_thickness)
@@ -268,41 +261,16 @@ class IntrudeComponent(BasedStreamComponent):
                             cv2.putText(frame, "normal",
                                         (int(ltrb[0] + 50), int(ltrb[1])),
                                         cv2.FONT_HERSHEY_PLAIN, text_scale, obj_color, thickness=text_thickness)
-
-        if self.config.intrude_face_enable:
-            face_dict = self.face_helper.face_dict
-            # 人脸参考线
-            # y
-            # point1 = (0, int(self.face_helper.config.face_cull_up_y * self.stream_height))
-            point2 = (self.stream_width, int(self.face_helper.config.face_cull_up_y * self.stream_height))
-            # point3 = (0, int((1 - self.face_helper.config.face_cull_down_y) * self.stream_height))
-            point4 = (self.stream_width, int((1 - self.face_helper.config.face_cull_down_y) * self.stream_height))
-            # x
-            point5 = (int(self.face_helper.config.face_cull_left_x * self.stream_width), 0)
-            # point6 = (int(self.face_helper.config.face_cull_left_x * self.stream_width), self.stream_height)
-            point7 = (int((1 - self.face_helper.config.face_cull_right_x) * self.stream_width), 0)
-            # point8 = (int((1 - self.face_helper.config.face_cull_right_x) * self.stream_width), self.stream_height)
-            # 交线
-            line_up1 = (point5[0], point2[1])
-            line_up2 = (point7[0], point2[1])
-            line_down1 = (point5[0], point4[1])
-            line_down2 = (point7[0], point4[1])
-            line_left1 = (point5[0], point2[1])
-            line_left2 = (point5[0], point4[1])
-            line_right1 = (point7[0], point2[1])
-            line_right2 = (point7[0], point4[1])
-            cv2.line(frame, line_up1, line_up2, (255, 255, 0), line_thickness)  # 绘制线条
-            cv2.line(frame, line_down1, line_down2, (255, 255, 0), line_thickness)  # 绘制线条
-            cv2.line(frame, line_left1, line_left2, (255, 255, 0), line_thickness)  # 绘制线条
-            cv2.line(frame, line_right1, line_right2, (255, 255, 0), line_thickness)  # 绘制线条
-            # 人脸识别结果
-            for key, value in face_dict.items():
-                if self.data_dict.__contains__(key):
-                    ltrb = self.data_dict[key].ltrb
-                    obj_id = self.data_dict[key].obj_id
+        if self.config.intrude_reid_enable:
+            # reid识别结果
+            reid_dict = self.reid_helper.reid_dict
+            for key, value in reid_dict.items():
+                if self.item_dict.__contains__(key):
+                    ltrb = self.item_dict[key].ltrb
+                    obj_id = self.item_dict[key].obj_id
                     obj_color = self._get_color(obj_id)
-                    cv2.putText(frame, f"per_id:{face_dict[key]['per_id']}",
-                                (int((ltrb[0] + ltrb[2]) / 2), int(self.data_dict[key].ltrb[1] + 20)),
+                    cv2.putText(frame, f"per_id:{reid_dict[key]['per_id']}",
+                                (int((ltrb[0] + ltrb[2]) / 2), int(self.item_dict[key].ltrb[1] + 20)),
                                 cv2.FONT_HERSHEY_PLAIN, text_scale, obj_color, thickness=text_thickness)
         # 可视化并返回
         return frame

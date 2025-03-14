@@ -55,7 +55,7 @@ algorithm_list:
   #   conf: conf/pro/feature/count/count1.yaml
   # - path: src/renlian/renlian_comp.py  # 人脸 (人检测)
   #   conf: conf/pro/feature/renlian/renlian1.yaml
-  - path: src/intrude/intrude_comp.py  # 入侵 (人检测+人脸服务)
+  - path: src/intrude/intrude_comp.py  # 入侵 (人检测+reid服务)
     conf: conf/pro/feature/intrude/intrude1.yaml
   # - path: src/helmet/helmet_comp.py  # 安全帽 (人检测+安全帽检测)
   #   conf: conf/pro/feature/helmet/helmet1.yaml

@@ -11,7 +11,8 @@ class IntrudeItem:
         self.base_y = 0  # base_y 百分比
         self.per_id = 1  # 默认为陌生人
         self.score = 0  # 置信度分数
-        self.ltrb = (0, 0, 0, 0)  # 包围盒（实际像素位置）
+        self.ltrb = [0, 0, 0, 0]  # 包围盒（实际像素位置）
+        self.warn_img = None  # 报警时缓存
 
     def init(self, obj_id, last_update_id):
         self.obj_id = obj_id
@@ -23,7 +24,8 @@ class IntrudeItem:
         self.base_y = 0  # base_y 百分比
         self.per_id = 1  # 默认为陌生人
         self.score = 0  # 置信度分数
-        self.ltrb = (0, 0, 0, 0)  # 包围盒（实际像素位置）
+        self.ltrb = [0, 0, 0, 0]  # 包围盒（实际像素位置）
+        self.warn_img = None  # 报警时缓存
 
     def update(self, last_update_id, in_warn, base_x, base_y, ltrb):
         self.last_update_id = last_update_id
@@ -39,7 +41,7 @@ class IntrudeItem:
         return self.valid_count
 
     def reset_update(self):
-        self.ltrb = (0, 0, 0, 0)  # 包围盒（实际像素位置）
+        self.ltrb = [0, 0, 0, 0]  # 包围盒（实际像素位置）
         self.enable = False
         self.base_x = 0  # base_x 百分比
         self.base_y = 0  # base_y 百分比
