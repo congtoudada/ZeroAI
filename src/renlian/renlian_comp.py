@@ -43,17 +43,24 @@ class RenlianComponent(CountComponent):
                                       value.base_y, self.cam_id)
             # reid存图
             if not value.has_save_reid and value.per_id != 1:
-                value.ltrb[0] = max(1, value.ltrb[0])
-                value.ltrb[1] = max(1, value.ltrb[1])
-                value.ltrb[2] = min(self.stream_width - 1, value.ltrb[2])
-                value.ltrb[3] = min(self.stream_height - 1, value.ltrb[3])
-                img_shot = ImgKit.crop_img(frame, value.ltrb)
+                img_shot = self.crop_valid_img(frame, value)
                 if img_shot is None or img_shot.shape[0] == 0 or img_shot.shape[1] == 0:
                     continue
-                self.save_reid_img(frame, value.ltrb, self.config.reid_path, value.per_id)
+                self.save_reid_img(img_shot, self.config.reid_path, value.per_id)
                 image_path = os.path.join(self.config.reid_path, f"{value.per_id}_{self.cam_id}.jpg")
                 logger.info(f"{self.pname} reid存图成功，路径: {image_path}")
                 value.has_save_reid = True
+            # 最优存图
+            if self.config.reid_best_enable:
+                if value.person_score > value.best_person_score:
+                    w = value.ltrb[2] - value.ltrb[0]
+                    h = value.ltrb[3] - value.ltrb[1]
+                    if float(w) / h < self.config.reid_best_aspect:  # 长宽比 < aspect
+                        img_shot = self.crop_valid_img(frame, value)
+                        if img_shot is None or img_shot.shape[0] == 0 or img_shot.shape[1] == 0:
+                            continue
+                        value.best_person_image = img_shot
+                        value.best_person_score = value.person_score
         return ret
 
     def on_update(self):
@@ -77,20 +84,23 @@ class RenlianComponent(CountComponent):
         time_str = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())
         status_str = "In" if status == 1 else "Out"
         img_path = os.path.join(self.output_dir[0], f"{time_str}_{status_str}_{item.per_id}.jpg")
-        item.ltrb[0] = max(1, item.ltrb[0])
-        item.ltrb[1] = max(1, item.ltrb[1])
-        item.ltrb[2] = min(self.stream_width - 1, item.ltrb[2])
-        item.ltrb[3] = min(self.stream_height - 1, item.ltrb[3])
-        img_shot = ImgKit.crop_img(frame, item.ltrb)
+        img_shot = self.crop_valid_img(frame, item)
         if self.config.stream_export_img_enable:
             if img_shot is None or img_shot.shape[0] == 0 or img_shot.shape[1] == 0:
                 pass
             else:
                 cv2.imwrite(img_path, img_shot)
-                # reid存图（报警时记录）
-                # if self.config.reid_enable and item.per_id != 1:
-                #     self.save_reid_img(frame, item.ltrb, self.config.reid_path, item.per_id)
-                #     logger.info(f"{self.pname} reid存图成功，路径: {img_path}")
+        # reid最优存图
+        if self.config.reid_best_enable and self.config.reid_enable:
+            if item.per_id is not None and item.best_person_image is not None:
+                self.save_reid_img(img_shot, self.config.reid_path, item.per_id)
+                image_path = os.path.join(self.config.reid_path, f"{item.per_id}_{self.cam_id}.jpg")
+                logger.info(f"{self.pname} reid最优存图成功，路径: {image_path}")
+                item.has_save_reid = True
+            # reid存图（报警时记录）
+            # if self.config.reid_enable and item.per_id != 1:
+            #     self.save_reid_img(frame, item.ltrb, self.config.reid_path, item.per_id)
+            #     logger.info(f"{self.pname} reid存图成功，路径: {img_path}")
 
         if self.config.stream_web_enable:
             # 通知后端
@@ -167,12 +177,22 @@ class RenlianComponent(CountComponent):
         y2 = im.shape[0] if y2 > im.shape[0] else y2
         return np.ascontiguousarray(np.copy(im[int(y1): int(y2), int(x1): int(x2)]))
 
-    def save_reid_img(self, img, bbox=None, path='', id=1):
+    def crop_valid_img(self, frame, item: RenlianItem):
+        if frame is None:
+            return
+        item.ltrb[0] = max(1, item.ltrb[0])
+        item.ltrb[1] = max(1, item.ltrb[1])
+        item.ltrb[2] = min(self.stream_width - 1, item.ltrb[2])
+        item.ltrb[3] = min(self.stream_height - 1, item.ltrb[3])
+        img_shot = ImgKit.crop_img(frame, item.ltrb)
+        return img_shot
+
+    def save_reid_img(self, img, path='', id=1):
         # 创建目录
         if not os.path.exists(path):
             os.makedirs(path)
         # 裁剪图像
-        img = img[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
+        # img = img[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
 
         if img.size == 0:
             logger.error(f"{self.pname} 警告: 裁剪的图像为空。")

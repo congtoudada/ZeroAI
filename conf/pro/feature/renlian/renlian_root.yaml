@@ -13,4 +13,6 @@ count:
   face_config: conf/pro/feature/renlian/face_helper.yaml  # 人脸请求配置
 reid:
   enable: True  # 是否开启reid存图
+  best_enable: True  # 是否启用最优匹配
+  best_aspect: 0.8  # 长宽比小于该aspect的图才有资格成为最优
   path: output/service/clip_reid/face_gallery  # reid存图路径

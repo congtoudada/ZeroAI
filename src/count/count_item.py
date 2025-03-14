@@ -13,6 +13,7 @@ class CountItem:
         self.valid_count = 5  # 有效更新阈值（到达该阈值的Item才有效，避免抖动开销）
         self._update_count = 0  # 累计更新次数
         self.enable = False  # 是否为有效点
+        self.person_score = 0  # 当前帧人置信度
 
     def init(self, obj_id, valid_count):
         self.obj_id = obj_id  # 目标id
@@ -27,8 +28,9 @@ class CountItem:
         self.valid_count = valid_count
         self._update_count = 0  # 累计更新次数
         self.enable = False
+        self.person_score = 0  # 当前帧人置信度
 
-    def update(self, last_update_id, base_x, base_y, ltrb):
+    def update(self, last_update_id, base_x, base_y, ltrb, person_score):
         self._update_count += 1
         if self._update_count >= self.valid_count:
             self.enable = True
@@ -36,6 +38,7 @@ class CountItem:
         self.ltrb = ltrb  # 包围盒（实际像素位置）
         self.base_x = base_x  # base_x 百分比
         self.base_y = base_y  # base_y 百分比
+        self.person_score = person_score
 
     def update_red(self, red_cur):
         if red_cur == -1:
@@ -52,6 +55,7 @@ class CountItem:
         self.ltrb = (0, 0, 0, 0)  # 包围盒（实际像素位置）
         self.base_x = 0  # base_x 百分比
         self.base_y = 0  # base_y 百分比
+        self.person_score = 0  # 人分数
         # self.red_cur = -1
         # self.green_cur = -1
 

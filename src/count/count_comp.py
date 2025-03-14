@@ -131,7 +131,7 @@ class CountComponent(BasedStreamComponent):
                     self.on_create_obj(item)
                 # 2.更新状态
                 x, y = self._get_base(self.config.count_base, ltrb)
-                self.item_dict[obj_id].update(current_frame_id, x / width, y / height, ltrb)
+                self.item_dict[obj_id].update(current_frame_id, x / width, y / height, ltrb, conf)
         # 收集结果
         self._process_result(frame)
 

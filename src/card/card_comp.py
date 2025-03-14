@@ -220,8 +220,14 @@ class CardComponent(BasedStreamComponent):
             self.valid = True  # 检测到代刷卡行为
             self.valid_count = self.config.card_warning_frame
             logger.info(f"{self.pname} {key} 代刷卡行为")  # 控制台打印
-            screen_x = int(base[0] * self.stream_width)
-            screen_y = int(base[1] * self.stream_height)
+            if self.config.card_item_base == 0:  # center_base
+                screen_x = int(base[0] * self.stream_width)
+                screen_y = int(base[1] * self.stream_height)
+            else:  # left-top
+                half_w = (base[2] - base[0]) / 2.0
+                half_h = (base[3] - base[1]) / 2.0
+                screen_x = int((base[0] + half_w) * self.stream_width)
+                screen_y = int((base[1] + half_h) * self.stream_height)
             cv2.circle(frame, (screen_x, screen_y), 12, (0, 0, 255), 3)
             # 发送报警信息给后端
             WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, 3, 1,
