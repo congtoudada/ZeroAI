@@ -59,7 +59,7 @@ class DoubleMatchComponent(BasedStreamComponent):
         self.stream_width = self.read_dict[0][StreamKey.STREAM_WIDTH.name]
         self.stream_height = self.read_dict[0][StreamKey.STREAM_HEIGHT.name]
         if self.config.dm_reid_enable:
-            self.reid_helper = ReidHelper(self.config.dm_reid_info_config, self.reid_callback)
+            self.reid_helper = ReidHelper(self.config.dm_reid_config, self.reid_callback)
 
     def on_update(self):
         self.release_unused()  # 清理无用资源（一定要在最前面调用）
