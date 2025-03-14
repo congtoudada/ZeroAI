@@ -2,7 +2,7 @@ import os
 import subprocess
 
 # 定义要搜索的目录
-uninstall_package = ['bytetrack', 'clip_reid', 'insight', 'reid_core', 'simple_http', 'utility', 'yolox', 'zero']  # 修改为你的工程目录
+uninstall_package = ['bytetrack', 'clip_reid', 'insight', 'reid_core', 'simple_http', 'utility', 'yolox', 'zero', 'src']  # 修改为你的工程目录
 
 for i, name in enumerate(uninstall_package):
     print(f"Running 'pip uninstall {name} -y'")
