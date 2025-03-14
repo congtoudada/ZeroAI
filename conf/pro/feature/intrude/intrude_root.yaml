@@ -7,7 +7,5 @@ stream:
 intrude:
   valid_count: 3
   lost_frames: 180
-  reid_enable: True
-  reid_config: conf/pro/service/reid/helper/fast_reid_helper.yaml
   face_enable: True
   face_config: conf/pro/feature/intrude/face_helper.yaml  # 人脸请求配置

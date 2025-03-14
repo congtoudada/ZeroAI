@@ -11,4 +11,4 @@ dm:
   match_method: 1  # 0:里外包围盒匹配  1:基于L2匹配
   warn_type: 1  # 报警类型 (1:phone 2:helmet 3:card 4:intrude)
   reid_enable: True  # 是否支持reid
-  reid_config: conf/pro/service/reid/helper/fast_reid_helper.yaml
+  reid_info_config: conf/pro/service/reid/helper/fast_reid_helper.yaml
