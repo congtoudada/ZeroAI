@@ -4,7 +4,7 @@ INCLUDE:
 
 stream:
   cam_id: 1  # 摄像头编号（对应数据库）
-  url: res/video/intrude01.mp4 # 本地取流地址（输入）
+  url: res/video/card01.mp4 # 本地取流地址（输入）
 #  url: rtsp://用户名:密码@IP:554/h264/ch1/main/av_stream # rtsp取流地址（输入）
 
 output_port: camera1  # 输出端口

@@ -29,7 +29,7 @@ class CardItem:
         self._update_count = 0  # 累计更新次数
         self.enable = False
 
-    def update(self, last_update_id, base_x, base_y, ltrb):
+    def update(self, last_update_id, base_x, base_y, ltrb, base_center_x, base_center_y):
         self._update_count += 1
         if self._update_count >= self.valid_count:
             self.enable = True

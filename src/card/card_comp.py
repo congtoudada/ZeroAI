@@ -163,8 +163,11 @@ class CardComponent(BasedStreamComponent):
                     self.on_create_obj(item)  # 调用 on_create_obj 方法，处理新创建的对象
                 # 2.更新状态
                 x, y = self._get_base(self.config.card_item_base, ltrb)  # 调用 _get_base 方法获取目标的基准点坐标
+                center_base_x = (ltrb[0] + ltrb[2]) / 2
+                center_base_y = (ltrb[1] + ltrb[3]) / 2
                 # 调用对象的 update 方法，更新目标的状态信息，包括当前帧序号、归一化后的坐标和边界框坐标
-                self.item_dict[obj_id].update(current_frame_id, x / self.stream_width, y / self.stream_height, ltrb)
+                self.item_dict[obj_id].update(current_frame_id, x / self.stream_width, y / self.stream_height,
+                                              ltrb, center_base_x, center_base_y)
         # 收集结果
         self._process_result(frame)
 
@@ -220,14 +223,15 @@ class CardComponent(BasedStreamComponent):
             self.valid = True  # 检测到代刷卡行为
             self.valid_count = self.config.card_warning_frame
             logger.info(f"{self.pname} {key} 代刷卡行为")  # 控制台打印
+            item = self.item_dict[key]
             if self.config.card_item_base == 0:  # center_base
-                screen_x = int(base[0] * self.stream_width)
-                screen_y = int(base[1] * self.stream_height)
+                screen_x = int(item.base_x * self.stream_width)
+                screen_y = int(item.base_y * self.stream_height)
             else:  # left-top
-                half_w = (base[2] - base[0]) / 2.0
-                half_h = (base[3] - base[1]) / 2.0
-                screen_x = int((base[0] + half_w) * self.stream_width)
-                screen_y = int((base[1] + half_h) * self.stream_height)
+                half_w = (item.ltrb[2] - item.ltrb[0]) / (self.stream_width * 2.0)
+                half_h = (item.ltrb[3] - item.ltrb[1]) / (self.stream_height * 2.0)
+                screen_x = int((item.base_x + half_w) * self.stream_width)
+                screen_y = int((item.base_y + half_h) * self.stream_height)
             cv2.circle(frame, (screen_x, screen_y), 12, (0, 0, 255), 3)
             # 发送报警信息给后端
             WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, 3, 1,
@@ -279,21 +283,14 @@ class CardComponent(BasedStreamComponent):
             if i == 0:
                 continue
             cv2.line(frame, (
-            int(self.green_points[i][0] * self.stream_width), int(self.green_points[i][1] * self.stream_height)),
+                      int(self.green_points[i][0] * self.stream_width), int(self.green_points[i][1] * self.stream_height)),
                      (int(self.green_points[i - 1][0] * self.stream_width),
                       int(self.green_points[i - 1][1] * self.stream_height)),
                      (255, 0, 0), line_thickness)  # 绘制线条
         # 对象基准点、红绿信息
         for item in self.item_dict.values():
-            if self.config.card_item_base == 0:  # center_base
-                screen_x = int(item.base_x * self.stream_width)
-                screen_y = int(item.base_y * self.stream_height)
-            else:  # left-top
-                half_w = (item.ltrb[2] - item.ltrb[0]) / 2.0
-                half_h = (item.ltrb[3] - item.ltrb[1]) / 2.0
-                screen_x = int((item.base_x + half_w) * self.stream_width)
-                screen_y = int((item.base_y + half_h) * self.stream_height)
-
+            screen_x = int(item.base_x * self.stream_width)
+            screen_y = int(item.base_y * self.stream_height)
             cv2.circle(frame, (screen_x, screen_y), 4, (118, 154, 242), line_thickness)
             # cv2.putText(frame, str(item.red_cur), (screen_x, screen_y), cv2.FONT_HERSHEY_PLAIN,
             #             text_scale, (0, 0, 255), thickness=text_thickness)
