@@ -213,11 +213,11 @@ class ReidComponent(Component):
         elif reid_method == 3:  # 找人
             k = 3  # topK的K值
             # 优先从异常库找
-            extra_info = self.anomaly_gallery.search(feat, k, self.config.reid_search_person_threshold)
+            extra_info = self.anomaly_gallery.search(feat, k, self.config.reid_anomaly_threshold)
             k = k - len(extra_info)
             # 剩余的从普通库找
             if k > 0:
-                extra_info = extra_info + self.camera_gallery.search(feat, k, self.config.reid_search_person_threshold)
+                extra_info = extra_info + self.camera_gallery.search(feat, k, self.config.reid_camera_threshold)
             if len(extra_info) == 0:
                 # method3中 obj_id是per_id
                 logger.info(
