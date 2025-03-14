@@ -279,8 +279,15 @@ class CardComponent(BasedStreamComponent):
                      (255, 0, 0), line_thickness)  # 绘制线条
         # 对象基准点、红绿信息
         for item in self.item_dict.values():
-            screen_x = int(item.base_x * self.stream_width)
-            screen_y = int(item.base_y * self.stream_height)
+            if self.config.card_item_base == 0:  # center_base
+                screen_x = int(item.base_x * self.stream_width)
+                screen_y = int(item.base_y * self.stream_height)
+            else:  # left-top
+                half_w = (item.ltrb[2] - item.ltrb[0]) / 2.0
+                half_h = (item.ltrb[3] - item.ltrb[1]) / 2.0
+                screen_x = int((item.base_x + half_w) * self.stream_width)
+                screen_y = int((item.base_y + half_h) * self.stream_height)
+
             cv2.circle(frame, (screen_x, screen_y), 4, (118, 154, 242), line_thickness)
             # cv2.putText(frame, str(item.red_cur), (screen_x, screen_y), cv2.FONT_HERSHEY_PLAIN,
             #             text_scale, (0, 0, 255), thickness=text_thickness)
