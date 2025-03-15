@@ -6,15 +6,23 @@ from PIL import ImageDraw
 
 class ImgKit:
     @staticmethod
-    def crop_img(im, ltrb):
+    def crop_img(im, ltrb, with_clamp=True):
         """
         裁剪图片
         """
+        if im is None:
+            return im
         x1, y1, x2, y2 = ltrb[0], ltrb[1], ltrb[2], ltrb[3]
-        if x1 < 0 or y1 < 0 or x2 > im.shape[1] or y2 > im.shape[0]:
-            return None
+        if with_clamp:
+            x1 = max(0, x1)
+            y1 = max(0, y1)
+            x2 = min(im.shape[1], x2)
+            y2 = min(im.shape[0], y2)
+        else:
+            if x1 < 0 or y1 < 0 or x2 > im.shape[1] or y2 > im.shape[0]:
+                return im
         if x1 > x2 or y1 > y2:
-            return None
+            return im
         return np.ascontiguousarray(np.copy(im[int(y1): int(y2), int(x1): int(x2)]))
 
     @staticmethod
