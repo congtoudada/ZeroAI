@@ -157,8 +157,8 @@ class CardComponent(BasedStreamComponent):
                 if not self.item_dict.__contains__(obj_id):  # 检查当前目标是否在 item_dict 中
                     self.gate_dict[obj_id] = 0  # 加入item_dict时为初始状态0
                     item: CardItem = self.pool.pop()  # 如果当前目标不在 item_dict 中，则从对象池中取出一个对象，这里假设为 CountItem 类型
-                    item.init(obj_id,
-                              self.config.card_item_valid_frames)  # 初始化对象 ，传入目标的唯一标识符和有效帧数,card_valid_frames对象稳定出现多少帧，才开始计算
+                    # 初始化对象 ，传入目标的唯一标识符和有效帧数,card_valid_frames对象稳定出现多少帧，才开始计算
+                    item.init(obj_id, self.config.card_item_valid_frames)
                     self.item_dict[obj_id] = item  # 将初始化后的对象添加到 item_dict 字典中，以目标的唯一标识符为键
                     self.on_create_obj(item)  # 调用 on_create_obj 方法，处理新创建的对象
                 # 2.更新状态
@@ -200,7 +200,7 @@ class CardComponent(BasedStreamComponent):
     # 判断是否通过了门
     def is_through_gate_line(self, key, base, last_base):
         # 不在合法运动区域内就剔除
-        if not (self.config.card_valid_zone[0] < base[0] < self.config.card_valid_zone[2] and \
+        if not (self.config.card_valid_zone[0] < base[0] < self.config.card_valid_zone[2] and
                 self.config.card_valid_zone[1] < base[1] < self.config.card_valid_zone[3]):
             return False
 
@@ -283,7 +283,7 @@ class CardComponent(BasedStreamComponent):
             if i == 0:
                 continue
             cv2.line(frame, (
-                      int(self.green_points[i][0] * self.stream_width), int(self.green_points[i][1] * self.stream_height)),
+                int(self.green_points[i][0] * self.stream_width), int(self.green_points[i][1] * self.stream_height)),
                      (int(self.green_points[i - 1][0] * self.stream_width),
                       int(self.green_points[i - 1][1] * self.stream_height)),
                      (255, 0, 0), line_thickness)  # 绘制线条

@@ -160,30 +160,9 @@ class RenlianComponent(CountComponent):
             self.item_dict[obj_id].per_id = per_id
             self.item_dict[obj_id].score = score
 
-    def _crop_img(self, im, ltrb):
-        x1, y1, x2, y2 = ltrb[0], ltrb[1], ltrb[2], ltrb[3]
-        return np.ascontiguousarray(np.copy(im[int(y1): int(y2), int(x1): int(x2)]))
-        # return im[int(y1): int(y2), int(x1): int(x2)]
-
-    def _crop_img_border(self, im, ltrb, border=0):
-        x1, y1, w, h = ltrb[0], ltrb[1], ltrb[2] - ltrb[0], ltrb[3] - ltrb[1]
-        x2 = x1 + w + border
-        x1 = x1 - border
-        y2 = y1 + h + border
-        y1 = y1 - border
-        x1 = 0 if x1 < 0 else x1
-        y1 = 0 if y1 < 0 else y1
-        x2 = im.shape[1] if x2 > im.shape[1] else x2
-        y2 = im.shape[0] if y2 > im.shape[0] else y2
-        return np.ascontiguousarray(np.copy(im[int(y1): int(y2), int(x1): int(x2)]))
-
     def crop_valid_img(self, frame, item: RenlianItem):
         if frame is None:
             return
-        item.ltrb[0] = max(1, item.ltrb[0])
-        item.ltrb[1] = max(1, item.ltrb[1])
-        item.ltrb[2] = min(self.stream_width - 1, item.ltrb[2])
-        item.ltrb[3] = min(self.stream_height - 1, item.ltrb[3])
         img_shot = ImgKit.crop_img(frame, item.ltrb)
         return img_shot
 
