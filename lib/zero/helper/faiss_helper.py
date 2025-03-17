@@ -5,6 +5,7 @@ import faiss
 import numpy
 import numpy as np
 from loguru import logger
+from datetime import datetime
 
 from utility.timer_kit import TimerKit
 from zero.helper.analysis_helper import AnalysisHelper
@@ -87,7 +88,7 @@ class FaissHelper:
     def get_total(self):
         return self.activate_database.ntotal
 
-    def search(self, query, top_k=4, conf=0):
+    def search(self, query, top_k=4, conf=0, sort=False):
         assert query.shape == (1, self.dimension), \
             f"Expected feat to have shape (1, {self.dimension}), but got {query.shape}"
         faiss.normalize_L2(query)
@@ -118,6 +119,12 @@ class FaissHelper:
         if self.enable_analysis:
             AnalysisHelper.refresh(f"{self.pname} Search max time", self.search_timer.max_time * 1000, 33.3)
             AnalysisHelper.refresh(f"{self.pname} Search average time", self.search_timer.average_time * 1000, 33.3)
+
+        if sort:
+            values_with_scores = sorted(
+                values_with_scores,
+                key=lambda x: datetime.strptime(x['recordTime'], "%Y-%m-%d-%H-%M-%S")
+            )
         return values_with_scores
 
     def tick(self, now):

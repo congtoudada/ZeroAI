@@ -212,12 +212,15 @@ class ReidComponent(Component):
                     logger.info(f"{self.pname} 当前anomaly gallery有效特征数: {self.anomaly_gallery.get_total()}")
         elif reid_method == 3:  # 找人
             k = 3  # topK的K值
-            # 优先从异常库找
-            extra_info = self.anomaly_gallery.search(feat, k, self.config.reid_anomaly_threshold)
-            k = k - len(extra_info)
-            # 剩余的从普通库找
-            if k > 0:
-                extra_info = extra_info + self.camera_gallery.search(feat, k, self.config.reid_camera_threshold)
+            # 法1.优先从异常库找
+            # extra_info = self.anomaly_gallery.search(feat, k, self.config.reid_anomaly_threshold)
+            # k = k - len(extra_info)
+            # # 剩余的从普通库找
+            # if k > 0:
+            #     extra_info = extra_info + self.camera_gallery.search(feat, k, self.config.reid_camera_threshold)
+
+            # 法2.只从普通库里找
+            extra_info = self.camera_gallery.search(feat, k, self.config.reid_camera_threshold, sort=True)
             if len(extra_info) == 0:
                 # method3中 obj_id是per_id
                 logger.info(
