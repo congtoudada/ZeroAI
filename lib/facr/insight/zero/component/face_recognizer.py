@@ -35,6 +35,8 @@ class FaceRecognizer(object):
                                    device=self.device)
         self.database_file = os.path.join(os.path.dirname(self.config.insight_database),
                                      "database-{}.json".format(self.config.insight_rec_feature))
+        if os.path.exists(self.database_file):
+            os.remove(self.database_file)
         # 初始化人脸数据库，用于注册人脸
         self.faceReg = FaceRegister(self.database_file)
         # 如果不存在就重新建库，加载

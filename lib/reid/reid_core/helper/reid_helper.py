@@ -158,9 +158,10 @@ class ReidHelper:
             self.req_lock.add(self.search_per_id)
         return True, img_path
 
-    def find_first_file(self, prefix):
+    def find_first_file(self, per_id):
         for filename in os.listdir(self.config.reid_face_gallery_dir):
-            if filename.startswith(str(prefix)):
+            file_id = int(filename.split('_')[0])
+            if int(per_id) == file_id:
                 return os.path.join(self.config.reid_face_gallery_dir, filename)
         return None
 
