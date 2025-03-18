@@ -212,7 +212,7 @@ class ReidComponent(Component):
                     logger.info(f"{self.pname} 当前anomaly gallery有效特征数: {self.anomaly_gallery.get_total()}")
         elif reid_method == 3:  # 找人
             k = 3  # topK的K值
-            # 法1.优先从异常库找
+            # 优先从异常库找
             anomaly_topK = min(k, self.config.reid_anomaly_topK)
             extra_info = self.anomaly_gallery.search(feat, anomaly_topK, self.config.reid_anomaly_threshold)
             k = k - len(extra_info)
