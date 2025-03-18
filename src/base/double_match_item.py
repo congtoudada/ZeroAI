@@ -12,7 +12,7 @@ class DoubleMatchItem:
         self.has_warn = False  # 是否已经报警
         self.config: DoubleMatchInfo = None
         # 主体属性(通常是手机、安全帽等)
-        self.main_cls = 0   # 主体类别
+        self.main_cls = 1   # 主体类别
         self.main_ltrb = (0, 0, 1, 1)  # 主体ltrb
         self.main_valid = False  # 主体是否有效（由于主体和次体未必同时出现，因此需要限制）
         self.main_score = 0  # 主体置信度
@@ -29,7 +29,7 @@ class DoubleMatchItem:
         self.valid_count = 0
         self.has_warn = False
         # 主体属性
-        self.main_cls = 0
+        self.main_cls = 1
         self.main_ltrb = (0, 0, 1, 1)
         self.main_valid = False
         self.main_score = 0

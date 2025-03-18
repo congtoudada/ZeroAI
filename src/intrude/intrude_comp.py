@@ -144,15 +144,15 @@ class IntrudeComponent(BasedStreamComponent):
                     screen_y = int((ltrb[1] + ltrb[3]) * 0.5)
                     cv2.circle(img, (screen_x, screen_y), 4, (118, 154, 242), 2)
                     # 画警戒线
-                    for i, point in enumerate(self.zone_points):
-                        if i == 0:
-                            continue
-                        cv2.line(img, (
-                            int(self.zone_points[i][0] * self.stream_width),
-                            int(self.zone_points[i][1] * self.stream_height)),
-                                 (int(self.zone_points[i - 1][0] * self.stream_width),
-                                  int(self.zone_points[i - 1][1] * self.stream_height)),
-                                 (0, 255, 255), 2)  # 绘制线条
+                    # for i, point in enumerate(self.zone_points):
+                    #     if i == 0:
+                    #         continue
+                    #     cv2.line(img, (
+                    #         int(self.zone_points[i][0] * self.stream_width),
+                    #         int(self.zone_points[i][1] * self.stream_height)),
+                    #              (int(self.zone_points[i - 1][0] * self.stream_width),
+                    #               int(self.zone_points[i - 1][1] * self.stream_height)),
+                    #              (0, 255, 255), 2)  # 绘制线条
                     item.has_warn = True
                     # 有reid需要发送请求
                     if self.config.intrude_reid_enable:

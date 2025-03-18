@@ -50,7 +50,7 @@ class DoubleMatchComponent(BasedStreamComponent):
         self.sub_records: List[DetectionRecord] = []  # 次体目标检测结果
         self.http_helper = SimpleHttpHelper(self.config.stream_http_config)  # http帮助类
         self.is_clear_main_records = False  # 用于延迟清理主体检测结果，当mot有值是会在匹配后清理
-        self.reid_info_dict = {}  # reid 额外信息
+        self.reid_info_dict = {}  # reid 额外信息（缓存报警时图像）
         self.reid_helper = None
 
     def on_start(self):
@@ -74,16 +74,23 @@ class DoubleMatchComponent(BasedStreamComponent):
 
     def reid_callback(self, obj_id, per_id, score):
         if self.reid_info_dict.__contains__(obj_id):
+            item = None
+            if self.item_dict.__contains__(obj_id):
+                item = self.item_dict[obj_id]
+            if item is None:
+                return
+            if item.has_warn:
+                return
+            item.sub_per_id = per_id
+            item.sub_score = score
+            item.has_warn = True  # 避免同一个人反复报警
             # 发送报警信息给后端
             WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id, self.config.dm_warn_type,
-                           per_id, self.reid_info_dict[obj_id], self.item_dict[obj_id].max_main_score,
+                           per_id, self.reid_info_dict[obj_id], item.max_main_score,
                            self.config.stream_export_img_enable, self.config.stream_web_enable)
             self.reid_info_dict.pop(obj_id)
             if self.reid_helper is not None:
                 self.reid_helper.destroy_obj(obj_id)  # 主动销毁对象数据缓存(可选)
-            if self.item_dict.__contains__(obj_id):
-                self.item_dict[obj_id].sub_per_id = per_id
-                self.item_dict[obj_id].sub_score = score
 
     def release_unused(self):
         # 清空长期未更新点
@@ -127,8 +134,11 @@ class DoubleMatchComponent(BasedStreamComponent):
                 score = item[4]
                 cls = item[5]
                 # 主体类别映射
-                if cls in self.config.dm_aggregate_cls:
-                    cls = self.config.dm_aggregate_cls[0]
+                if cls in self.config.dm_normal_cls:  # 正常类别映射到1
+                    cls = 1
+                if cls in self.config.dm_anomaly_cls:  # 异常类别映射到0
+                    cls = 0
+                input_det[i][5] = cls  # 更新映射后结果
                 record = self.det_pool.pop()
                 record.init(ltrb, score, cls)
                 self.main_records.append(record)
@@ -212,13 +222,12 @@ class DoubleMatchComponent(BasedStreamComponent):
     def process_result(self, frame, item: DoubleMatchItem):
         # 没有报过警且异常状态保持一段时间才发送
         if not item.has_warn and item.valid_count > self.config.dm_valid_count:
-            if item.main_cls in self.config.dm_anomaly_cls:
+            if item.main_cls == 0:  # 0为报警类别
                 logger.info(f"{self.pname} {DoubleMatchComponent.Warn_Desc[self.config.dm_warn_type]}异常: "
                             f"obj_id:{item.sub_obj_id} score:{item.max_main_score:.3f}")
-                item.has_warn = True  # 一旦视为异常，则一直为异常，避免一个人重复报警
-
                 if not self.config.dm_reid_enable:  # 不支持reid就直接发送后端
                     img = ImgKit.draw_img_box(frame, item.main_ltrb)  # 画框
+                    item.has_warn = True  # 一旦视为异常，则一直为异常，避免一个人重复报警
                     # 发送报警信息给后端
                     WarnProxy.send(self.http_helper, self.pname, self.output_dir[0], self.cam_id,
                                    self.config.dm_warn_type, item.sub_per_id, img, item.max_main_score,
@@ -256,10 +265,10 @@ class DoubleMatchComponent(BasedStreamComponent):
         line_thickness = 3
         # 标题线
         num = 0 if input_mot is None else input_mot.shape[0]
-        # cv2.putText(frame, 'inference_fps:%.2f num:%d' %
-        #             (1. / max(1e-5, self.update_timer.average_time),
-        #              num), (0, int(15 * text_scale)),
-        #             cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
+        cv2.putText(frame, 'inference_fps:%.2f num:%d' %
+                    (1. / max(1e-5, self.update_timer.average_time),
+                     num), (0, int(15 * text_scale)),
+                    cv2.FONT_HERSHEY_PLAIN, text_scale, (0, 0, 255), thickness=text_thickness)
         # 合法检测区域
         if len(self.config.dm_zone) > 0:
             valid_zone_zone = self.config.dm_zone
@@ -304,7 +313,7 @@ class DoubleMatchComponent(BasedStreamComponent):
             ltrb = item.ltrb
             cls = int(item.cls)
             score = item.score
-            if cls in self.config.dm_draw_cls:  # 只绘制异常类型
+            if cls == 0:  # 只绘制异常类型
                 cv2.rectangle(frame, pt1=(int(ltrb[0]), int(ltrb[1])), pt2=(int(ltrb[2]), int(ltrb[3])),
                               color=(0, 0, 255), thickness=line_thickness)
             id_text = f"cls:{self.config.detection_labels[cls]}({score:.2f})"

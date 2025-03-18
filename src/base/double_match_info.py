@@ -18,11 +18,9 @@ class DoubleMatchInfo(BasedStreamInfo):
         # 0:像素容忍值(通常为10) 1:像素**2容忍值(通常为10000)
         self.dm_match_tolerance = self.dm_match_tolerance if self.dm_match_method == 0 \
             else self.dm_match_tolerance ** 4
-        # 绘制类别(安全帽只绘制未佩戴的2, 手机则绘制0)
-        self.dm_draw_cls = [2] if self.dm_warn_type == 2 else [0]
-        # 指定类别映射到0类别（在main_update时需要）
-        # 安全帽未标准佩戴和正常佩戴为0，其他类别不映射
-        self.dm_aggregate_cls = [0, 1] if self.dm_warn_type == 2 else [0]
-        # 指定报警类别（在最后计算结果时需要）
+        # 指定类别映射到正常类别1（在main_update时需要）
+        # 安全帽未标准佩戴和正常佩戴为1，手机other映射到1
+        self.dm_normal_cls = [0, 1] if self.dm_warn_type == 2 else [1]
+        # 指定类别映射到报警类别0（在最后计算结果时需要）
         # 安全帽未佩戴为2，其他类别默认为0
         self.dm_anomaly_cls = [2] if self.dm_warn_type == 2 else [0]
