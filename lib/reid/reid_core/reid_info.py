@@ -7,6 +7,7 @@ class ReidInfo(BaseInfo):
         self.reid_anomaly_threshold = 0.9  # anomaly_gallery 相似度阈值
         self.reid_camera_threshold = 0.86  # camera_gallery 相似度阈值
         self.reid_match_threshold = 0.85  # reid匹配相似度阈值
+        self.reid_anomaly_topK = 0  # 找人时优先从异常库查找topK
         # self.data_shape = 3072  # RN50特征维度
         self.reid_config_file = "lib/reid/clip_reid/configs/person/vit_clipreid.yml"  # 模型配置文件
         self.reid_face_gallery_dir = "output/service/clip_reid/face_gallery"  # 由人脸识别捕捉的带id的人像gallery
