@@ -89,6 +89,8 @@ class FaissHelper:
         return self.activate_database.ntotal
 
     def search(self, query, top_k=4, conf=0, sort=False):
+        if top_k == 0:
+            return []
         assert query.shape == (1, self.dimension), \
             f"Expected feat to have shape (1, {self.dimension}), but got {query.shape}"
         faiss.normalize_L2(query)
