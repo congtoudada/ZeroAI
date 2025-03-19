@@ -38,9 +38,13 @@ class RenlianComponent(CountComponent):
         # 人脸识别请求
         current_id = self.frame_id_cache[0]
         for key, value in self.item_dict.items():
-            # face 请求
-            self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, value.base_x,
-                                      value.base_y, self.cam_id)
+            if len(value.red_seq) > 0:
+                ret = self._get_dir(value.red_seq[0] == 0, self.config.count_reverse)
+                if ret:  # 只有进入做人脸识别
+                    # face 请求
+                    if self.face_helper.try_send(current_id, self.frames[0], value.ltrb, key, value.base_x,
+                                                 value.base_y, self.cam_id):
+                        value.face_req_image = self.frames[0].copy()  # 请求成功存当前图
             # reid存图
             if not value.has_save_reid and value.per_id != 1:
                 img_shot = self.crop_valid_img(frame, value)
@@ -84,7 +88,11 @@ class RenlianComponent(CountComponent):
         time_str = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime())
         status_str = "In" if status == 1 else "Out"
         img_path = os.path.join(self.output_dir[0], f"{time_str}_{status_str}_{item.per_id}.jpg")
-        img_shot = self.crop_valid_img(frame, item)
+        # 如果存在人脸识别图就使用人脸识别图导出，否则使用当前帧人的截图
+        if item.face_req_image is not None:
+            img_shot = item.face_req_image.copy()
+        else:
+            img_shot = self.crop_valid_img(frame, item)
         if self.config.stream_export_img_enable:
             if img_shot is None or img_shot.shape[0] == 0 or img_shot.shape[1] == 0:
                 pass
@@ -93,7 +101,7 @@ class RenlianComponent(CountComponent):
         # reid最优存图
         if self.config.reid_best_enable and self.config.reid_enable:
             if item.per_id is not None and item.best_person_image is not None:
-                self.save_reid_img(img_shot, self.config.reid_path, item.per_id)
+                self.save_reid_img(item.best_person_image.copy(), self.config.reid_path, item.per_id)
                 image_path = os.path.join(self.config.reid_path, f"{item.per_id}_{self.cam_id}.jpg")
                 logger.info(f"{self.pname} reid最优存图成功，路径: {image_path}")
                 item.has_save_reid = True

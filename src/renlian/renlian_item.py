@@ -7,6 +7,7 @@ class RenlianItem(CountItem):
         self.per_id = 1  # 默认为陌生人
         self.score = 0  # 人脸置信度分数
         self.has_save_reid = False  # 是否已经reid存图
+        self.face_req_image = None  # 人脸识别请求图
         self.best_person_image = None  # 最优人全身图片
         self.best_person_score = 0  # 最优人的分数
 
@@ -15,5 +16,6 @@ class RenlianItem(CountItem):
         self.per_id = 1  # 默认为陌生人
         self.score = 0  # 置信度分数
         self.has_save_reid = False  # 是否已经reid存图
+        self.face_person_image = None  # 人脸识别请求图
         self.best_person_image = None  # 最优人全身图片
         self.best_person_score = 0  # 最优分数
