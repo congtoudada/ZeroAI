@@ -1,0 +1,4 @@
+detection:
+  labels:
+    - no-hat
+    - right

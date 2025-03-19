@@ -235,7 +235,6 @@ class DoubleMatchComponent(BasedStreamComponent):
                 else:
                     shot_img = ImgKit.crop_img(frame, item.sub_ltrb)  # 扣出人的包围框
                     if shot_img is not None:
-                        self.reid_info_dict[item.sub_obj_id] = shot_img
                         # 发送reid
                         if self.reid_helper is not None:
                             ret = self.reid_helper.try_send_reid(self.frame_id_cache[1], shot_img,

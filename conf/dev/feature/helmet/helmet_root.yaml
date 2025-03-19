@@ -1,6 +1,6 @@
 INCLUDE:
   - conf/dev/feature/double_match.yaml
-  - conf/dev/algorithm/yolox/labels/helmet_labels.yaml
+  - conf/dev/feature/helmet/helmet_labels.yaml
 
 stream:
   output_dir: output/feature/helmet  # 输出目录

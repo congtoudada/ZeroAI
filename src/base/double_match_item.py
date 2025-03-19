@@ -47,7 +47,7 @@ class DoubleMatchItem:
                 self.max_main_score = main_score
             self.main_valid = True
             if self.main_cls == main_cls:  # 当前检测类别和记录的类别相同，递增
-                self.valid_count += 3
+                self.valid_count += 5
             else:  # 不同则重置
                 self.valid_count = 0
                 self.main_cls = main_cls
